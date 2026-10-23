@@ -1,0 +1,946 @@
+{
+ "attribution": "Basic Formal Ontology (BFO) 2020, ISO/IEC 21838-2. Copyright the BFO contributors, licensed CC BY 4.0.",
+ "commit": "044490fc5100ffed6df7d4d15cbc167698b6fdee",
+ "files": [
+  {
+   "sha256": "6944e2c96a0d8709dc15ae5364792019e208061eda3f32311af4f3b8d8443a3b",
+   "url": "https://raw.githubusercontent.com/BFO-ontology/BFO-2020/044490fc5100ffed6df7d4d15cbc167698b6fdee/src/owl/bfo-core.ttl"
+  }
+ ],
+ "format_version": 1,
+ "generated_by": "tools/ontology/vendor_upstream.py",
+ "licence": "CC-BY-4.0",
+ "licence_as_stated_by_source": "https://creativecommons.org/licenses/by/4.0/",
+ "namespace": "http://purl.obolibrary.org/obo/",
+ "note": "Every term the pinned files describe in this namespace, not only the ones vendored: what exists, and what it is called. Generated -- do not edit. The labels are the upstream's, under the upstream's licence.",
+ "project": "Basic Formal Ontology",
+ "release": "release-2024-01-29",
+ "source": "bfo",
+ "terms": {
+  "http://purl.obolibrary.org/obo/BFO_0000001": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "entity"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000002": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "continuant"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000003": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "occurrent"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000004": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "independent continuant"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000006": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "spatial region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000008": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "temporal region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000009": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "two-dimensional spatial region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000011": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "spatiotemporal region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000015": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "process"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000016": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "disposition"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000017": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "realizable entity"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000018": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "zero-dimensional spatial region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000019": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "quality"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000020": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "specifically dependent continuant"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000023": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "role"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000024": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "fiat object part"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000026": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "one-dimensional spatial region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000027": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "object aggregate"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000028": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "three-dimensional spatial region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000029": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "site"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000030": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "object"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000031": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "generically dependent continuant"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000034": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "function"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000035": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "process boundary"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000038": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "one-dimensional temporal region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000040": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "material entity"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000054": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "has realization"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000055": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "realizes"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000056": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "participates in"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000057": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "has participant"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000058": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "is concretized by"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000059": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "concretizes"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000062": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "preceded by"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty",
+    "http://www.w3.org/2002/07/owl#TransitiveProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000063": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "precedes"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty",
+    "http://www.w3.org/2002/07/owl#TransitiveProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000066": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "occurs in"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000084": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "generically depends on"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000101": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "is carrier of"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000108": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "exists at"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000115": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "has member part"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000117": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "has occurrent part"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty",
+    "http://www.w3.org/2002/07/owl#TransitiveProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000121": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "has temporal part"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty",
+    "http://www.w3.org/2002/07/owl#TransitiveProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000124": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "location of"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000127": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "material basis of"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000129": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "member part of"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000132": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "occurrent part of"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty",
+    "http://www.w3.org/2002/07/owl#TransitiveProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000139": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "temporal part of"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty",
+    "http://www.w3.org/2002/07/owl#TransitiveProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000140": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "continuant fiat boundary"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000141": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "immaterial entity"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000142": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "fiat line"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000145": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "relational quality"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000146": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "fiat surface"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000147": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "fiat point"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000148": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "zero-dimensional temporal region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000153": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "temporally projects onto"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#FunctionalProperty",
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000171": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "located in"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000176": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "continuant part of"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000178": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "has continuant part"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000182": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "history"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000183": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "environs"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000184": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "history of"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#FunctionalProperty",
+    "http://www.w3.org/2002/07/owl#InverseFunctionalProperty",
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000185": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "has history"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000194": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "specifically depended on by"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000195": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "specifically depends on"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000196": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "bearer of"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000197": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "inheres in"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000199": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "occupies temporal region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#FunctionalProperty",
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000200": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "occupies spatiotemporal region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#FunctionalProperty",
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000202": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "temporal interval"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000203": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "temporal instant"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#Class"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000210": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "occupies spatial region"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000216": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "spatially projects onto"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000218": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "has material basis"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000221": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "first instant of"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000222": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "has first instant"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#FunctionalProperty",
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000223": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "last instant of"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000224": {
+   "deprecated": false,
+   "labels": [
+    {
+     "lang": "en",
+     "value": "has last instant"
+    }
+   ],
+   "types": [
+    "http://www.w3.org/2002/07/owl#FunctionalProperty",
+    "http://www.w3.org/2002/07/owl#ObjectProperty"
+   ]
+  }
+ }
+}

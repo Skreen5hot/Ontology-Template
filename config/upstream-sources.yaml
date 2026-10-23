@@ -43,6 +43,28 @@
 # `prefix` is what the extract is serialised with, and what the vendoring
 # tool reads in a specification when it looks for the upstream terms the
 # design names.
+#
+# ONE FILE OR SEVERAL
+#
+# A source is one file (`url` and `sha256`) or several at the same
+# commit:
+#
+#     files:
+#       - url: https://raw.githubusercontent.com/<owner>/<repo>/<commit>/a.ttl
+#         sha256: <digest of a.ttl>
+#       - url: https://raw.githubusercontent.com/<owner>/<repo>/<commit>/b.ttl
+#         sha256: <digest of b.ttl>
+#
+# Every url must name `commit`. The files are read as one graph, so a
+# term declared in one and refined in another is vendored whole.
+#
+# THE REGISTER
+#
+# `register` is where the list of every term the source describes is
+# written: each IRI with its labels, OWL types and deprecation. The IRI
+# linter reads it to tell a real term from a mistyped one and to suggest
+# the opaque IRI for a readable name. Declare it in the layout contract
+# as `vendored-register`.
 
 version: 1
 
@@ -59,6 +81,7 @@ sources:
     prefix: obo
     select: all
     extract: vendor/bfo/bfo-core-extract.ttl
+    register: vendor/bfo/bfo-register.json
     licence:
       spdx: CC-BY-4.0
       url: https://creativecommons.org/licenses/by/4.0/
@@ -82,6 +105,7 @@ sources:
     prefix: cco
     select: named
     extract: vendor/cco/cco-extract.ttl
+    register: vendor/cco/cco-register.json
     licence:
       spdx: BSD-3-Clause
       url: >-
@@ -98,3 +122,44 @@ sources:
       The same pin the Business Capability Ontology and the Business
       Process Ontology use, so terms shared between them anchor to the
       same CCO IRIs.
+
+  # ---- A sister ontology: a worked entry --------------------------------
+  #
+  # An ontology this project builds on, pinned like BFO and CCO. This is
+  # the Business Process Ontology exactly as the Business Capability
+  # Ontology pins it (its config/upstream-sources.yaml, 2026-10-23); the
+  # digests are that pin's, not invented. It shows the one case BFO and
+  # CCO do not: Turtle that states no licence, so the licence is read from
+  # the LICENSE file at the same commit.
+  #
+  # To use it, uncomment it, declare vendor/bpo/bpo-ext-extract.ttl
+  # (vendored-ontology) and vendor/bpo/bpo-register.json
+  # (vendored-register) in the layout contract, and rebuild. Check the pin
+  # first: BPO has announced a namespace move to
+  # https://fandaws.com/ontology/bpo#, after which this commit and this
+  # namespace are no longer the ones to pin.
+  #
+  # - id: bpo
+  #   project: Business Process Ontology
+  #   release: main@6613194
+  #   commit: 66131945b525c54f44e4962f32bb1f52dfa0cd12
+  #   url: >-
+  #     https://raw.githubusercontent.com/Skreen5hot/BusinessProcessOntology/66131945b525c54f44e4962f32bb1f52dfa0cd12/ontology/apqc-ext.ttl
+  #   sha256: 1b9a9375cb7303003556004effd712b63913d6aa4935dbf604a653aec65cab4b
+  #   namespace: http://example.org/apqc#
+  #   prefix: ex
+  #   select: named
+  #   extract: vendor/bpo/bpo-ext-extract.ttl
+  #   register: vendor/bpo/bpo-register.json
+  #   licence:
+  #     spdx: MIT
+  #     url: >-
+  #       https://github.com/Skreen5hot/BusinessProcessOntology/blob/66131945b525c54f44e4962f32bb1f52dfa0cd12/LICENSE
+  #     statement_url: >-
+  #       https://raw.githubusercontent.com/Skreen5hot/BusinessProcessOntology/66131945b525c54f44e4962f32bb1f52dfa0cd12/LICENSE
+  #     statement_sha256: 2154e0221f7e5119b2d45842fcd4be421c11c5d64a459601f2c35f53710c487a
+  #     licence_statement_contains: MIT License
+  #     attribution: >-
+  #       Business Process Ontology (BPO). Copyright (c) 2026 Aaron Damiano,
+  #       licensed under the MIT License; the full licence text is at the
+  #       licence url above, at the pinned commit.

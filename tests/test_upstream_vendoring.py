@@ -83,30 +83,52 @@ def extract(layout, component_id):
 def constructed_upstreams(vendoring, monkeypatch, upstreams, seeds):
     """Pins and bytes built here, so `build` runs without the network.
 
-    `upstreams` is [(id, namespace, select, turtle)]. Afterwards
-    `vendoring.build(tmp)` builds from these.
+    `upstreams` is [(id, namespace, select, turtle)], where turtle is one
+    string for a one-file source or a list of strings, one per file.
+    Afterwards `vendoring.build(tmp)` builds from these.
     """
     licence = "<http://purl.org/dc/terms/license>"
     pins = []
     for key, namespace, select, text in upstreams:
+        texts = list(text) if isinstance(text, list) else [text]
         # The licence statement's subject is outside every pinned
         # namespace, so it is never selected as one of the source's terms.
-        text += "<https://licence.invalid/%s> %s \"licence-%s\" .\n" % (
+        texts[0] += "<https://licence.invalid/%s> %s \"licence-%s\" .\n" % (
             key, licence, key.upper())
         pins.append({
             "id": key, "project": key.upper(), "release": "r",
-            "commit": "c0ffee", "url": "https://u.invalid/c0ffee/" + key,
-            "sha256": key, "namespace": namespace, "prefix": key,
+            "commit": "c0ffee",
+            "files": [{"url": "https://u.invalid/c0ffee/%s/%d.ttl"
+                              % (key, n), "sha256": "%s%d" % (key, n)}
+                      for n in range(len(texts))],
+            "namespace": namespace, "prefix": key,
             "select": select,
-            "extract": "vendor/%s.ttl" % key, "_text": text,
+            "extract": "vendor/%s.ttl" % key,
+            "register": "vendor/%s-register.json" % key, "_texts": texts,
             "licence": {"spdx": "MIT", "url": "https://l.invalid/",
                         "licence_statement_contains": "licence-" + key.upper(),
                         "attribution": key}})
     monkeypatch.setattr(vendoring, "sources", lambda: pins)
     monkeypatch.setattr(vendoring, "fetch",
-                        lambda source, cache: source["_text"].encode("utf-8"))
+                        lambda source, cache: [t.encode("utf-8")
+                                               for t in source["_texts"]])
     monkeypatch.setattr(vendoring, "seed_terms", lambda namespaces: set(seeds))
     monkeypatch.setattr(vendoring, "spec_terms", lambda: set())
+
+
+def pins_with(vendoring, monkeypatch, change):
+    """The real pins, with `change` applied to the first, read back
+    through `sources()` so the tool's own validation runs on them."""
+    import yaml
+
+    real = vendoring.sources()
+    tampered = [dict(entry, licence=dict(entry["licence"]))
+                for entry in real]
+    for entry in tampered:
+        entry.pop("files", None)
+    change(tampered[0])
+    monkeypatch.setattr(yaml, "safe_load", lambda _text: {"sources": tampered})
+    return tampered
 
 
 def parsed(text):
@@ -139,34 +161,48 @@ def test_a_licence_statement_off_the_pinned_commit_is_refused(
 
     The template pins no source with a separate licence statement, so
     one is constructed: the first pin, given a statement url on `main`."""
-    real = vendoring.sources()
-    tampered = [dict(entry, licence=dict(entry["licence"]))
-                for entry in real]
-    first = tampered[0]
-    first["licence"]["statement_url"] = (
-        "https://raw.githubusercontent.com/o/r/main/LICENSE")
-    first["licence"]["statement_sha256"] = "0" * 64
-    assert first["commit"] not in first["licence"]["statement_url"]
+    def change(first):
+        first["licence"]["statement_url"] = (
+            "https://raw.githubusercontent.com/o/r/main/LICENSE")
+        first["licence"]["statement_sha256"] = "0" * 64
+        assert first["commit"] not in first["licence"]["statement_url"]
 
-    import yaml
-
-    monkeypatch.setattr(yaml, "safe_load", lambda _text: {"sources": tampered})
+    pins_with(vendoring, monkeypatch, change)
     with pytest.raises(SystemExit) as error:
         vendoring.sources()
     assert "does not name the pinned commit" in str(error.value)
 
 
 def test_an_unknown_select_mode_is_refused(vendoring, monkeypatch):
-    real = vendoring.sources()
-    tampered = [dict(entry) for entry in real]
-    tampered[0]["select"] = "everything"
-
-    import yaml
-
-    monkeypatch.setattr(yaml, "safe_load", lambda _text: {"sources": tampered})
+    pins_with(vendoring, monkeypatch,
+              lambda first: first.update(select="everything"))
     with pytest.raises(SystemExit) as error:
         vendoring.sources()
     assert "the modes are" in str(error.value)
+
+
+@pytest.mark.parametrize("change, expect", [
+    (lambda e: e.update(files=[{"url": e["url"], "sha256": e["sha256"]}]),
+     "both url/sha256 and files"),
+    (lambda e: (e.pop("url"), e.pop("sha256")), "no url and sha256"),
+    (lambda e: (e.update(files=[
+        {"url": e.pop("url"), "sha256": e.pop("sha256")},
+        {"url": "https://raw.githubusercontent.com/o/r/main/b.ttl",
+         "sha256": "0" * 64}])), "does not name it"),
+    (lambda e: (e.update(files=[
+        {"url": e["url"], "sha256": e.pop("sha256")},
+        {"url": e.pop("url"), "sha256": "0" * 64}])), "the same url twice"),
+    (lambda e: (e.update(files=[{"url": e.pop("url")}]), e.pop("sha256")),
+     "no url or no sha256"),
+    (lambda e: e.pop("register"), "declares no 'register'"),
+])
+def test_each_pinning_rule_refuses(vendoring, monkeypatch, change, expect):
+    """Several files per source widen what a pin can say, and each new
+    way of saying it wrong is refused by the tool."""
+    pins_with(vendoring, monkeypatch, change)
+    with pytest.raises(SystemExit) as error:
+        vendoring.sources()
+    assert expect in str(error.value), str(error.value)
 
 
 def test_the_recorded_digest_is_what_the_extract_digests_to(report):
@@ -181,9 +217,10 @@ def test_the_manifest_records_a_source_digest_for_every_extract(vendoring,
         "BFO and CCO are the foundation every project made from the "
         "template is aligned to; one of them is no longer pinned")
     for key, record in manifest["extracts"].items():
-        assert record["source_sha256"] == pinned[key]["sha256"], key
+        assert record["source_files"] == pinned[key]["files"], key
         assert record["commit"] == pinned[key]["commit"], key
         assert record["select"] == pinned[key]["select"], key
+        assert record["register"] == pinned[key]["register"], key
 
 
 def test_the_extract_headers_name_this_project(layout, project):
@@ -388,6 +425,195 @@ def test_a_select_all_source_that_describes_nothing_is_refused(
     with pytest.raises(SystemExit) as error:
         vendoring.build(tmp_path)
     assert "describes no term" in str(error.value)
+
+
+# ---------------------------------------------- several files per source
+
+
+def test_a_source_of_two_files_is_vendored_and_attributed(
+        vendoring, monkeypatch, tmp_path):
+    """The phase-2 gate. A declares x in its first file and refines it in
+    its second; B names A's y. Both of A's files must reach A's extract,
+    under A's licence, with both named as its sources -- read as one
+    graph, or the refinement in the second file would be lost and x
+    would reach nothing."""
+    import rdflib
+
+    a_ns, b_ns = "https://a.invalid/", "https://b.invalid/"
+    constructed_upstreams(vendoring, monkeypatch, [
+        ("a", a_ns, "named", [
+            "<%sx> <%slabel> \"x\" .\n"
+            "<%sroot> <%slabel> \"root\" .\n" % (a_ns, RDFS, a_ns, RDFS),
+            "<%sx> <%ssubClassOf> <%sroot> .\n"
+            "<%sy> <%ssubClassOf> <%sx> .\n" % (a_ns, RDFS, a_ns,
+                                                a_ns, RDFS, a_ns),
+        ]),
+        ("b", b_ns, "named",
+         "<%sz> <%slabel> \"z\" .\n" % (b_ns, RDFS)),
+    ], seeds={a_ns + "y"})
+
+    built = vendoring.build(tmp_path)
+    graph_a, graph_b = parsed(built["a"]["text"]), parsed(built["b"]["text"])
+    sub = rdflib.RDFS.subClassOf
+    assert (rdflib.URIRef(a_ns + "y"), sub, rdflib.URIRef(a_ns + "x")) \
+        in graph_a
+    assert (rdflib.URIRef(a_ns + "x"), sub, rdflib.URIRef(a_ns + "root")) \
+        in graph_a, "the second file's refinement did not reach the extract"
+    assert (rdflib.URIRef(a_ns + "root"), rdflib.RDFS.label,
+            rdflib.Literal("root")) in graph_a
+    assert not [t for t in graph_b if str(t[0]).startswith(a_ns)], (
+        "A's terms were attributed to B")
+
+    sources = {str(o) for o in graph_a.objects(
+        None, rdflib.URIRef("http://purl.org/dc/terms/source"))}
+    assert sources == {"https://u.invalid/c0ffee/a/0.ttl",
+                       "https://u.invalid/c0ffee/a/1.ttl"}, sources
+    head = built["a"]["text"][:2000]
+    assert "a/0.ttl" in head and "a/1.ttl" in head
+
+
+def test_each_file_has_its_own_cache_name(vendoring):
+    """A one-file source keeps the `<id>.ttl` every earlier cache used;
+    a larger one numbers its files, so two never overwrite each other."""
+    one = {"id": "a", "files": [{"url": "u1", "sha256": "s1"}]}
+    two = {"id": "a", "files": [{"url": "u1", "sha256": "s1"},
+                                {"url": "u2", "sha256": "s2"}]}
+    assert vendoring.cache_name(one, 1) == "a.ttl"
+    assert [vendoring.cache_name(two, n) for n in (1, 2)] == [
+        "a.1.ttl", "a.2.ttl"]
+
+
+# ------------------------------------------------------------ registers
+
+
+@pytest.fixture(scope="module")
+def registers(vendoring):
+    import json
+
+    root = vendoring.layout.repository_root()
+    return {entry["id"]: json.loads((root / entry["register"]).read_text(
+        encoding="utf-8")) for entry in vendoring.sources()}
+
+
+def test_a_register_describes_its_pin(vendoring, registers):
+    for entry in vendoring.sources():
+        record = registers[entry["id"]]
+        assert record["commit"] == entry["commit"], entry["id"]
+        assert record["files"] == entry["files"], entry["id"]
+        assert record["licence"] == entry["licence"]["spdx"], entry["id"]
+        assert all(iri.startswith(entry["namespace"])
+                   for iri in record["terms"]), entry["id"]
+
+
+def test_the_register_covers_every_vendored_term(layout, vendoring,
+                                                 registers, extracts):
+    """Every term an extract describes in a source's namespace is in that
+    source's register: the register is the whole source, the extract a
+    selection from it."""
+    import rdflib
+
+    for entry in vendoring.sources():
+        described = {str(s) for s in extracts.subjects()
+                     if isinstance(s, rdflib.URIRef)
+                     and str(s).startswith(entry["namespace"])
+                     and (s, rdflib.RDF.type, rdflib.OWL.Ontology)
+                     not in extracts}
+        missing = sorted(described - set(registers[entry["id"]]["terms"]))
+        assert missing == [], (entry["id"], missing[:5])
+
+
+def test_the_cco_register_is_all_of_cco(registers, manifest):
+    """Not the selection: the template names no CCO class, its extract
+    carries one CCO term, and its register must still hold the whole
+    namespace -- that is what lets a linter know cco:ont00001180 exists
+    before anything here uses it. 1,995 terms at v2.0, measured when the
+    template was built; a floor, as with BFO."""
+    cco = registers["cco"]["terms"]
+    assert len(cco) >= 1900, len(cco)
+    assert manifest["extracts"]["cco"]["terms_described_in_full"] < 100
+    assert {"value": "Organization", "lang": "en"} in cco[ORGANIZATION]["labels"]
+    assert "http://www.w3.org/2002/07/owl#Class" in cco[ORGANIZATION]["types"]
+
+
+def test_a_readable_name_resolves_to_one_opaque_iri(registers):
+    """The lookup phase 3's linter makes: "Organization" names exactly one
+    CCO term, so a suggestion can be made without guessing."""
+    found = [iri for iri, record in registers["cco"]["terms"].items()
+             if any(label["value"] == "Organization"
+                    for label in record["labels"])]
+    assert found == [ORGANIZATION], found
+
+
+def test_the_bfo_register_matches_the_whole_extract(registers, layout):
+    """BFO is select: all, so its register and its extract describe the
+    same BFO terms."""
+    import rdflib
+
+    graph = extract(layout, "vendor.bfo")
+    described = {str(s) for s in graph.subjects()
+                 if str(s).startswith(OBO + "BFO_")}
+    assert set(registers["bfo"]["terms"]) == described
+
+
+def test_a_register_records_labels_types_and_deprecation(
+        vendoring, monkeypatch, tmp_path):
+    """Neither pinned upstream marks a term deprecated -- no owl:deprecated
+    in either file, checked when this was written -- so the flag is
+    exercised on a constructed source."""
+    import json
+
+    a_ns = "https://a.invalid/"
+    owl_type = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
+    constructed_upstreams(vendoring, monkeypatch, [
+        ("a", a_ns, "named",
+         "<%sold> <%sdeprecated> true .\n"
+         "<%sold> %s <%sClass> .\n"
+         "<%sold> <%slabel> \"old\"@en , \"ancien\"@fr .\n"
+         "<%snew> <%slabel> \"new\" .\n"
+         "<%shead> %s <%sOntology> .\n"
+         % (a_ns, OWL, a_ns, owl_type, OWL, a_ns, RDFS, a_ns, RDFS,
+            a_ns, owl_type, OWL)),
+    ], seeds=set())
+
+    built = vendoring.build(tmp_path)
+    terms = json.loads(built["a"]["register_text"])["terms"]
+    assert set(terms) == {a_ns + "old", a_ns + "new"}, (
+        "the register carried the source's ontology header, or lost a term")
+    assert terms[a_ns + "old"]["deprecated"] is True
+    assert terms[a_ns + "new"]["deprecated"] is False
+    assert terms[a_ns + "old"]["types"] == [OWL + "Class"]
+    assert terms[a_ns + "old"]["labels"] == [
+        {"value": "ancien", "lang": "fr"}, {"value": "old", "lang": "en"}]
+
+
+def test_a_tampered_register_is_found_offline(vendoring, repo):
+    """The register is generated and digest-pinned like an extract. An
+    edited one has to be a finding, or it is a hand-kept list -- the
+    thing IRI_Linter's register was, and the reason it was not
+    vendored."""
+    entry = next(e for e in vendoring.sources() if e["id"] == "bfo")
+    path = repo / entry["register"]
+    original = path.read_bytes()
+    tampered = original.replace(b'"entity"', b'"entity (edited)"', 1)
+    assert tampered != original
+    try:
+        path.write_bytes(tampered)
+        record = vendoring.verify()
+        assert any(entry["register"] in f and "digests to" in f
+                   for f in record["findings"]), record["findings"]
+    finally:
+        path.write_bytes(original)
+    assert path.read_bytes() == original
+    assert vendoring.verify()["ok"]
+
+
+def test_a_register_is_never_loaded_as_ontology(layout, vendoring):
+    """JSON in a Turtle loader would fail the parse; JSON in the corpus
+    digest would be worse. It has a role of its own for that reason."""
+    loaded = {p.relative_to(layout.repository_root()).as_posix()
+              for p in layout.vendored_files() + layout.ontology_files()}
+    for entry in vendoring.sources():
+        assert entry["register"] not in loaded, entry["register"]
 
 
 # ---------------------------------------------------------- attribution

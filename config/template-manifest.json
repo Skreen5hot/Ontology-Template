@@ -1,8 +1,8 @@
 {
-  "digest": "d5d2dea0c8680eb5294e69f1004653d265231e9819f9f4a1ffe7b8d332b3c6c1",
+  "digest": "e5cbec087df7b2860a7104c1fcfc94e98b82b1e2b3d81c26195f20316754dab8",
   "files": {
     ".github/workflows/checks.yml": "0c8243eade1999a2d388b045b06bdf8f12eafa715dcf69ee87428af4aad75be5",
-    "docs/DEVELOPMENT.md": "af411a6414883ffc8e584be5ad558549d70ae9be1cbd50a517382392d2f67c6b",
+    "docs/DEVELOPMENT.md": "7164d3bb55fd06d0f5dd8806bb58392a1eaed2ef8ca74cc7d6ed5647cb4c9613",
     "docs/process/PROCESS.md": "7d05fe31365cbecfc27faa028671b0f95b12a196b91ff53bac4ccc01d4eea446",
     "requirements-dev.txt": "c9a55233d63e08bc8b5facf18f8401e33da84d2d2aef15f41507fc93963dedd3",
     "tests/conftest.py": "47f509ba156d6d99ffb174edbb502f3e7317e99318b8cc455db16e4eb6e262be",
@@ -13,14 +13,14 @@
     "tests/test_project.py": "64b6d4e7f80d268d962c3f0a936007a967d966b3cbcb3f6f3a3cd5965d97208e",
     "tests/test_repository_layout.py": "d225aeb6ba3cdaa4a6eddcb799af888c15433a273fcc535e5463ae85fcd07696",
     "tests/test_template.py": "7851eff7aa8a39d452c0c7264a502f5e5fe0155ae81e744ac90d2f3ce6ecee78",
-    "tests/test_upstream_vendoring.py": "22cc5034e8c09b4c3eb4ca64bed6f25a333f9d4a963034d8cab3f011d2060cbb",
+    "tests/test_upstream_vendoring.py": "f5694c70aafc19a80139d4881ba4e08d6b8d50d57f2acca8e83ea84bdad7933a",
     "tools/communications.py": "eb3cc330fb481d008fac6ea593a2540cc01b1979cc338ae9f6faa248600b0938",
     "tools/init_project.py": "4395f6b101b11545f3d2f97c50aaf21bbf928ad0d1b410c6d0ea01a60b2e44be",
     "tools/layout.py": "566e15c66366c88900cea4678712492102d4f10ad5205b875411fcf912e13a0a",
-    "tools/licensing/disposition.py": "888cabf46044d5d8128fa2a1103106b6f487238e90e8637742a9e614051fb203",
+    "tools/licensing/disposition.py": "5452e3337f61d3860a970649e5bf9f30221428f74bdab13e04f6dab524f5e5fa",
     "tools/ontology/corpus_digest.py": "f678be24b882091ba5627ad2d430e1ba0cefa9f74b823f3332706459de07a511",
     "tools/ontology/validate.py": "4dc72bf56ff01abf18b56629585983fce93789f686aed6326379db9064683c10",
-    "tools/ontology/vendor_upstream.py": "59e39f048442d1f1375d6c89c6d2fdbb96af8c2417ced27804d89565de57ed30",
+    "tools/ontology/vendor_upstream.py": "980afd45dd9604a33e4d58f4869c3e05a76672bd4e1281d527c9d9f78f2a06bc",
     "tools/project.py": "ca2293e67fcd64536d0f9d53547342b74d113bf52eb2c7c1d72fb6280ae610b5",
     "tools/template_status.py": "9618ccf1ec681d1f0daced31db87080e04e1e0a7e31b36c261652ec0239a92a6"
   },

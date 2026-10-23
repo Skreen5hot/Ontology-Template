@@ -12,6 +12,10 @@
       "named_by_specification_described_by_no_pinned_file": [],
       "namespace": "http://purl.obolibrary.org/obo/",
       "project": "Basic Formal Ontology",
+      "register": "vendor/bfo/bfo-register.json",
+      "register_on_disk_matches": true,
+      "register_sha256": "ff473b47aae7610e11303166bfc9ab6c46e234cea0b7265e16f19c0283986186",
+      "register_terms": 76,
       "release": "release-2024-01-29",
       "seed_terms": [
         "http://purl.obolibrary.org/obo/BFO_0000001",
@@ -93,8 +97,12 @@
       ],
       "seed_terms_from_corpus_and_shapes": [],
       "select": "all",
-      "source_sha256": "6944e2c96a0d8709dc15ae5364792019e208061eda3f32311af4f3b8d8443a3b",
-      "source_url": "https://raw.githubusercontent.com/BFO-ontology/BFO-2020/044490fc5100ffed6df7d4d15cbc167698b6fdee/src/owl/bfo-core.ttl",
+      "source_files": [
+        {
+          "sha256": "6944e2c96a0d8709dc15ae5364792019e208061eda3f32311af4f3b8d8443a3b",
+          "url": "https://raw.githubusercontent.com/BFO-ontology/BFO-2020/044490fc5100ffed6df7d4d15cbc167698b6fdee/src/owl/bfo-core.ttl"
+        }
+      ],
       "terms_declared_as_stubs": 0,
       "terms_described_in_full": 76,
       "triples": 542
@@ -111,12 +119,20 @@
       "named_by_specification_described_by_no_pinned_file": [],
       "namespace": "https://www.commoncoreontologies.org/",
       "project": "Common Core Ontologies",
+      "register": "vendor/cco/cco-register.json",
+      "register_on_disk_matches": true,
+      "register_sha256": "6ae382fafc5b3b1098ec155bf8d5f956921a8219a282ccbda79f3ce22d61185c",
+      "register_terms": 1995,
       "release": "v2.0-2024-11-06",
       "seed_terms": [],
       "seed_terms_from_corpus_and_shapes": [],
       "select": "named",
-      "source_sha256": "e609db27478a2c8b52b9bb5eb5ac979ac323510e851c368e4d9ec7d1c153fe5b",
-      "source_url": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/510dad76be0ef710b65a421075af912af25342b7/src/cco-merged/CommonCoreOntologiesMerged.ttl",
+      "source_files": [
+        {
+          "sha256": "e609db27478a2c8b52b9bb5eb5ac979ac323510e851c368e4d9ec7d1c153fe5b",
+          "url": "https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/510dad76be0ef710b65a421075af912af25342b7/src/cco-merged/CommonCoreOntologiesMerged.ttl"
+        }
+      ],
       "terms_declared_as_stubs": 1,
       "terms_described_in_full": 1,
       "triples": 32

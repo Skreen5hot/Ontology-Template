@@ -15,7 +15,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | Phase | What | State |
 |---|---|---|
 | 1 | Extract and generalize the core | **done** (gate held 2026-10-23) |
-| 2 | Upstreams: several files per source, sister ontologies, the upstream register | **in progress** |
+| 2 | Upstreams: several files per source, sister ontologies, the upstream register | **done**, pending the network `--confirm` on GitHub |
 | 3 | IRI lint, ported from IRI_Linter | not started |
 | 4 | Realist shape library and competency questions | not started |
 | 5 | Reasoning and release (ROBOT, own CI job) | not started |
@@ -55,6 +55,13 @@ and its suite passed.
 
 **Gate:** the weekly `--confirm` job passes; a test adds a second file to a constructed
 source and sees it vendored and attributed.
+
+Built 2026-10-23: `files:` per source, `vendor/<id>/<id>-register.json` (role
+`vendored-register`; BFO 76 terms, CCO 1,995 -- all of CCO, so "Organization" resolves to
+`cco:ont00001180` offline), digest-checked offline and byte-checked by `--confirm`, and a worked
+BPO entry, commented out, at the end of `config/upstream-sources.yaml`. Neither pinned
+upstream marks any term `owl:deprecated`, so the register's deprecation flag is exercised on
+a constructed source only.
 
 ## 3. IRI lint
 

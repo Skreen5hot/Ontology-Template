@@ -94,7 +94,8 @@ def project_licence() -> str:
 
 
 def vendored_sources() -> dict:
-    """Pinned upstreams, indexed by the extract path each produces.
+    """Pinned upstreams, indexed by every path each produces: its extract
+    and its register, both the upstream's content under its licence.
 
     Read here rather than restated, so the licence this tool reports for
     a vendored file and the licence the vendoring tool wrote into that
@@ -121,6 +122,8 @@ def vendored_sources() -> dict:
                               % (UPSTREAM_SOURCES, required,
                                  entry["extract"]))
         found[entry["extract"]] = entry
+        if entry.get("register"):
+            found[entry["register"]] = entry
     return found
 
 
@@ -131,9 +134,9 @@ def licence_of(disposition: str, relative=None):
         sources = vendored_sources()
         if relative not in sources:
             raise Refused(
-                "%s is declared a vendored upstream extract, and %s pins no "
-                "source producing it, so nothing states what licence it "
-                "carries." % (relative, UPSTREAM_SOURCES))
+                "%s is declared vendored, and %s pins no source producing "
+                "it, so nothing states what licence it carries."
+                % (relative, UPSTREAM_SOURCES))
         return sources[relative]["licence"]["spdx"]
     return project_licence()
 
@@ -180,7 +183,10 @@ LICENCE_ROLES = {"project-licence"}
 CITED_ROLES = {"third-party-reference"}
 
 #: Roles that are somebody else work, redistributed under their terms.
-VENDORED_ROLES = {"vendored-ontology"}
+#: `vendored-register` is the per-source list of every term and its
+#: labels: the upstream's words, so the upstream's licence, and a role of
+#: its own because it is JSON and must never be parsed as ontology.
+VENDORED_ROLES = {"vendored-ontology", "vendored-register"}
 
 #: Suffix rules for files no component claims. Kept small on purpose: the
 #: contract is the primary authority and this is the fallback, so a

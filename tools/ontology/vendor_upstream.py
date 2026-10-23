@@ -9,7 +9,8 @@ Written in the Application Requirement Ontology and carried through the
 Business Capability Ontology, which added three things: the serialiser's
 prefixes come from the pins, a source whose artifact states no licence
 may name a pinned licence file instead, and a specification is read for
-seeds. The template adds a fourth: a source may be vendored whole.
+seeds. The template adds: a source may be vendored whole, a source may be
+several files at one commit, and every source gets a register.
 
 WHY THIS EXISTS
 
@@ -51,6 +52,17 @@ WHAT IS SELECTED
             the extract would reference terms it does not describe, and
             the check for unresolved vocabulary would still fire -- on
             the extract's own annotations.
+
+THE REGISTER
+
+Beside each extract, a JSON register of every term the source's pinned
+files describe in its namespace -- not only the ones selected -- with its
+labels, its OWL types and whether it is deprecated. The extract answers
+"what does this term reach"; the register answers "is there such a term,
+and what is it called", which is what the IRI linter needs to tell a
+mistyped opaque id from a readable name and to suggest the right IRI,
+offline. It carries the upstream's own labels, so it is the upstream's
+content under the upstream's licence, like the extract.
 
 WHAT IS NOT SELECTED, AND WHAT THAT COSTS
 
@@ -168,16 +180,12 @@ def sources() -> list[dict]:
     if not declared:
         raise Refused(PINS + " declares no sources")
     for entry in declared:
-        for required in ("id", "url", "commit", "sha256", "namespace",
-                         "prefix", "extract", "licence"):
+        for required in ("id", "commit", "namespace", "prefix", "extract",
+                         "register", "licence"):
             if not entry.get(required):
                 raise Refused("a source in %s declares no %r: %r"
                               % (PINS, required, entry.get("id", entry)))
-        if entry["commit"] not in entry["url"]:
-            raise Refused(
-                "%s pins commit %s but its url does not name it, so the "
-                "url is not pinned to that commit"
-                % (entry["id"], entry["commit"]))
+        entry["files"] = files_of(entry)
         entry.setdefault("select", "named")
         if entry["select"] not in SELECT_MODES:
             raise Refused("%s declares select %r; the modes are %s"
@@ -200,6 +208,43 @@ def sources() -> list[dict]:
         raise Refused("two sources in %s share a prefix: %s"
                       % (PINS, prefixes))
     return declared
+
+
+def files_of(entry: dict) -> list[dict]:
+    """The pinned files of one source, as [{url, sha256}].
+
+    A source is one file (`url` and `sha256`) or several (`files`, each
+    with both) -- never both spellings, because then which one is pinned
+    would depend on which this tool read first. Every url must name the
+    source's commit, so all of a source's files come from one state of
+    its repository.
+    """
+    single = entry.get("url") or entry.get("sha256")
+    listed = entry.get("files")
+    if single and listed:
+        raise Refused(
+            "%s declares both url/sha256 and files; a source is one file or "
+            "a list of them" % entry["id"])
+    if listed:
+        files = [dict(f) for f in listed]
+    elif entry.get("url") and entry.get("sha256"):
+        files = [{"url": entry["url"], "sha256": entry["sha256"]}]
+    else:
+        raise Refused("%s declares no url and sha256, and no files"
+                      % entry["id"])
+    for number, pinned in enumerate(files, 1):
+        if not (pinned.get("url") and pinned.get("sha256")):
+            raise Refused("%s: file %d declares no url or no sha256"
+                          % (entry["id"], number))
+        if entry["commit"] not in pinned["url"]:
+            raise Refused(
+                "%s pins commit %s but its url %s does not name it, so the "
+                "url is not pinned to that commit"
+                % (entry["id"], entry["commit"], pinned["url"]))
+    urls = [f["url"] for f in files]
+    if len(urls) != len(set(urls)):
+        raise Refused("%s pins the same url twice" % entry["id"])
+    return files
 
 
 def prefixes() -> tuple:
@@ -240,9 +285,19 @@ def fetch_pinned(source_id: str, url: str, sha256: str, cache: Path,
     return data
 
 
-def fetch(source: dict, cache: Path) -> bytes:
-    return fetch_pinned(source["id"], source["url"], source["sha256"],
-                        cache, source["id"] + ".ttl")
+def cache_name(source: dict, number: int) -> str:
+    """`<id>.ttl` for a one-file source -- the name every earlier cache
+    used -- and `<id>.<n>.ttl` for each file of a larger one."""
+    if len(source["files"]) == 1:
+        return source["id"] + ".ttl"
+    return "%s.%d.ttl" % (source["id"], number)
+
+
+def fetch(source: dict, cache: Path) -> list[bytes]:
+    """Every pinned file of a source, in pin order, each digest checked."""
+    return [fetch_pinned(source["id"], pinned["url"], pinned["sha256"],
+                         cache, cache_name(source, number))
+            for number, pinned in enumerate(source["files"], 1)]
 
 
 # --------------------------------------------------------- selection
@@ -576,8 +631,10 @@ def header_lines(source: dict, stated: str, counts: dict) -> list:
         "",
         "  release     %s" % source["release"],
         "  commit      %s" % source["commit"],
-        "  source      %s" % source["url"],
-        "  sha256      %s" % source["sha256"],
+    ] + [line for pinned in source["files"] for line in (
+        "  source      %s" % pinned["url"],
+        "  sha256      %s" % pinned["sha256"],
+    )] + [
         "  licence     %s (%s)" % (licence["spdx"], licence["url"]),
         "  as stated   %s" % stated,
         "",
@@ -607,7 +664,10 @@ def ontology_triples(source: dict, stated: str, counts: dict) -> list:
          rdflib.Literal("%s %s, partial extract for %s"
                         % (source["project"], source["release"],
                            project.load()["title"]), lang="en")),
-        (iri, rdflib.URIRef(DCTERMS + "source"), rdflib.URIRef(source["url"])),
+    ] + [
+        (iri, rdflib.URIRef(DCTERMS + "source"), rdflib.URIRef(pinned["url"]))
+        for pinned in source["files"]
+    ] + [
         (iri, rdflib.URIRef(DCTERMS + "license"),
          rdflib.URIRef(licence["url"])),
         (iri, rdflib.URIRef(RDFS + "comment"),
@@ -637,9 +697,9 @@ def build(cache: Path) -> dict:
     upstream = rdflib.Graph()
     per_source = {}
     for entry in declared:
-        data = fetch(entry, cache)
         graph = rdflib.Graph()
-        graph.parse(data=data.decode("utf-8"), format="turtle")
+        for data in fetch(entry, cache):
+            graph.parse(data=data.decode("utf-8"), format="turtle")
         per_source[entry["id"]] = graph
         for triple in graph:
             upstream.add(triple)
@@ -693,9 +753,12 @@ def build(cache: Path) -> dict:
         mine = mine + ontology_triples(entry, stated, counts)
         text = serialise(mine, header_lines(entry, stated, counts))
         round_trip(text, mine)
+        register = register_of(entry, per_source[entry["id"]], stated)
         built[entry["id"]] = {
             "source": entry,
             "text": text,
+            "register_text": register_bytes(register).decode("utf-8"),
+            "register_terms": len(register["terms"]),
             "counts": counts,
             "stated_licence": stated,
             "seeds": sorted(s for s in seeds if s.startswith(namespace)),
@@ -717,6 +780,79 @@ def build(cache: Path) -> dict:
     return built
 
 
+# ------------------------------------------------------------ register
+
+
+#: The OWL kinds a register records for a term. Others (rdf:Property,
+#: skos:Concept) are recorded too, but these are the ones a linter asks
+#: about, so they are what `types` is guaranteed to hold if present.
+REGISTER_TYPES = (OWL + "Class", OWL + "ObjectProperty",
+                  OWL + "DatatypeProperty", OWL + "AnnotationProperty",
+                  OWL + "NamedIndividual")
+
+
+def register_of(source: dict, graph, stated: str) -> dict:
+    """Every term the source's pinned files describe in its namespace.
+
+    The whole source, not the selection: the register is how a linter
+    knows that cco:ont00001180 exists and is called "Organization" before
+    anything here names it. The source's own owl:Ontology is left out,
+    as from a whole-source extract.
+    """
+    import rdflib
+
+    ontology = rdflib.URIRef(OWL + "Ontology")
+    deprecated = rdflib.URIRef(OWL + "deprecated")
+    terms = {}
+    for subject in set(graph.subjects()):
+        if not (isinstance(subject, rdflib.URIRef)
+                and str(subject).startswith(source["namespace"])):
+            continue
+        if (subject, rdflib.RDF.type, ontology) in graph:
+            continue
+        labels = sorted({(str(o), o.language or "")
+                         for o in graph.objects(subject, rdflib.RDFS.label)
+                         if isinstance(o, rdflib.Literal)})
+        types = sorted({str(o) for o in graph.objects(subject, rdflib.RDF.type)
+                        if isinstance(o, rdflib.URIRef)})
+        flagged = any(str(o).lower() == "true"
+                      for o in graph.objects(subject, deprecated))
+        terms[str(subject)] = {
+            "labels": [{"value": v, "lang": lang} for v, lang in labels],
+            "types": types,
+            "deprecated": flagged,
+        }
+    if not terms:
+        raise Refused("%s: its pinned files describe no term in %s, so the "
+                      "register would be empty" % (source["id"],
+                                                   source["namespace"]))
+    return {
+        "format_version": FORMAT_VERSION,
+        "generated_by": GENERATOR,
+        "source": source["id"],
+        "project": source["project"],
+        "release": source["release"],
+        "commit": source["commit"],
+        "files": source["files"],
+        "namespace": source["namespace"],
+        "licence": source["licence"]["spdx"],
+        "licence_as_stated_by_source": stated,
+        "attribution": " ".join(source["licence"]["attribution"].split()),
+        "note": (
+            "Every term the pinned files describe in this namespace, not "
+            "only the ones vendored: what exists, and what it is called. "
+            "Generated -- do not edit. The labels are the upstream's, "
+            "under the upstream's licence."),
+        "terms": terms,
+    }
+
+
+def register_bytes(register: dict) -> bytes:
+    """Deterministic: sorted keys, one indentation, LF, trailing newline."""
+    return (json.dumps(register, indent=1, sort_keys=True,
+                       ensure_ascii=False).encode("utf-8") + b"\n")
+
+
 def manifest_of(built: dict) -> dict:
     root = layout.repository_root()
     extracts = {}
@@ -726,14 +862,15 @@ def manifest_of(built: dict) -> dict:
         entry = record["source"]
         path = root / entry["extract"]
         data = record["text"].encode("utf-8")
+        register_path = root / entry["register"]
+        register_data = record["register_text"].encode("utf-8")
         extracts[key] = {
             "extract": entry["extract"],
             "project": entry["project"],
             "release": entry["release"],
             "select": entry["select"],
             "commit": entry["commit"],
-            "source_url": entry["url"],
-            "source_sha256": entry["sha256"],
+            "source_files": entry["files"],
             "licence_spdx": entry["licence"]["spdx"],
             "licence_url": entry["licence"]["url"],
             "licence_as_stated_by_source": record["stated_licence"],
@@ -751,6 +888,12 @@ def manifest_of(built: dict) -> dict:
             "extract_on_disk_matches": (
                 path.is_file()
                 and sha256_of(path.read_bytes()) == sha256_of(data)),
+            "register": entry["register"],
+            "register_terms": record["register_terms"],
+            "register_sha256": sha256_of(register_data),
+            "register_on_disk_matches": (
+                register_path.is_file()
+                and register_path.read_bytes() == register_data),
         }
     return {
         "format_version": FORMAT_VERSION,
@@ -805,10 +948,12 @@ def notice_of(built: dict) -> str:
         "from `" + PINS + "`; the licensing check reads the same pins and",
         "fails if an attribution declared there is missing here.",
         "",
-        "The extracts are not the upstream ontologies. Each carries only the",
-        "terms this repository names plus their structural ancestry, and",
-        "drops every axiom whose object is an anonymous class expression.",
-        "See the header of each file, and `" + MANIFEST + "`.",
+        "The extracts are not the upstream ontologies. Each carries the terms",
+        "this repository names plus their structural ancestry (or, for a",
+        "source pinned `select: all`, every term it describes), and drops",
+        "every axiom whose object is an anonymous class expression. The",
+        "registers list every term each source describes, with its labels.",
+        "See the header of each extract, and `" + MANIFEST + "`.",
         "",
     ]
     for key, record in sorted(built.items()):
@@ -821,7 +966,8 @@ def notice_of(built: dict) -> str:
             entry["licence"]["attribution"].strip(),
             "",
             "- extract: `" + entry["extract"] + "`",
-            "- source: " + entry["url"],
+            "- register: `" + entry["register"] + "`",
+        ] + ["- source: " + pinned["url"] for pinned in entry["files"]] + [
             "- commit: `" + entry["commit"] + "`",
             "- licence: " + entry["licence"]["spdx"] + " -- "
             + entry["licence"]["url"],
@@ -877,6 +1023,25 @@ def verify() -> dict:
                 % (entry["id"], entry["extract"], digest[:16], MANIFEST,
                    (want or "nothing")[:16]))
         vendored.parse(data=data.decode("utf-8"), format="turtle")
+
+        register = root / entry["register"]
+        want = recorded["extracts"].get(entry["id"], {}).get("register_sha256")
+        if not register.is_file():
+            findings.append("%s: %s is missing" % (entry["id"],
+                                                  entry["register"]))
+        elif sha256_of(register.read_bytes()) != want:
+            findings.append(
+                "%s: %s digests to %s but %s records %s"
+                % (entry["id"], entry["register"],
+                   sha256_of(register.read_bytes())[:16], MANIFEST,
+                   (want or "nothing")[:16]))
+        else:
+            pinned = json.loads(register.read_text(encoding="utf-8"))
+            if pinned.get("commit") != entry["commit"]:
+                findings.append(
+                    "%s: %s describes commit %s, and the pin is %s"
+                    % (entry["id"], entry["register"], pinned.get("commit"),
+                       entry["commit"]))
 
     # Spec terms the last build recorded as unresolvable are excused; any
     # other spec term is held to the same standard as a corpus term. A
@@ -958,13 +1123,21 @@ def main(argv=None) -> int:
              totals["spec_terms_unresolved"]))
 
     manifest = manifest_of(built)
-    differing = [key for key, record in manifest["extracts"].items()
+    differing = [record["extract"]
+                 for record in manifest["extracts"].values()
                  if not record["extract_on_disk_matches"]]
+    differing += [record["register"]
+                  for record in manifest["extracts"].values()
+                  if not record["register_on_disk_matches"]]
 
     for key, record in sorted(manifest["extracts"].items()):
         print("    %-4s %-40s %6d triple(s)  %s"
               % (key, record["extract"], record["triples"],
                  "same" if record["extract_on_disk_matches"] else "DIFFERS"))
+        print("    %-4s %-40s %6d term(s)    %s"
+              % ("", record["register"], record["register_terms"],
+                 "same" if record["register_on_disk_matches"]
+                 else "DIFFERS"))
 
     notice = notice_of(built)
     notice_path = root / NOTICE
@@ -980,8 +1153,8 @@ def main(argv=None) -> int:
                   "from the pinned sources produces: %s"
                   % (len(differing), ", ".join(sorted(differing))))
             return 1
-        print("  every extract is byte-identical to a fresh build from the "
-              "pinned upstreams")
+        print("  every extract, register and the notice are byte-identical "
+              "to a fresh build from the pinned upstreams")
         return 0
 
     for key, record in sorted(built.items()):
@@ -991,6 +1164,11 @@ def main(argv=None) -> int:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(record["text"].encode("utf-8"))
         print("  wrote %s" % record["source"]["extract"])
+        register = root / record["source"]["register"]
+        register.parent.mkdir(parents=True, exist_ok=True)
+        register.write_bytes(record["register_text"].encode("utf-8"))
+        print("  wrote %s (%d terms)" % (record["source"]["register"],
+                                         record["register_terms"]))
 
     notice_path.parent.mkdir(parents=True, exist_ok=True)
     notice_path.write_bytes(notice.encode("utf-8"))

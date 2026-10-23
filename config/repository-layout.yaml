@@ -183,6 +183,25 @@ components:
       ancestry. Grows as the ontology names more of CCO; the offline
       check fails until it is rebuilt.
 
+  - id: vendor.bfo-register
+    path: vendor/bfo/bfo-register.json
+    role: vendored-register
+    generator: tool.vendor-upstream
+    redistributable: true
+    description: >-
+      Every term BFO 2020 core describes, with its labels, OWL types and
+      deprecation. What the IRI linter checks an obo: reference against.
+
+  - id: vendor.cco-register
+    path: vendor/cco/cco-register.json
+    role: vendored-register
+    generator: tool.vendor-upstream
+    redistributable: true
+    description: >-
+      Every term CCO v2.0's merged file describes in CCO's namespace, with
+      its labels -- all of CCO, not only what is vendored, so a readable
+      name like "Organization" can be matched to its opaque IRI offline.
+
   - id: docs.vendor-notice
     path: vendor/NOTICE.md
     role: documentation

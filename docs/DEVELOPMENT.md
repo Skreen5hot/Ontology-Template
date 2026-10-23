@@ -131,6 +131,7 @@ the licensing tool so the two cannot drift:
 | `specification` | a design document; read by the vendoring tool for the upstream terms it names |
 | `historical-draft` | preserved as imported; never loaded |
 | `vendored-ontology` | somebody else's, redistributed under their licence, attribution required |
+| `vendored-register` | the list of every term a pinned upstream describes; its labels, so its licence; JSON, never loaded as ontology |
 | `third-party-reference` | somebody else's, **not** redistributable |
 | `site-source` | a public site's pages, copy and assets |
 | `communication` | the communications record |
@@ -185,20 +186,38 @@ python tools/ontology/vendor_upstream.py --confirm  # fetch and require byte-ide
 python tools/ontology/vendor_upstream.py --rebuild  # fetch and rewrite
 ```
 
-| id | pin | selected |
-|---|---|---|
-| `bfo` | release-2024-01-29 | `all`: every term `bfo-core.ttl` describes |
-| `cco` | v2.0-2024-11-06 | `named`: the terms this repository names, plus their ancestry |
+| id | pin | selected | register |
+|---|---|---|---|
+| `bfo` | release-2024-01-29 | `all`: every term `bfo-core.ttl` describes | `vendor/bfo/bfo-register.json` |
+| `cco` | v2.0-2024-11-06 | `named`: the terms this repository names, plus their ancestry | `vendor/cco/cco-register.json` |
+
+**Each source has a register** beside its extract: every term its pinned files describe in its
+namespace — all of CCO, not only what is vendored — with labels, OWL types and deprecation. It
+answers "is there such a term, and what is it called", which the extract cannot for a term
+nothing here names yet. To find the opaque IRI for a readable name:
+
+```bash
+python -c "import json; t=json.load(open('vendor/cco/cco-register.json',encoding='utf-8'))['terms']; print([i for i,r in t.items() if any(l['value']=='Organization' for l in r['labels'])])"
+```
+
+The register is the upstream's labels, so it is licensed as the upstream is (role
+`vendored-register`), generated, and digest-checked offline like the extract.
+
+**A source may be several files** at one commit: `files:` with a `url` and `sha256` each,
+instead of a single `url` and `sha256`. They are read as one graph. Every url must name the
+commit.
 
 **Seeds** come from the authored modules and the shapes — including terms named only inside
 SPARQL text — and from any component with the role `specification`. A specification term no
 pinned file describes is recorded in `config/upstream-extracts.json` rather than refused.
 
 **A sister ontology** (one this project builds on, such as the Business Process Ontology) is
-another entry in `config/upstream-sources.yaml`: url at a commit, sha256, namespace, prefix,
-extract path, licence. If its Turtle states no licence, name its LICENSE file at the same
-commit as `statement_url` with a `statement_sha256`. Declare the extract in the layout
-contract as a `vendored-ontology`.
+another entry in `config/upstream-sources.yaml`: url(s) at a commit, sha256, namespace,
+prefix, extract and register paths, licence. If its Turtle states no licence, name its LICENSE
+file at the same commit as `statement_url` with a `statement_sha256`. The end of that file
+carries a worked entry, commented out: the BPO pin the Business Capability Ontology uses.
+Declare the extract as a `vendored-ontology` and the register as a `vendored-register` in the
+layout contract, then `--rebuild`.
 
 **What the extracts leave out:** every axiom whose object is an anonymous class
 expression. That is recorded in each file's header and in `config/upstream-extracts.json`,
