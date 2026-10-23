@@ -85,6 +85,10 @@ of an IRI reported for every occurrence. Each is a test case in
 registers; wired into CI, a git pre-commit hook (`.githooks/`), and a Claude Code
 PostToolUse hook (`.claude/settings.json`). One addition the plan did not name: a readable
 name is matched against the other upstream too (`cco:Process` -> `obo:BFO_0000015`).
+After the gate, the three things the suite cannot show were run for real (recorded in
+`docs/HANDOFF.md` §4): `deprecated_upstream` against IAO, which deprecates 24 terms (no
+pinned upstream deprecates any); the git hook refusing and accepting real commits; and the
+Claude Code hook handing a finding back to an agent in a live session.
 IRI_Linter is credited in the tool's docstring and DEVELOPMENT.md rather than in
 `vendor/NOTICE.md`: no code or data of it is redistributed, only its rules and test ideas,
 rewritten.

@@ -49,12 +49,15 @@ https://github.com/Skreen5hot/Ontology-Template.
   repository on GitHub without changing that line makes the template refuse itself.
 - **The generators are not exercised by the suite in a copy.** init's regeneration needs the
   network or a warm cache. It was run by hand once (§4); a CI job doing it is phase 8.
-- **Deprecation is untested on real data.** Neither pinned upstream marks a term
-  `owl:deprecated`; the register's flag is exercised on a constructed source only.
+- **No pinned upstream deprecates anything.** Neither CCO v2.0, nor the 2026-04-04 CCO, nor
+  BFO 2020 carries `owl:deprecated`, an IAO obsolescence annotation, or an "obsolete" label
+  (searched 2026-10-23). The rule is shown to work on a real upstream that does (§4) and
+  guards against a future release; the suite exercises it on a constructed source.
 - **The CCO extract is a header plus what CCO says about BFO**, because the template names no
   CCO term. Nothing about CCO's hierarchy is exercised until a project names one.
 - **The git hook is opt-in** (`git config core.hooksPath .githooks`); the Claude Code hook
-  runs for any agent session in the repository, using `python` on the PATH.
+  runs for any agent session in the repository, using `python` on the PATH. Both were run for
+  real once (§4); neither can run in CI, so a change to either is re-run by hand.
 - **No reasoner, no release artefacts, no realist shapes, no site.** Phases 4–8.
 
 ## 4. Evidence outside the suite
@@ -81,8 +84,27 @@ yet, so there is no commit to cite):
   the shapes — and `leftovers()` was rewritten to scan every non-vendored `.ttl` before it
   failed as it should.
 
-Not covered: `vendor_upstream.py --rebuild` from the network (only from the cache, whose
-bytes match the pins); a real "Use this template". CI on GitHub had not run when this was
+Added after phase 3, 2026-10-23, in scratch clones (nothing in the repository changed):
+
+- **Deprecation on real data.** IAO at commit `3006aedacbf813ffd1d2ac15cda10766ca9ed388`,
+  `iao.owl` (sha256 `c27ff2964a2ad8165bc365698b628aae95108411384aa4450e6e1b1e82bf0f41`), has
+  24 `owl:deprecated "true"^^xsd:boolean` terms. `register_of` over it flagged exactly those
+  24 of 398 — none missed, none extra, against rdflib's own boolean reading — and the
+  linter, given that register, reported `deprecated_upstream` for `obo:IAO_0000008` on its
+  line and nothing for a live IAO term. IAO is RDF/XML, which the vendoring tool does not
+  read; the register builder and the linter were driven directly.
+- **The git hook, real commits** (`core.hooksPath .githooks`): a module change writing
+  `cco:Organization` was refused (`readable_label cco:Organization -> cco:ont00001180`, HEAD
+  unchanged); the same change with `cco:ont00001180` was committed; a docs-only commit did not
+  run the linter.
+- **The Claude Code hook, a live headless session** (Claude Code 2.1.143, `claude -p`, tools
+  Read and Edit): asked to add a class under `cco:Organization`, the agent made two edits;
+  after the first (the prefix alone) the hook was silent, and after the second the agent's
+  reply quoted the hook's feedback verbatim: `ontology/example.ttl:27 readable_label
+  cco:Organization -> cco:ont00001180`.
+
+Not covered: `vendor_upstream.py --rebuild` from the network outside CI (CI's weekly job
+does it); a real "Use this template". CI on GitHub had not run when this was
 written; its first run is on the commit that publishes the repository.
 
 ## 5. Where to look
