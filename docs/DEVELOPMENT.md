@@ -52,6 +52,7 @@ python tools/licensing/disposition.py         # one disposition per tracked file
 python tools/licensing/disposition.py --check # nothing unpublishable is tracked
 python tools/ontology/vendor_upstream.py      # the extracts cover what is named
 python tools/ontology/validate.py --gate      # no new ontology findings
+python tools/ontology/iri_lint.py             # every IRI is a real term or a declared one
 python tools/communications.py                # the communications record follows its protocol
 python tools/template_status.py               # where this has diverged from the template
 python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsifications
@@ -66,6 +67,7 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `vendor_upstream.py` | an upstream term the corpus or the shapes name that no extract describes; an extract whose digest is not what the manifest records |
 | `validate.py --gate` | a rung with more findings than `config/validation-baseline.json` records, a rung with fewer that has not been re-recorded, a shape set the fixture does not exercise, a rung blocked on missing vocabulary, a violation against a vendored term, and a rung the baseline does not mention |
 | `validate.py --record` | raising any recorded count without `--accept-regression "<why>"`. Lowering is always free |
+| `iri_lint.py` | an upstream IRI its pinned release does not have (`unverified`), a readable name where the upstream mints ids (`readable_label`, with the id suggested), an id in the wrong case (`case_mismatch`), a deprecated upstream term, an authored file typing an upstream term (`redeclared_upstream`), an authored IRI nothing declares (`dangling_ref`); and, as exit 2, a file it cannot read or parse |
 | `template_status.py --check` | in the template only: a manifest that does not describe the owned files. A project's divergence is reported, never refused |
 
 `validate.py` writes a report with `-o config/validation-report.json`. That file is
@@ -102,6 +104,39 @@ and CCO are opaque: `obo:BFO_0000015` is *process* and `cco:ont00001180` is
 
 The offline vendoring check fails between steps 2 and 3, naming the term. That failure is
 the point: it is the moment somebody looks at what the new reference is.
+
+---
+
+## The IRI linter
+
+```bash
+python tools/ontology/iri_lint.py                  # the modules and the shapes, as one corpus
+python tools/ontology/iri_lint.py a.ttl b.ttl      # these files
+python tools/ontology/iri_lint.py --output json
+```
+
+It checks every upstream IRI against its source's register — every term the pinned release
+describes, not only what is vendored — and every IRI in the project namespace against the
+declarations in the files linted together. A finding names the file and line of each
+occurrence:
+
+```text
+ontology/widget.ttl:14 readable_label cco:Organization -> cco:ont00001180
+ontology/widget.ttl:22 readable_label cco:Process -> obo:BFO_0000015
+ontology/widget.ttl:30 unverified cco:ont99999999
+```
+
+Exit 0 is clean, 1 is findings, 2 is "could not lint" — a file that does not parse is never a
+file with no findings. The rules and the JSON shape are IRI_Linter's; why the code is not is
+in the tool's docstring.
+
+**Two hooks run it before CI does.** For agents, `.claude/settings.json` runs it after every
+Write or Edit of a `.ttl` and hands findings back to the agent on the edit that caused them.
+For people, a git pre-commit hook, enabled once per clone:
+
+```bash
+git config core.hooksPath .githooks
+```
 
 ---
 

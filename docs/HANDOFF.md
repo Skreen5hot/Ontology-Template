@@ -1,6 +1,6 @@
 # Handoff — state of the template
 
-Written 2026-10-23, at the end of roadmap phase 1; §2 and §3 updated at the end of phase 2. It is a snapshot: where this file and a
+Written 2026-10-23, at the end of roadmap phase 1; §2 and §3 updated at the ends of phases 2 and 3. It is a snapshot: where this file and a
 test disagree, the test is right and this file is stale. In a project made from the
 template, init replaces this file with the project's own.
 
@@ -13,7 +13,8 @@ method with every project-specific value taken out, so a new BFO/CCO ontology re
 starts with them on its first commit. Its own project is a placeholder called `example`
 that exists so every check has something to run against. Phase 1 of
 [`docs/template/ROADMAP.md`](template/ROADMAP.md) — extract and generalize — is done; phase 2
-is done too, pending its network check on GitHub; phase 3 (the IRI linter) is next. The
+and phase 3 (the IRI linter) are done; phase 4 (realist shapes and competency questions) is
+next. The
 repository is published, private and marked as a template, at
 https://github.com/Skreen5hot/Ontology-Template.
 
@@ -34,6 +35,10 @@ https://github.com/Skreen5hot/Ontology-Template.
 - **A register per source** — every term the pinned files describe, with labels, types and
   deprecation; all 1,995 CCO terms, not only the vendored one — generated, licensed as the
   upstream's, digest-checked offline. It is what phase 3's linter will read.
+- **An IRI linter** (`tools/ontology/iri_lint.py`): readable names with the opaque id
+  suggested, unknown ids, wrong-case ids, deprecated and redeclared upstream terms, dangling
+  authored references; a parse failure exits 2. Run in CI, by a git hook, and by a Claude Code
+  hook after each `.ttl` edit (`tests/test_iri_lint.py`).
 - Everything the BCO's suite asserted about the layout contract, licensing, the SHACL ladder
   and the corpus digest, carried over and generalized.
 
@@ -48,7 +53,9 @@ https://github.com/Skreen5hot/Ontology-Template.
   `owl:deprecated`; the register's flag is exercised on a constructed source only.
 - **The CCO extract is a header plus what CCO says about BFO**, because the template names no
   CCO term. Nothing about CCO's hierarchy is exercised until a project names one.
-- **No reasoner, no release artefacts, no IRI linter, no realist shapes, no site.** Phases 2–8.
+- **The git hook is opt-in** (`git config core.hooksPath .githooks`); the Claude Code hook
+  runs for any agent session in the repository, using `python` on the PATH.
+- **No reasoner, no release artefacts, no realist shapes, no site.** Phases 4–8.
 
 ## 4. Evidence outside the suite
 

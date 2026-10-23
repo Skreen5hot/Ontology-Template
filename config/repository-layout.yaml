@@ -369,6 +369,42 @@ components:
       the vendored extracts, and against the fixtures built to break it.
       Gates against the baseline.
 
+  - id: tool.iri-lint
+    path: tools/ontology/iri_lint.py
+    role: tool
+    template: owned
+    description: >-
+      Verify before assert: every upstream IRI the authored Turtle uses is
+      a term of its pinned release (checked against the registers), every
+      authored IRI is declared, and a readable name gets the opaque IRI
+      suggested. The rules are IRI_Linter's; the code is not.
+
+  - id: tool.claude-hook
+    path: tools/hooks/claude_ttl_lint.py
+    role: tool
+    template: owned
+    description: >-
+      The Claude Code PostToolUse hook: after an agent writes or edits a
+      .ttl here, runs the IRI linter over the authored scope and hands any
+      finding back to the agent.
+
+  - id: config.claude
+    path: .claude/settings.json
+    role: configuration
+    template: owned
+    description: >-
+      Claude Code project settings: registers the IRI-lint hook on Write
+      and Edit.
+
+  - id: hooks.git
+    path: .githooks
+    role: tool
+    template: owned
+    description: >-
+      Git hooks, enabled per clone with `git config core.hooksPath
+      .githooks`: pre-commit runs the IRI linter when a commit touches
+      Turtle.
+
   - id: tool.corpus-digest
     path: tools/ontology/corpus_digest.py
     role: tool

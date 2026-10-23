@@ -1,0 +1,54 @@
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix obo:  <http://purl.obolibrary.org/obo/> .
+@prefix cco:  <https://www.commoncoreontologies.org/> .
+@prefix p:    <{{namespace}}> .
+
+# Built to break tools/ontology/iri_lint.py, one rule per line. Every line
+# that must be reported says so in its trailing comment -- `expect:` then
+# the rule, then `->` and the suggestion when there is exactly one -- and
+# tests/test_iri_lint.py reads those comments as the expected result. A
+# line with no `expect:` must not be reported.
+
+# readable_label, suggested within the same upstream
+p:A1 a owl:Class ; rdfs:subClassOf cco:Organization .            # expect: readable_label -> cco:ont00001180
+
+# readable_label in a restriction, snake_case
+p:A2 a owl:Class ; rdfs:subClassOf [ a owl:Restriction ;
+    owl:onProperty cco:has_output ;                                 # expect: readable_label -> cco:ont00001986
+    owl:someValuesFrom p:FromTheOtherModule ] .
+
+# readable_label suggested from the other upstream: CCO has no "process";
+# BFO's is obo:BFO_0000015
+p:A3 a owl:Class ; rdfs:subClassOf cco:Process .                  # expect: readable_label -> obo:BFO_0000015
+
+# readable_label in BFO's namespace
+p:A4 a owl:Class ; rdfs:subClassOf obo:continuant .               # expect: readable_label -> obo:BFO_0000002
+
+# readable_label with two candidates: CCO v2.0 labels two terms "Acronym"
+p:A5 a owl:Class ; rdfs:subClassOf cco:Acronym .                  # expect: readable_label candidates
+
+# readable_label with nothing to suggest: not id-shaped, matches no label
+p:A6 a owl:Class ; rdfs:subClassOf cco:ONT001 .                   # expect: readable_label
+
+# case_mismatch: id-shaped, wrong case
+p:A7 a owl:Class ; rdfs:subClassOf cco:ONT00001180 .              # expect: case_mismatch -> cco:ont00001180
+
+# unverified: id-shaped, in no pinned file
+p:A8 a owl:Class ; rdfs:subClassOf cco:ont99999999 .              # expect: unverified
+p:A9 a owl:Class ; rdfs:subClassOf obo:BFO_9999999 .              # expect: unverified
+
+# redeclared_upstream: CCO's Organization, typed here
+cco:ont00001180 a owl:Class .                                     # expect: redeclared_upstream
+
+# dangling_ref, in a restriction filler
+p:B1 a owl:Class ; rdfs:subClassOf [ a owl:Restriction ;
+    owl:onProperty cco:ont00001986 ;
+    owl:someValuesFrom p:Undeclared ] .                             # expect: dangling_ref
+
+# the same bad reference on two lines is two findings, each on its line
+p:B2 a owl:Class ; rdfs:subClassOf p:AlsoUndeclared .             # expect: dangling_ref
+p:B3 a owl:Class ; rdfs:subClassOf p:AlsoUndeclared .             # expect: dangling_ref
+
+# positive control inside the dirty file: real, and not reported
+p:C1 a owl:Class ; rdfs:subClassOf cco:ont00001180 .

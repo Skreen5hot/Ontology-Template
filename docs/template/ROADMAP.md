@@ -15,8 +15,8 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | Phase | What | State |
 |---|---|---|
 | 1 | Extract and generalize the core | **done** (gate held 2026-10-23) |
-| 2 | Upstreams: several files per source, sister ontologies, the upstream register | **done**, pending the network `--confirm` on GitHub |
-| 3 | IRI lint, ported from IRI_Linter | not started |
+| 2 | Upstreams: several files per source, sister ontologies, the upstream register | **done** (network `--confirm` passed on GitHub, run 40012716769) |
+| 3 | IRI lint, ported from IRI_Linter | **done** |
 | 4 | Realist shape library and competency questions | not started |
 | 5 | Reasoning and release (ROBOT, own CI job) | not started |
 | 6 | Authoring ergonomics and the research record | not started |
@@ -74,6 +74,20 @@ as a pre-commit hook, and as a Claude Code hook on `.ttl` edits. Credit IRI_Lint
 notice.
 
 **Gate:** a fixture breaks each rule and a positive control passes it; a parse failure exits 2.
+
+Assessed before porting, 2026-10-23 (cloned, its 128 assertions run, probed with
+constructed files): the rules were right, and four defects made the code unusable for a
+BFO/CCO project -- `obo:` treated as project-minted, so every BFO parent was a dangling
+reference; an unparseable file reported clean, exit 0; a register from a 2026-04-04 CCO, so
+114 CCO v2.0 terms were "unverified" and 34 it accepted are not in v2.0; and the first line
+of an IRI reported for every occurrence. Each is a test case in
+`tests/fixtures/iri_lint/`. Built as `tools/ontology/iri_lint.py`, reading the phase-2
+registers; wired into CI, a git pre-commit hook (`.githooks/`), and a Claude Code
+PostToolUse hook (`.claude/settings.json`). One addition the plan did not name: a readable
+name is matched against the other upstream too (`cco:Process` -> `obo:BFO_0000015`).
+IRI_Linter is credited in the tool's docstring and DEVELOPMENT.md rather than in
+`vendor/NOTICE.md`: no code or data of it is redistributed, only its rules and test ideas,
+rewritten.
 
 ## 4. Realist shape library and competency questions
 

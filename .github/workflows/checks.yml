@@ -84,6 +84,12 @@ jobs:
       - name: No new ontology findings
         run: python tools/ontology/validate.py --gate
 
+      # Every upstream IRI is a term of its pinned release, every authored
+      # one is declared. A file that does not parse fails here (exit 2),
+      # never passes as a file with nothing wrong in it.
+      - name: Every IRI is a real term or a declared one
+        run: python tools/ontology/iri_lint.py
+
       - name: The communications record follows its protocol
         run: python tools/communications.py
 

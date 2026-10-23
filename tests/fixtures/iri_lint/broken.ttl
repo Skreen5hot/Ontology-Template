@@ -1,0 +1,6 @@
+@prefix p: <{{namespace}}> .
+
+# Not Turtle: a triple with no object. IRI_Linter skipped a file like this
+# and reported it clean, exit 0.
+
+p:Broken a  .

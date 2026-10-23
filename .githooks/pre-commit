@@ -1,0 +1,17 @@
+#!/bin/sh
+# Git pre-commit hook: lint the authored Turtle when a commit touches any.
+#
+# Enable once per clone:   git config core.hooksPath .githooks
+#
+# Lints the working tree, not the index -- what is staged and what is on
+# disk can differ, and this checks what is on disk. CI lints the commit.
+
+if git diff --cached --name-only --diff-filter=ACMR | grep -q '\.ttl$'; then
+    py=.venv/Scripts/python.exe
+    [ -x "$py" ] || py=.venv/bin/python
+    [ -x "$py" ] || py=python
+    "$py" tools/ontology/iri_lint.py || {
+        echo "pre-commit: the IRI linter refused this commit (see above)." >&2
+        exit 1
+    }
+fi

@@ -1,0 +1,51 @@
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix obo:  <http://purl.obolibrary.org/obo/> .
+@prefix cco:  <https://www.commoncoreontologies.org/> .
+@prefix p:    <{{namespace}}> .
+
+# Positive controls for tools/ontology/iri_lint.py: nothing here may be
+# reported. Linted together with module2.ttl, which declares the class
+# this file points at across modules. {{namespace}} is replaced with the
+# project namespace by the test, so the fixture names no project.
+
+# A BFO parent. IRI_Linter reported this as a dangling reference, because
+# it took every namespace that was neither CCO nor W3C as project-minted.
+p:Widget a owl:Class ;
+    rdfs:label "widget" ;
+    rdfs:subClassOf obo:BFO_0000040 .
+
+# A CCO v2.0 term (UPC Barcode) that IRI_Linter's 2026-04-04 register
+# does not have, so it reported it unverified.
+p:Label a owl:Class ;
+    rdfs:subClassOf cco:ont00000326 .
+
+# A declaration spread over several lines, and a restriction whose
+# property and filler are both real: has output, and a class declared in
+# the other module.
+p:Assembly
+    a
+        owl:Class ;
+    rdfs:subClassOf [
+        a owl:Restriction ;
+        owl:onProperty cco:ont00001986 ;
+        owl:someValuesFrom p:FromTheOtherModule
+    ] .
+
+# Names in a comment are not references: cco:Organization, obo:continuant,
+# p:NeverDeclared.
+
+# Nor are names inside a string, including on the second line of a
+# triple-quoted literal -- IRI_Linter blanked strings a line at a time.
+p:Documented a owl:Class ;
+    skos:definition """A thing defined at length,
+which mentions cco:Organization and <https://www.commoncoreontologies.org/Organization>
+and p:NeverDeclared in its prose.""" ;
+    rdfs:comment 'single-quoted cco:ONT001 is prose too' .
+
+# A concept is declared by its type, like a class.
+p:Scheme a skos:ConceptScheme .
+p:Entry a skos:Concept ;
+    skos:inScheme p:Scheme ;
+    skos:prefLabel "entry" .

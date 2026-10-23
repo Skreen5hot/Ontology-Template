@@ -11,8 +11,9 @@ method.
   `tests/test_namespace.py` holds the two together. Change it with both in one commit.
 - **Upstream terms are referenced, never redeclared, and never written from memory.**
   BFO is `obo:BFO_*`, CCO is `cco:ont*` — opaque ids, not readable names. Grep the vendored
-  extract before using one, or rebuild with `tools/ontology/vendor_upstream.py --rebuild`
-  if the term is not there yet. The offline check fails on a term no pin describes.
+  register (`vendor/<id>/<id>-register.json`, every term with its label) before using one.
+  `tools/ontology/iri_lint.py` checks every IRI, and a hook runs it after each `.ttl` edit:
+  a `readable_label` finding names the real IRI after `->`.
 - **Every tracked file is declared** in `config/repository-layout.yaml` with a role. A new
   file without a declaration fails the suite.
 - **A new shape set arrives with its negative fixture** and positive controls in the same
@@ -36,6 +37,7 @@ method.
 .venv/Scripts/python tools/licensing/disposition.py --check
 .venv/Scripts/python tools/ontology/vendor_upstream.py
 .venv/Scripts/python tools/ontology/validate.py --gate
+.venv/Scripts/python tools/ontology/iri_lint.py
 .venv/Scripts/python tools/communications.py
 .venv/Scripts/python -m pytest tests/ -q -p no:randomly
 ```

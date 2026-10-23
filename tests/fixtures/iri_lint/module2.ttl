@@ -1,0 +1,11 @@
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix obo:  <http://purl.obolibrary.org/obo/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix p:    <{{namespace}}> .
+
+# The other module: declares what clean.ttl and dirty.ttl point at, so a
+# reference resolves across the files linted together, not only within
+# one.
+
+p:FromTheOtherModule a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000015 .

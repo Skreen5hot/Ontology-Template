@@ -16,12 +16,13 @@ project on its first commit:
 | BFO 2020 (whole) and CCO v2.0 (what is named) vendored from pinned commits, digest-checked, rebuilt weekly | `tools/ontology/vendor_upstream.py` |
 | A SHACL ladder gated against a baseline, where every shape set must fail on a fixture built to break it | `tools/ontology/validate.py` |
 | A corpus digest that survives blank-node renaming | `tools/ontology/corpus_digest.py` |
+| An IRI linter: every upstream IRI a term of its pinned release, every authored one declared, the opaque id suggested for a readable name -- in CI, a git hook, and a Claude Code hook | `tools/ontology/iri_lint.py` |
 | A communications record for other teams, and a decision record for the architect | `communications/`, `docs/decisions/` |
 | CI with actions pinned to commit SHAs | `.github/workflows/checks.yml` |
 | The method, and the defects each rule exists because of | `docs/process/PROCESS.md` |
 
-What it does not have yet (reasoning, releases, an IRI linter, realist shape sets, a public
-site) is in [`docs/template/ROADMAP.md`](docs/template/ROADMAP.md).
+What it does not have yet (realist shape sets and competency questions, reasoning and
+releases, a research record, a public site) is in [`docs/template/ROADMAP.md`](docs/template/ROADMAP.md).
 
 ## Starting a project
 

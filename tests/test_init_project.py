@@ -68,6 +68,17 @@ def copy_of(repo, target):
     assert copied > 30, "only %d files were copied" % copied
     git(target, "init", "-q")
     git(target, "add", "-A")
+    # Carry the executable bit over from the index. "Use this template"
+    # copies git objects, modes included; a file copy on a filesystem git
+    # does not trust for modes (Windows, core.filemode=false) loses it,
+    # and the copy would then fail a check the real one passes.
+    staged = subprocess.run(["git", "ls-files", "-s"], cwd=str(repo),
+                            check=True, capture_output=True
+                            ).stdout.decode("utf-8").splitlines()
+    for row in staged:
+        mode, _blob, _stage, name = row.split(None, 3)
+        if mode == "100755":
+            git(target, "update-index", "--chmod=+x", name)
     git(target, "commit", "-q", "-m", "copy")
     return target
 
@@ -192,6 +203,7 @@ def test_the_copy_passes_its_own_suite(initialized):
                     "tests/test_repository_layout.py",
                     "tests/test_licensing.py", "tests/test_project.py",
                     "tests/test_communications.py",
+                    "tests/test_iri_lint.py",
                     env_extra=env)
     assert code == 0, out[-3000:]
 
