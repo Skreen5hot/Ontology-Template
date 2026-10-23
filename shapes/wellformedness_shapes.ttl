@@ -1,0 +1,149 @@
+@prefix sh:    <http://www.w3.org/ns/shacl#> .
+@prefix owl:   <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:  <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:   <http://www.w3.org/2001/XMLSchema#> .
+@prefix wf:    <https://fandaws.com/ontology/example/shapes/wellformedness#> .
+
+# Well-formedness of an authored term, whatever module it lives in.
+#
+# Carried from the Application Requirement Ontology, where it was written
+# against the APQC corpus and found 57 real conflicts there. In a
+# project made from the template it is in place before the first term
+# exists, which is the only moment a constraint like this is cheap: every
+# module inherits it on the day it is written, and nothing has to be paid
+# down first.
+#
+# SCOPE: AUTHORED TERMS ONLY
+#
+# The targets filter on this repository's namespace,
+# https://fandaws.com/ontology/example#, which tools/init_project.py
+# writes here from config/project.yaml. The vendored BFO and CCO extracts
+# are in the same data graph, and a violation against one of their terms
+# would be a finding about somebody else's vocabulary.
+# tools/ontology/validate.py reads the same string as AUTHORED_NAMESPACE,
+# and tests/test_namespace.py requires the two to agree: a SPARQL filter
+# on a stale namespace string still runs, selects nothing, and reports
+# success.
+#
+# TWO POPULATIONS, NOT ONE
+#
+# An owl:Class is labelled with rdfs:label and defined with
+# skos:definition. A skos:Concept is labelled with skos:prefLabel and
+# carries neither of the other two. In ARO the first draft of this file
+# asked one question of both and reported 3,842 findings that were a
+# concept scheme being told it should look like a class. A catalog or
+# code list a project adds will be concepts, so the distinction is kept.
+#
+# WHY THE DRIFT RULES ARE SPARQL
+#
+# The obvious spellings are both wrong.
+#
+#   sh:uniqueLang true   ignores literals with no language tag, which is
+#                        most of what gets written, so it fires on
+#                        almost nothing.
+#
+#   sh:maxCount 1        fires on the drift, and also on a legitimate
+#                        "x"@en / "y"@fr pair -- so it would break the
+#                        first time this ontology gained a second
+#                        language, and the fix would be to weaken it.
+#
+# Comparing only values that share a language tag is correct in both
+# directions. wellformedness_bad_examples.ttl carries the multilingual
+# case as a positive control, so that false positive is a test rather
+# than something somebody has to remember.
+#
+# A VALUES clause is the natural way to write this and SHACL forbids it
+# inside a constraint; FILTER(?p IN (...)) is the same thing spelled
+# legally.
+#
+# WHAT THE DRIFT IS
+#
+# The Business Process Ontology's slices inline shared act genera rather
+# than importing them, and in ARO's copy those inlined copies had moved
+# apart -- one IRI, two definitions, depending on which module was
+# loaded. Any project that inlines a term in two modules has the same
+# failure available. Identical copies collapse -- an RDF graph is a set
+# -- so a second value is always a disagreement and never a duplicate.
+#
+# The count lives in config/validation-baseline.json rather than here.
+
+wf:prefixes
+    a owl:Ontology ;
+    sh:declare
+        [ sh:prefix "rdfs" ; sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ] ,
+        [ sh:prefix "skos" ; sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ] ,
+        [ sh:prefix "owl"  ; sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ] .
+
+
+# ---------------------------------------------------------------------
+# Authored classes
+# ---------------------------------------------------------------------
+
+wf:AuthoredClassShape
+    a sh:NodeShape ;
+
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes wf:prefixes ;
+        sh:select """SELECT ?this WHERE {
+          ?this a owl:Class .
+          FILTER(STRSTARTS(STR(?this), "https://fandaws.com/ontology/example#"))
+        }""" ] ;
+
+    # Presence. Native constraints rather than SPARQL, because these are
+    # evaluated set-wise and cost almost nothing.
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "Class has no rdfs:label." ] ;
+
+    sh:property [
+        sh:path skos:definition ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "Class has no skos:definition." ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:severity sh:Violation ;
+        sh:message "Class {$this} carries two different {?p} values in the same language. Inlined copies of a shared term have drifted, so the same IRI now reads differently depending on which module is loaded." ;
+        sh:prefixes wf:prefixes ;
+        sh:select """SELECT $this ?p WHERE {
+          $this ?p ?a, ?b .
+          FILTER(?p IN (rdfs:label, skos:definition))
+          FILTER(STR(?a) < STR(?b))
+          FILTER(LANG(?a) = LANG(?b)) }""" ] .
+
+
+# ---------------------------------------------------------------------
+# Authored SKOS concepts
+# ---------------------------------------------------------------------
+
+wf:AuthoredConceptShape
+    a sh:NodeShape ;
+
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes wf:prefixes ;
+        sh:select """SELECT ?this WHERE {
+          ?this a skos:Concept .
+          FILTER(STRSTARTS(STR(?this), "https://fandaws.com/ontology/example#"))
+        }""" ] ;
+
+    sh:property [
+        sh:path skos:prefLabel ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "Concept has no skos:prefLabel." ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:severity sh:Violation ;
+        sh:message "Concept {$this} carries two different skos:prefLabel values in the same language." ;
+        sh:prefixes wf:prefixes ;
+        sh:select """SELECT $this WHERE {
+          $this skos:prefLabel ?a, ?b .
+          FILTER(STR(?a) < STR(?b))
+          FILTER(LANG(?a) = LANG(?b)) }""" ] .

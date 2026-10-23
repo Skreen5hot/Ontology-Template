@@ -1,0 +1,35 @@
+# Line endings are content here, so git is told rather than asked.
+#
+# Without a rule, core.autocrlf decides, and it is a per-machine setting.
+# In the Application Requirement Ontology, which this setup is carried
+# from, a Windows checkout produced CRLF and a Linux one LF, and the two
+# disagreed about the contents of every multi-line Turtle literal --
+# because a CRLF inside a literal is part of that literal's value, not
+# formatting around it.
+#
+# This repository has the same exposure, and one more: it records
+# digests of files -- the vendored extracts in config/upstream-extracts.json,
+# the template-owned files in config/template-manifest.json. Those digests
+# are over LF bytes. A checkout that rewrote them as CRLF would fail its
+# own records while every file read the same.
+#
+# The rule is repository-wide rather than limited to *.ttl: any digest
+# recorded over a file git is free to re-encode is not a digest.
+#
+# Applied before the corpus grew, which is the cheap moment.
+
+* text=auto eol=lf
+
+# Redundant under the rule above, and kept anyway: the corpus is the
+# reason the rule exists, and a future narrowing of `*` should not
+# silently take the corpus with it.
+*.ttl text eol=lf
+*.tsv text eol=lf
+
+# Declared binary so content detection is not what stands between these
+# and a corrupting newline translation.
+*.pdf -text
+*.zip -text
+*.png -text
+*.xlsx -text
+.DS_Store -text

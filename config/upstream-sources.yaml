@@ -1,0 +1,100 @@
+# Pinned upstream ontologies, and what may be done with them.
+#
+# BFO 2020 is the upper ontology and CCO v2.0 the mid-level one. A shape
+# asking whether an authored class reaches obo:BFO_0000001 cannot answer
+# without them, so both are vendored as pinned partial extracts. Add a
+# sister ontology (a domain ontology this one builds on) as another entry
+# here, then rebuild.
+#
+# WHY EXTRACTS RATHER THAN owl:imports
+#
+# An owl:imports resolves over the network at validation time. That makes
+# the result depend on when it ran and on what the far end served, which
+# is the opposite of what a check is for. A pinned extract is part of the
+# repository, identical on every machine, and reviewable.
+#
+# WHY PINNED TO A COMMIT RATHER THAN A TAG
+#
+# A tag can be moved to a different commit. The raw URLs below name the
+# commit, so the bytes they serve cannot change; `sha256` records what
+# those bytes were, so a proxy or a cache that serves something else is a
+# refusal rather than a silent substitution.
+#
+# WHAT IS SELECTED
+#
+# `select: all` vendors every term the source file describes. That is
+# right for BFO: it is small, and a realist ontology answers to all of it
+# -- disjointness between continuant and occurrent is a fact about two
+# terms an authored class may never name. `select: named` (the default)
+# vendors only the terms this repository names plus their structural
+# ancestry, which is right for CCO's 1.2 MB merged file.
+#
+# LICENSING
+#
+# Both may be redistributed on condition of attribution, which is what
+# makes vendoring legitimate here. `licence_statement_contains` is
+# checked against what the source itself says -- the file's own
+# dcterms:license -- or, for a source whose Turtle states none, against a
+# LICENSE file at the same pinned commit (`statement_url`, with its own
+# `statement_sha256`). Either way the SPDX identifier below is verified
+# against an artifact at the pin rather than asserted by whoever wrote
+# this file.
+#
+# `prefix` is what the extract is serialised with, and what the vendoring
+# tool reads in a specification when it looks for the upstream terms the
+# design names.
+
+version: 1
+
+sources:
+
+  - id: bfo
+    project: Basic Formal Ontology
+    release: release-2024-01-29
+    commit: 044490fc5100ffed6df7d4d15cbc167698b6fdee
+    url: >-
+      https://raw.githubusercontent.com/BFO-ontology/BFO-2020/044490fc5100ffed6df7d4d15cbc167698b6fdee/src/owl/bfo-core.ttl
+    sha256: 6944e2c96a0d8709dc15ae5364792019e208061eda3f32311af4f3b8d8443a3b
+    namespace: http://purl.obolibrary.org/obo/
+    prefix: obo
+    select: all
+    extract: vendor/bfo/bfo-core-extract.ttl
+    licence:
+      spdx: CC-BY-4.0
+      url: https://creativecommons.org/licenses/by/4.0/
+      licence_statement_contains: creativecommons.org/licenses/by/4.0
+      attribution: >-
+        Basic Formal Ontology (BFO) 2020, ISO/IEC 21838-2. Copyright the
+        BFO contributors, licensed CC BY 4.0.
+    note: >-
+      The commit behind the release-2024-01-29 tag; the same pin the
+      Application Requirement Ontology and the Business Capability
+      Ontology use.
+
+  - id: cco
+    project: Common Core Ontologies
+    release: v2.0-2024-11-06
+    commit: 510dad76be0ef710b65a421075af912af25342b7
+    url: >-
+      https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/510dad76be0ef710b65a421075af912af25342b7/src/cco-merged/CommonCoreOntologiesMerged.ttl
+    sha256: e609db27478a2c8b52b9bb5eb5ac979ac323510e851c368e4d9ec7d1c153fe5b
+    namespace: https://www.commoncoreontologies.org/
+    prefix: cco
+    select: named
+    extract: vendor/cco/cco-extract.ttl
+    licence:
+      spdx: BSD-3-Clause
+      url: >-
+        https://github.com/CommonCoreOntology/CommonCoreOntologies/blob/510dad76be0ef710b65a421075af912af25342b7/LICENSE
+      licence_statement_contains: BSD 3-Clause
+      attribution: >-
+        Common Core Ontologies v2.0. Copyright (c) 2017 CUBRC, Inc.,
+        licensed BSD-3-Clause.
+    note: >-
+      v2.0, the target of the v2.0-2024-11-06 tag, resolved through the
+      GitHub API rather than taken from the tag name. The file declares
+      version IRI
+      https://www.commoncoreontologies.org/2024-11-06/CommonCoreOntologiesMerged.
+      The same pin the Business Capability Ontology and the Business
+      Process Ontology use, so terms shared between them anchor to the
+      same CCO IRIs.

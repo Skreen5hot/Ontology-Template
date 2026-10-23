@@ -1,0 +1,36 @@
+{
+  "format_version": 1,
+  "generated_by": "tools/ontology/corpus_digest.py",
+  "merged": {
+    "blank_nodes": {
+      "blank_nodes": 0,
+      "distinct_shapes": 0,
+      "shape_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "triples_touching": 0
+    },
+    "ground_sha256": "0ea06adc23d575a9973f3520468e3f2d4c0cc91aa617ac62729c63cd90877957",
+    "ground_triples": 5,
+    "triples": 5
+  },
+  "note": "Ground triples and blank-node shape together cover every triple. Blank nodes are renamed by every parse, so their identities are erased and only their structure is digested.",
+  "per_file": {
+    "ontology/example.ttl": {
+      "blank_nodes": {
+        "blank_nodes": 0,
+        "distinct_shapes": 0,
+        "shape_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "triples_touching": 0
+      },
+      "ground_sha256": "0ea06adc23d575a9973f3520468e3f2d4c0cc91aa617ac62729c63cd90877957",
+      "ground_triples": 5,
+      "triples": 5
+    }
+  },
+  "scope": {
+    "files": 1,
+    "from": "config/repository-layout.yaml, roles ontology-module and ontology-module-set",
+    "paths": [
+      "ontology/example.ttl"
+    ]
+  }
+}

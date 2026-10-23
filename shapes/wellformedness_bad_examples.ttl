@@ -1,0 +1,99 @@
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix example:  <https://fandaws.com/ontology/example#> .
+
+# Graphs built to break wellformedness_shapes.ttl.
+#
+# Loaded ALONE, so each case states everything it needs. The terms use
+# the authored namespace deliberately: the shape's target filters on that
+# prefix string, and a fixture in some other namespace would leave the
+# target selecting nothing while every constraint reported success --
+# which is the failure mode the shape file's own comment warns about.
+#
+# The positive controls are not decoration. A fixture where every case
+# violates cannot show that a constraint discriminates, and the
+# multilingual pair below is the specific false positive that sh:maxCount
+# would have produced.
+
+# -- W1: no label -----------------------------------------------------
+
+example:FixtureUnlabelled a owl:Class ;
+    skos:definition "Has a definition and no label." .
+
+# -- W2: no definition ------------------------------------------------
+
+example:FixtureUndefined a owl:Class ;
+    rdfs:label "Has a label and no definition." .
+
+# -- W3: two labels, same language (both untagged) --------------------
+#
+# This is the shape of the drift ARO found: 6 terms in its APQC corpus
+# looked like this, because two slices inlined a term and the copies moved.
+
+example:FixtureDriftedLabel a owl:Class ;
+    rdfs:label "Compliance Policy" , "Compliance Policy and Procedure" ;
+    skos:definition "One term, two names, no way to tell which is meant." .
+
+# -- W4: two definitions, same language -------------------------------
+#
+# 51 terms in ARO's APQC corpus looked like this.
+
+example:FixtureDriftedDefinition a owl:Class ;
+    rdfs:label "Drifted definition" ;
+    skos:definition
+        "An Act of Prediction in which an Agent extrapolates from historical data." ,
+        "An Act of Prediction in which an Agent examines present information." .
+
+# -- W5: two labels tagged the same language --------------------------
+#
+# Same defect as W3 with the tag written out, so the rule is not passing
+# only because both values happen to be untagged.
+
+example:FixtureDriftedTaggedLabel a owl:Class ;
+    rdfs:label "First name"@en , "Second name"@en ;
+    skos:definition "Two English labels."@en .
+
+# -- positive controls: these must NOT violate ------------------------
+
+# Multilingual. The reason the drift rules are SPARQL rather than
+# sh:maxCount 1, which would reject this.
+example:FixtureMultilingual a owl:Class ;
+    rdfs:label "Demand Forecast"@en , "Prevision de la demande"@fr ;
+    skos:definition "A forecast of demand."@en , "Une prevision de la demande."@fr .
+
+# The ordinary case.
+example:FixtureWellFormed a owl:Class ;
+    rdfs:label "Well formed" ;
+    skos:definition "One label, one definition, nothing to report." .
+
+# A term carrying the same value twice is not drift -- an RDF graph is a
+# set, so the duplicate collapses on parse and there is nothing to find.
+# Here so that the rule is known to be about disagreement rather than
+# about counting triples.
+example:FixtureRepeatedValue a owl:Class ;
+    rdfs:label "Repeated" , "Repeated" ;
+    skos:definition "Said twice, identically." , "Said twice, identically." .
+
+# -- SKOS concepts ----------------------------------------------------
+#
+# A catalog concept is a different kind of thing from a class: it is
+# labelled with skos:prefLabel and carries neither rdfs:label nor
+# skos:definition. Asking it for those was the first draft of the shape
+# file and produced 3,842 findings that were the catalog being told to
+# look like a class. These cases exist so that the split is exercised
+# rather than asserted.
+
+# W6: a concept with no prefLabel.
+example:FixtureConceptUnlabelled a skos:Concept ;
+    skos:inScheme <https://fandaws.com/ontology/example/scheme#FixtureScheme> .
+
+# W7: two prefLabels in the same language.
+example:FixtureConceptDrifted a skos:Concept ;
+    skos:prefLabel "Develop Vision and Strategy" , "Develop Vision" .
+
+# positive control: the ordinary catalog concept. Carries no rdfs:label
+# and no skos:definition, and must NOT be reported for either.
+example:FixtureConceptWellFormed a skos:Concept ;
+    skos:prefLabel "Manage Customer Service" ;
+    skos:inScheme <https://fandaws.com/ontology/example/scheme#FixtureScheme> .

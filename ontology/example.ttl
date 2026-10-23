@@ -1,0 +1,23 @@
+@prefix rdfs:     <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:      <http://www.w3.org/2002/07/owl#> .
+@prefix dcterms:  <http://purl.org/dc/terms/> .
+@prefix example:  <https://fandaws.com/ontology/example#> .
+
+# Example Ontology -- the first module. No term is written yet.
+#
+# The file exists so that the layout contract, the corpus digest and the
+# validation ladder have a module in scope from the first commit, and so
+# that the first term written here is checked by the shapes on the day it
+# lands.
+#
+# Terms are minted in https://fandaws.com/ontology/example# with readable
+# local names (example:SomeClass). Upstream terms -- BFO's obo:BFO_*,
+# CCO's cco:ont* -- are referenced, never redeclared, and never written
+# from memory: the vendoring check fails on a term no pinned upstream
+# describes.
+
+<https://fandaws.com/ontology/example> a owl:Ontology ;
+    dcterms:title "Example Ontology" ;
+    dcterms:license <https://opensource.org/licenses/MIT> ;
+    owl:versionInfo "0.0.0" ;
+    rdfs:comment "A placeholder project. The template repository carries it so that every check has something to run against; init replaces it." .

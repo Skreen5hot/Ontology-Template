@@ -1,0 +1,123 @@
+# The checks that run on every push and pull request.
+#
+# Carried from the Business Capability Ontology, which carried it from the
+# Application Requirement Ontology. Owned by the ontology template, so it
+# names no project: every value it needs comes from config/project.yaml
+# through the tools it runs.
+#
+# Deliberately small to begin with. A workflow that runs everything from
+# day one is a workflow whose failures nobody reads; this runs the
+# contract, the licensing classification and the suite, and grows as the
+# checks do.
+#
+# Actions are pinned to commit SHAs. A tag can be moved to a different
+# commit; a commit cannot. Everything else in this repository pins
+# exactly, and a supply chain is a strange place to make an exception.
+#
+# fetch-depth is 0 because history-dependent checks exist: the
+# communications check counts the commits that touched a message, and a
+# shallow clone would see one.
+
+name: Checks
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+  schedule:
+    # Weekly, for the one job that needs the network. Nothing here should
+    # change on its own -- the upstream urls name commits -- so a failure
+    # is a real finding: a moved artifact, a rewritten history, or a
+    # repository that has gone away.
+    - cron: '19 6 * * 1'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: checks-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Contract, licensing, tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install the pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+          python -m pip list
+
+      # First, because everything after it would otherwise pass in a copy
+      # of the template that was never set up -- every check green, about
+      # a placeholder ontology called `example`.
+      - name: This is a project, not an uninitialized copy of the template
+        run: python tools/project.py --check
+
+      - name: The layout contract describes the tree
+        run: python tools/layout.py
+
+      - name: Every tracked file has exactly one disposition
+        run: python tools/licensing/disposition.py
+
+      - name: Nothing unpublishable is tracked
+        run: python tools/licensing/disposition.py --check
+
+      - name: The vendored extracts cover what the corpus and shapes name
+        run: python tools/ontology/vendor_upstream.py
+
+      # The SHACL ladder, gated against config/validation-baseline.json.
+      # This is the check that says "no new findings" -- known defects are
+      # recorded, and this is what stops them growing.
+      - name: No new ontology findings
+        run: python tools/ontology/validate.py --gate
+
+      - name: The communications record follows its protocol
+        run: python tools/communications.py
+
+      # In the template, a stale manifest fails. In a project it reports
+      # where the project has diverged from the template, and passes.
+      - name: Where this has diverged from the template
+        run: python tools/template_status.py --check
+
+      - name: Tests
+        run: python -m pytest tests/ -q -p no:randomly
+
+  vendored:
+    # The check the offline one cannot make: that the committed extracts
+    # are what rebuilding from the pinned upstreams produces, rather than
+    # files that were once generated and have been edited since.
+    #
+    # Separate because it needs the network. Folding it into the job
+    # above would make every pull request depend on external hosts being
+    # up, and a check that fails for reasons unrelated to the change is a
+    # check people learn to re-run rather than read.
+    name: Extracts still rebuild from the pinned sources
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install the pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+
+      - name: Fetch the pinned upstreams and compare
+        run: python tools/ontology/vendor_upstream.py --confirm

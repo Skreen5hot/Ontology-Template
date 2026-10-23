@@ -1,0 +1,60 @@
+# The project's own values, in one place.
+#
+# Every tool that needs the namespace, the prefix, the code or the
+# repository reads it from here through tools/project.py. A value that
+# is also written somewhere a tool cannot read -- the SPARQL inside the
+# shapes, the module header -- is written there by tools/init_project.py
+# and held to agree with this file by a test, because a SPARQL filter on
+# a stale namespace string still runs, selects nothing, and reports
+# success.
+#
+# Do not edit these by hand to rename the project. Run
+#
+#     python tools/init_project.py --id <id> --title "<title>" ...
+#
+# which rewrites this file and every file that repeats it, in one step.
+#
+# `template: true` means this checkout is the template repository itself.
+# A repository created from the template with "Use this template" still
+# says true until init has run, and `python tools/project.py --check`
+# (run in CI) fails it, so an uninitialized copy cannot pass as a project.
+
+version: 1
+
+template: true
+
+#: Lowercase, letters, digits and hyphens. Names the module file and the
+#: namespace.
+id: example
+
+#: Uppercase. The short name other teams know this repository by; it is
+#: the sender code in communications ids (communications/README.md).
+code: EXAMPLE
+
+title: Example Ontology
+
+description: >-
+  A placeholder project. The template repository carries it so that every
+  check has something to run against; init replaces it.
+
+#: Where authored terms are minted. Readable local names
+#: (https://fandaws.com/ontology/<id>#SomeClass), not opaque ids.
+namespace: https://fandaws.com/ontology/example#
+
+#: The Turtle prefix for `namespace`.
+prefix: example
+
+#: Base for ontology and module IRIs (the owl:Ontology of each module,
+#: the vendored extracts' headers). The namespace without its `#`.
+iri_base: https://fandaws.com/ontology/example
+
+#: owner/name on GitHub. In the template, the template's own slug -- that
+#: is how --check tells the template from an uninitialized copy of it.
+repository: Skreen5hot/Ontology-Template
+
+#: The copyright holder named in LICENSE.
+licence_holder: Aaron Damiano
+
+#: Team codes this repository corresponds with (communications/). Empty
+#: until the first message to or from another team.
+correspondents: []

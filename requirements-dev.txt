@@ -1,0 +1,29 @@
+# Pinned dependencies for the checks in this repository.
+#
+# Only what the tools and tests actually import. That is verified the one
+# way it can be: by installing this file into an empty environment and
+# running the suite there.
+#
+# Pinned exactly rather than with a floor. The point of a pinned file is
+# that a clean environment reproduces this one, and ">=" reproduces
+# whatever was newest that day. The versions are the ones the Application
+# Requirement Ontology and the Business Capability Ontology pin, so a
+# project made from the template runs the same checks on the same
+# libraries.
+#
+# What each is for:
+#
+#   pytest      the suite
+#   PyYAML      tools/layout.py reads the layout contract; the licensing
+#               and vendoring tools read the pins and adjudications
+#   rdflib      reading the ontology without a reasoner
+#   pyshacl     the SHACL validation ladder
+#
+# Markdown (the BCO's site build), jsonschema and owlrl are not pinned:
+# nothing here imports them, and the rule is to take out a pin nothing
+# exercises. Add each back in the commit that adds what needs it.
+
+pytest==9.1.1
+PyYAML==6.0.3
+rdflib==7.6.0
+pyshacl==0.40.1

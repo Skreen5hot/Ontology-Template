@@ -1,0 +1,36 @@
+# Owner rulings where recorded role and licensing reality diverge.
+#
+# The classifier derives a disposition from a file's declared role. That
+# is right almost always, and an adjudication is how the owner overrides
+# it for one named file with the evidence the ruling rests on.
+#
+# Two things this file is not. It is not a place to silence a finding: an
+# adjudication that says "publish it anyway" about somebody else's
+# standard is a decision to infringe, written down. And it is not a
+# convenience list -- each entry is policed, so an adjudication matching
+# no file fails, because an exception granted for nothing reads as
+# coverage.
+
+version: 1
+
+# Each entry:
+#   path:        exactly one repository-relative path
+#   disposition: project-content | project-software | third-party-cited
+#   licence:     SPDX identifier, or null when no rights are granted
+#   why:         the evidence. Not "because it is fine".
+#   decided:     ISO date
+#   decided_by:  who
+
+adjudications: []
+
+# Example of the shape, kept here rather than in a wiki:
+#
+# adjudications:
+#   - path: README.md
+#     disposition: project-content
+#     licence: CC-BY-4.0
+#     why: >-
+#       Rewritten in full at commit abc1234; retains no upstream text.
+#       Compared against the pre-rewrite revision line by line.
+#     decided: 2026-09-10
+#     decided_by: Aaron Damiano

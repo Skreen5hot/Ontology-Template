@@ -1,0 +1,46 @@
+# Build and run artifacts. Nothing generated is committed unless the
+# layout contract names its generator and a test compares the two: a
+# generated file in git is otherwise a file that can disagree with its
+# generator, and the disagreement is invisible from either side.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/
+.env
+*.log
+dist/
+build/
+
+# Editor and OS noise
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Reference material: consulted, cited, never redistributed.
+#
+# Standards, frameworks and papers are licensed works. They may sit in
+# docs/Reference/ because the work needs them, and
+# config/repository-layout.yaml declares that directory
+# `tracked: false`, which tests/test_repository_layout.py checks against
+# the index -- ignoring a file and it being absent from the index are
+# different facts, and only the second keeps it off a public URL.
+docs/Reference/
+*.pdf
+*.xlsx
+
+# The built site. Deployed from an Actions artifact, never committed: a
+# committed copy would agree with the repository only until the next edit.
+_site/
+_site_again/
+
+# Upstream sources, downloaded to rebuild the vendored extracts. The
+# extracts are committed; these are not -- the pins in
+# config/upstream-sources.yaml fetch them again byte-for-byte.
+.upstream-cache/
+
+# The validation report is a measurement, not a pin. Committing it would
+# put a file in the tree that agrees with the ontology only until the
+# next edit, and nothing here compares the two.
+config/validation-report.json
