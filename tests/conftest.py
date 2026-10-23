@@ -29,6 +29,13 @@ def load_tool(name: str, relative: str):
     return module
 
 
+def pytest_configure(config):
+    config.addinivalue_line(
+        "markers",
+        "reasoning: needs Java and the pinned ROBOT jar; the Reasoning "
+        "workflow runs these, the Checks workflow deselects them")
+
+
 @pytest.fixture(scope="session")
 def repo() -> Path:
     return ROOT

@@ -35,6 +35,10 @@ docs/Reference/
 _site/
 _site_again/
 
+# The pinned ROBOT jar, downloaded by tools/ontology/reason.py and checked
+# against config/reasoning.yaml. Never committed or redistributed.
+.tool-cache/
+
 # Upstream sources, downloaded to rebuild the vendored extracts. The
 # extracts are committed; these are not -- the pins in
 # config/upstream-sources.yaml fetch them again byte-for-byte.

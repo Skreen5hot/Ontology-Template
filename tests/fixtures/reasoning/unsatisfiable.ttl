@@ -1,0 +1,20 @@
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix obo:  <http://purl.obolibrary.org/obo/> .
+@prefix p:    <{{namespace}}> .
+
+# Two classes no instance can have, and one that is fine. Reasoned with the
+# full pinned BFO: material entity (BFO_0000040) with process
+# (BFO_0000015) is continuant with occurrent, a named disjointness; with
+# quality (BFO_0000019) it is independent with specifically dependent
+# continuant, which BFO states only as owl:AllDisjointClasses -- the axiom
+# the extract drops and the reasoner, over the full upstream, sees.
+
+p:ContinuantAndOccurrent a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000040 , obo:BFO_0000015 .
+
+p:IndependentAndDependent a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000040 , obo:BFO_0000019 .
+
+p:Fine a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000040 .

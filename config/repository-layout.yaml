@@ -339,6 +339,13 @@ components:
       definition, with severity and reason. CCO's definition source, as a
       warning, by default.
 
+  - id: config.reasoning
+    path: config/reasoning.yaml
+    role: configuration
+    description: >-
+      The ROBOT pin (version, url, sha256, the commit its tag named), the
+      reasoner, and the Java version the CI jobs install.
+
   - id: config.layout
     path: config/repository-layout.yaml
     role: configuration
@@ -487,6 +494,23 @@ components:
       Generates the annotation-profile shapes from
       config/annotation-profile.yaml, refusing a property no pinned
       upstream or W3C vocabulary defines.
+
+  - id: tool.reason
+    path: tools/ontology/reason.py
+    role: tool
+    template: owned
+    description: >-
+      ROBOT with ELK over the authored modules plus the full pinned
+      upstreams: consistency and unsatisfiable classes, then the examples'
+      consistency. Needs Java; run by the Reasoning workflow.
+
+  - id: tool.release
+    path: tools/release.py
+    role: tool
+    template: owned
+    description: >-
+      Builds <id>-base and <id>-full as Turtle, RDF/XML and JSON-LD with
+      NOTICE, LICENSE and SHA256SUMS, byte-identical across builds.
 
   - id: tool.corpus-digest
     path: tools/ontology/corpus_digest.py

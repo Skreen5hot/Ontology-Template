@@ -1,0 +1,113 @@
+# Release: on a tag v<MAJOR>.<MINOR>.<PATCH>, check everything, build the
+# artefacts twice, require them identical, and publish them.
+#
+# The artefacts are tools/release.py's: <id>-base and <id>-full, each as
+# Turtle, RDF/XML and JSON-LD, with NOTICE.md, LICENSE and SHA256SUMS.
+# Built twice in separate processes with different hash seeds and
+# compared byte for byte before anything is published -- a release whose
+# checksums a second build would not reproduce publishes nothing worth
+# checking.
+#
+# Every check the Checks and Reasoning workflows run runs here first, on
+# the tagged commit: a tag on a commit those never saw is still checked.
+#
+# In the template repository itself this stops at the first step: its
+# ontology is the `example` placeholder, and a template version is
+# recorded in config/template-manifest.json, not released as an ontology.
+#
+# Only the publishing step can write; everything before it reads.
+
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Check, build twice, publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out the full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install the pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+
+      - name: What is being released
+        id: what
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import os, re, sys, yaml
+          sys.path.insert(0, "tools")
+          import project
+          tag = os.environ["GITHUB_REF_NAME"]
+          version = tag[1:] if tag.startswith("v") else tag
+          if project.is_template():
+              sys.exit("this is the ontology template; tag a project made from it")
+          if not re.fullmatch(r"\d+\.\d+\.\d+(-[0-9A-Za-z.-]+)?", version):
+              sys.exit("tag %s is not v<MAJOR>.<MINOR>.<PATCH>" % tag)
+          print("version=%s" % version)
+          print("id=%s" % project.project_id())
+          print("title=%s" % project.load()["title"])
+          print("java=%s" % yaml.safe_load(open("config/reasoning.yaml"))["java"])
+          PY
+
+      - name: Set up Java
+        uses: actions/setup-java@de7274f081f381c8f8158605e0321c36c376e2e6 # v6.0.1
+        with:
+          distribution: temurin
+          java-version: ${{ steps.what.outputs.java }}
+
+      - name: Cache the pinned jar and upstream files
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            .tool-cache
+            .upstream-cache
+          key: pinned-${{ hashFiles('config/reasoning.yaml', 'config/upstream-sources.yaml') }}
+
+      - name: Every check, on the tagged commit
+        run: |
+          python tools/project.py --check
+          python tools/layout.py
+          python tools/licensing/disposition.py --check
+          python tools/ontology/vendor_upstream.py
+          python tools/ontology/validate.py --gate
+          python tools/ontology/iri_lint.py
+          python tools/ontology/competency.py
+          python tools/ontology/reason.py
+
+      - name: Build twice, with different hash seeds, and compare
+        run: |
+          PYTHONHASHSEED=1 python tools/release.py --version "${{ steps.what.outputs.version }}" --out dist
+          PYTHONHASHSEED=2 python tools/release.py --version "${{ steps.what.outputs.version }}" --out dist-again
+          diff -r dist dist-again
+          cat "dist/${{ steps.what.outputs.id }}-${{ steps.what.outputs.version }}/SHA256SUMS"
+
+      - name: Publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" \
+            dist/${{ steps.what.outputs.id }}-${{ steps.what.outputs.version }}/* \
+            --title "${{ steps.what.outputs.title }} ${{ steps.what.outputs.version }}" \
+            --notes "Built from ${GITHUB_SHA} by tools/release.py; two builds compared byte for byte. The full release's BFO and CCO part is a partial extract -- see its header and NOTICE.md."

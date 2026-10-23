@@ -22,6 +22,10 @@ python -m pip install -r requirements-dev.txt
 python -m pytest tests/ -q -p no:randomly
 ```
 
+The tests marked `reasoning` need Java 11 or later (they run the pinned ROBOT jar); without
+Java they fail, by design, rather than skip. To run everything else, as the Checks workflow
+does: `python -m pytest tests/ -q -p no:randomly -m "not reasoning"`.
+
 `tools/` is deliberately not an installed package. It is a directory of scripts that the
 tests import by path, so there is no build step between writing a tool and testing the
 tool that ships.
@@ -55,6 +59,7 @@ python tools/ontology/validate.py --gate      # no new ontology findings
 python tools/ontology/iri_lint.py             # every IRI is a real term or a declared one
 python tools/ontology/competency.py           # every answerable competency question gives its answer
 python tools/ontology/profile_shapes.py --check   # the profile shapes are what the profile generates
+python tools/ontology/reason.py               # needs Java: consistent, nothing unsatisfiable
 python tools/communications.py                # the communications record follows its protocol
 python tools/template_status.py               # where this has diverged from the template
 python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsifications
@@ -72,6 +77,8 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `iri_lint.py` | an upstream IRI its pinned release does not have (`unverified`), a readable name where the upstream mints ids (`readable_label`, with the id suggested), an id in the wrong case (`case_mismatch`), a deprecated upstream term, an authored file typing an upstream term (`redeclared_upstream`), an authored IRI nothing declares (`dangling_ref`); and, as exit 2, a file it cannot read or parse |
 | `competency.py` | an answerable question whose query gives a different answer, or none where rows were expected; an expectation nothing can fail (`rows: []`, `count: 0`, `ask: false`); a question depending on a term nobody defines; an example file that does not exist or lies outside `examples/` |
 | `profile_shapes.py --check` | `shapes/annotation_profile_shapes.ttl` differing from what `config/annotation-profile.yaml` generates; a profile property no pinned upstream or W3C vocabulary defines |
+| `reason.py` | an unsatisfiable authored class; an ontology with no model; example individuals inconsistent with it; and, as exit 2, no Java, a ROBOT jar that is not the pinned one, or an answer from ROBOT it cannot read |
+| `release.py` | a version that is not MAJOR.MINOR.PATCH; a file that does not parse back to the graph it was written from |
 | `template_status.py --check` | in the template only: a manifest that does not describe the owned files. A project's divergence is reported, never refused |
 
 `validate.py` writes a report with `-o config/validation-report.json`. That file is
@@ -349,6 +356,46 @@ made from.
 python tools/template_status.py                                 # what this project changed
 python tools/template_status.py --against ../Ontology-Template  # what the template changed since
 ```
+
+---
+
+## Reasoning
+
+```bash
+python tools/ontology/reason.py               # needs Java 11+
+```
+
+ROBOT (pinned in `config/reasoning.yaml`, downloaded into `.tool-cache/` and checked against
+its sha256) runs ELK over the authored modules plus the **full** pinned BFO and CCO files —
+not the extracts, which drop every anonymous class expression and so could not support a
+consistency claim. It reports an inconsistent ontology and every unsatisfiable class, then,
+in a second pass, whether the `examples/` are consistent with it. Upstream unsatisfiable
+classes, if a re-pin ever brought any, are reported apart from authored ones.
+
+ELK is complete for OWL 2 EL: subclass, existential restriction, intersection,
+disjointness. It ignores universal restrictions, cardinality and most unions; HermiT
+(`reasoner: hermit`) covers OWL 2 DL and is far slower over CCO.
+
+The Reasoning workflow runs this and the `reasoning` tests on every push. The Checks
+workflow deselects those tests by marker — named in its command line, not skipped.
+
+## Releasing
+
+Tag the commit: `git tag v1.2.0 && git push origin v1.2.0`. The Release workflow runs every
+check and the reasoner on the tagged commit, builds the artefacts twice with different hash
+seeds, requires them byte-identical, and publishes a GitHub release:
+
+| File | What |
+|---|---|
+| `<id>-base.{ttl,owl,jsonld}` | the authored terms, every module merged, under one header |
+| `<id>-full.{ttl,owl,jsonld}` | the base plus the vendored extracts and BFO's derived disjointness; the upstream part is partial, and the header says so |
+| `NOTICE.md`, `LICENSE`, `SHA256SUMS` | attribution for the vendored part, this project's licence, checksums |
+
+The header's ontology IRI is `<iri_base>/<id>-base` (or `-full`), the version IRI
+`<iri_base>/<version>/<id>-base`, `owl:versionInfo` the version; title, licence and creator
+come from the main module's header. To build locally: `python tools/release.py --version
+1.2.0` (into `dist/`, gitignored). RDF/XML and JSON-LD are written by the tool, flat and
+sorted, because rdflib's writers for both are not deterministic across processes.
 
 ---
 

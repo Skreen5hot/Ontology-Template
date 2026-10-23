@@ -210,6 +210,7 @@ def test_the_copy_passes_its_own_suite(initialized):
                     "tests/test_communications.py",
                     "tests/test_iri_lint.py",
                     "tests/test_competency.py",
+                    "tests/test_release.py", "-m", "not reasoning",
                     env_extra=env)
     assert code == 0, out[-3000:]
 

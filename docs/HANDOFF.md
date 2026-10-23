@@ -1,6 +1,6 @@
 # Handoff — state of the template
 
-Written 2026-10-23, at the end of roadmap phase 1; §2 and §3 updated at the ends of phases 2, 3 and 4. It is a snapshot: where this file and a
+Written 2026-10-23, at the end of roadmap phase 1; §2 and §3 updated at the ends of phases 2 to 5. It is a snapshot: where this file and a
 test disagree, the test is right and this file is stale. In a project made from the
 template, init replaces this file with the project's own.
 
@@ -13,8 +13,9 @@ method with every project-specific value taken out, so a new BFO/CCO ontology re
 starts with them on its first commit. Its own project is a placeholder called `example`
 that exists so every check has something to run against. Phase 1 of
 [`docs/template/ROADMAP.md`](template/ROADMAP.md) — extract and generalize — is done; phase 2
-phase 3 (the IRI linter) and phase 4 (realist shapes, competency questions, examples) are
-done; phase 5 (reasoning and release, in its own CI job) is next. The
+phase 3 (the IRI linter), phase 4 (realist shapes, competency questions, examples) and
+phase 5 (reasoning and releases) are done; phase 6 (authoring ergonomics, vocabulary,
+governance, crosswalks) is next. The
 repository is published, private and marked as a template, at
 https://github.com/Skreen5hot/Ontology-Template.
 
@@ -48,6 +49,13 @@ https://github.com/Skreen5hot/Ontology-Template.
 - **Competency questions** over **example instance data**, a right answer passing, a wrong
   one failing, an expectation a query matching nothing would meet refused
   (`tests/test_competency.py`). A fresh project has none, and the tool says so.
+- **Reasoning** (`tools/ontology/reason.py`, `.github/workflows/reasoning.yml`): ROBOT
+  v1.9.10, pinned by digest, with ELK over the modules plus the full pinned BFO and CCO --
+  inconsistency, unsatisfiable classes, and the examples' consistency
+  (`tests/test_reasoning.py`, marked `reasoning`).
+- **Releases** (`tools/release.py`, `.github/workflows/release.yml`): base and full, in
+  three serialisations, byte-identical across hash seeds, each parsed back to its source
+  graph (`tests/test_release.py`).
 - Everything the BCO's suite asserted about the layout contract, licensing, the SHACL ladder
   and the corpus digest, carried over and generalized.
 
@@ -71,8 +79,11 @@ https://github.com/Skreen5hot/Ontology-Template.
   their domains and ranges as unions, which the extract drops, so the domain/range checks
   run only on relations with a named domain or range. A reasoner (phase 5) is what finds an
   unsatisfiable class the triples do not spell out.
-- **No reasoner, no release artefacts, no vocabulary layer or crosswalks, no site.**
-  Phases 5–8.
+- **The Release workflow has not published anything.** It refuses in the template, so its
+  first run is a project's first tag.
+- **ELK is OWL 2 EL.** Universal restrictions, cardinality and most unions are ignored by it;
+  an unsatisfiability that depends on them is not found.
+- **No vocabulary layer or crosswalks, no site.** Phases 6–8.
 
 ## 4. Evidence outside the suite
 

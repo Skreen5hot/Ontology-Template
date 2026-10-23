@@ -1,0 +1,7 @@
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix eg:  <{{iri_base}}/examples/> .
+
+# An example individual typed as both a material entity and a process.
+# The classes are each fine; this individual can exist in no model.
+
+eg:thing-1 a obo:BFO_0000040 , obo:BFO_0000015 .

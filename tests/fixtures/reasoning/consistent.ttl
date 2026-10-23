@@ -1,0 +1,15 @@
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix obo:  <http://purl.obolibrary.org/obo/> .
+@prefix p:    <{{namespace}}> .
+
+# The positive control: placed, and nothing that cannot hold.
+
+p:Widget a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000040 .
+
+p:Assembly a owl:Class ;
+    rdfs:subClassOf obo:BFO_0000015 ,
+        [ a owl:Restriction ;
+          owl:onProperty obo:BFO_0000057 ;
+          owl:someValuesFrom p:Widget ] .

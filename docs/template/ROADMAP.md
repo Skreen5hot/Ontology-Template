@@ -22,7 +22,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 2 | Upstreams: several files per source, sister ontologies, the upstream register | **done** (network `--confirm` passed on GitHub, run 40012716769) |
 | 3 | IRI lint, ported from IRI_Linter | **done** |
 | 4 | Realist shape library and competency questions | **done** |
-| 5 | Reasoning and release (ROBOT, own CI job) | not started |
+| 5 | Reasoning and release (ROBOT, own CI job) | **done** |
 | 6 | Authoring ergonomics, the vocabulary and governance layer, crosswalks, the research record | not started |
 | 7 | Public site and its Pages workflow, generalized | not started |
 | 8 | Prove the template works end to end | not started |
@@ -179,6 +179,28 @@ In a CI job of its own (decision 2):
 
 **Gate:** a fixture with an unsatisfiable class fails the job; two builds of one tag are
 byte-identical.
+
+Built 2026-10-23. ROBOT v1.9.10 (sha256 `16a73c07...`, tag commit `c7c03529`), chosen over
+the three-week-old v1.9.11; actions pinned by SHA from the GitHub API (setup-java v6.0.1,
+cache v6.1.0). Measured first: BFO + CCO v2.0 + the module reason clean with ELK in about
+11 seconds, and ELK over the full upstream catches the independent/dependent case the
+shapes need the derived disjointness for. Two things the plan did not foresee:
+
+- **rdflib's RDF/XML and JSON-LD writers are not deterministic** across processes, even for
+  a canonicalised graph inserted in sorted order (measured across three hash seeds). The
+  release tool writes both itself, flat and sorted; Turtle stays rdflib's, which measured
+  stable. Every file is parsed back and required to be its source graph, and ROBOT (the OWL
+  API) loads the hand-written `.owl` and `.jsonld`.
+- **ROBOT's unsatisfiable dump is a module, not a list** -- it carries the BFO context
+  classes too -- so the unsatisfiable classes are read from ROBOT's log, and a run whose
+  count line and named classes disagree is refused rather than read as "none".
+- The **full** release is asserted axioms only (authored plus the vendored extracts it was
+  checked against), not reasoned, so it stays deterministic and Python-built; the reasoner
+  gates the release instead.
+
+Not exercised end to end: the Release workflow publishing to GitHub. It refuses to run in
+the template (whose ontology is a placeholder), so its first real run is a project's first
+tag -- phase 8.
 
 ## 6. Authoring ergonomics, vocabulary and governance, crosswalks
 

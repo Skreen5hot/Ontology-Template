@@ -39,6 +39,7 @@ method.
 .venv/Scripts/python tools/ontology/validate.py --gate
 .venv/Scripts/python tools/ontology/iri_lint.py
 .venv/Scripts/python tools/ontology/competency.py
+.venv/Scripts/python tools/ontology/reason.py        # needs Java; the Reasoning workflow runs it too
 .venv/Scripts/python tools/communications.py
 .venv/Scripts/python -m pytest tests/ -q -p no:randomly
 ```

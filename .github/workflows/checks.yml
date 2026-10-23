@@ -104,8 +104,11 @@ jobs:
       - name: Where this has diverged from the template
         run: python tools/template_status.py --check
 
+      # Everything but the tests that need Java and ROBOT, which the
+      # Reasoning workflow runs. Deselected by marker, named here, rather
+      # than skipped where they stand: a skip reads as a pass.
       - name: Tests
-        run: python -m pytest tests/ -q -p no:randomly
+        run: python -m pytest tests/ -q -p no:randomly -m "not reasoning"
 
   vendored:
     # The check the offline one cannot make: that the committed extracts

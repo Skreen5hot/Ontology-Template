@@ -1,0 +1,33 @@
+# The reasoner, pinned like the upstreams.
+#
+# ROBOT runs ELK over the authored modules plus the FULL pinned BFO and
+# CCO -- not the extracts, which drop every anonymous class expression
+# and so cannot support a consistency claim. The jar is downloaded at run
+# time into .tool-cache/ (gitignored), checked against `sha256`, and never
+# committed or redistributed. Decision 2: this runs in a CI job of its
+# own (.github/workflows/reasoning.yml), so the checks every push runs
+# stay Python-only.
+#
+# Chosen 2026-10-23: v1.9.10 (2026-02-18) rather than v1.9.11, which was
+# three weeks old. The url names the release tag, which a maintainer can
+# move; the digest is what makes that a refusal rather than a silent
+# substitution, and `commit` records what the tag pointed at when pinned.
+
+version: 1
+
+robot:
+  version: 1.9.10
+  url: https://github.com/ontodev/robot/releases/download/v1.9.10/robot.jar
+  sha256: 16a73c074f3df359a7338a84b4e0788785fe06117f931bb9796e9619ea776105
+  tag_commit: c7c03529334ad978235d7bc9c787d15807147ba4
+  licence: BSD-3-Clause
+
+#: ELK: fast, and complete for OWL 2 EL -- subclass, existential
+#: restriction, intersection, disjointness. It ignores what EL lacks:
+#: universal restrictions, cardinality, negation, most union. HermiT
+#: covers OWL 2 DL and is far slower over CCO; ROBOT accepts `hermit`
+#: here.
+reasoner: ELK
+
+#: The JDK the CI jobs install. ROBOT 1.9 needs 11 or later.
+java: '21'
