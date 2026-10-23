@@ -7,7 +7,11 @@ written below before the phase starts.
 
 Sources weighed in planning it, 2026-10-23: the BCO repository (the tooling carried here),
 the ODK project-setup tutorial (for capabilities ODK projects get that the BCO did not
-have), and [IRI_Linter](https://github.com/Skreen5hot/IRI_Linter) (for inclusion).
+have), [IRI_Linter](https://github.com/Skreen5hot/IRI_Linter) (for inclusion), and the
+layered ontology pipeline associated with Jessica Talisman (controlled vocabulary, metadata
+schemas, taxonomy, thesaurus, ontology, knowledge graph), as a layout a colleague brought --
+weighed for what each layer adds, not adopted as a directory structure (see "Layers
+compared with the ontology pipeline", below).
 Decisions: [`DECISIONS.md`](DECISIONS.md).
 
 ## Status
@@ -19,7 +23,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 3 | IRI lint, ported from IRI_Linter | **done** |
 | 4 | Realist shape library and competency questions | not started |
 | 5 | Reasoning and release (ROBOT, own CI job) | not started |
-| 6 | Authoring ergonomics and the research record | not started |
+| 6 | Authoring ergonomics, the vocabulary and governance layer, crosswalks, the research record | not started |
 | 7 | Public site and its Pages workflow, generalized | not started |
 | 8 | Prove the template works end to end | not started |
 
@@ -120,12 +124,20 @@ ontology must be able to answer.
   shapes;
 - a fixture of questions built to fail (a wrong expected answer; a query that selects
   nothing) so a question that passes because it asks nothing is caught;
-- the terms the questions name are vendoring seeds, as the shapes' are.
+- the terms the questions name are vendoring seeds, as the shapes' are;
+- `examples/`: small instance graphs (ABox) the questions are answered against, one per
+  scenario, each saying which questions it serves. A question can only be answered over
+  individuals, and an ontology with no instances answers every "which X ..." with nothing.
+  Example individuals are held to the same rules as the modules: the IRI linter runs over
+  them, every type they assert is an authored or a pinned class, and they are in a namespace
+  of their own under the project (`<iri_base>/examples/`), so they are never counted as terms
+  of the ontology or published in its base release.
 
 **Gate:** each constraint is listed by message in a test and fires on its fixture; positive
 controls conform. Fixtures that need BFO in scope load the BFO extract. A competency
 question with a wrong expected answer fails the check, and one whose query matches nothing
-is refused rather than passed.
+is refused rather than passed. An example individual typed with a class nothing declares is
+refused.
 
 ## 5. Reasoning and release
 
@@ -140,13 +152,36 @@ In a CI job of its own (decision 2):
 **Gate:** a fixture with an unsatisfiable class fails the job; two builds of one tag are
 byte-identical.
 
-## 6. Authoring ergonomics
+## 6. Authoring ergonomics, vocabulary and governance, crosswalks
 
 - a Protégé `catalog-v001.xml`, so imports resolve to the vendored extracts offline;
 - a canonical-form check for authored modules, because Protégé reserializes files on save;
 - pre-commit, Dependabot for the SHA-pinned actions, issue and PR templates, CITATION.cff;
 - TSV-to-Turtle term generation (ROBOT-template style), its output declared generated;
 - semantic diff of authored terms as a PR comment;
+- **the vocabulary layer**: `vocabulary/terms.tsv`, the intake for domain experts who do not
+  write Turtle -- term, preferred label, definition, synonyms, proposed parent, source,
+  requester -- turned into Turtle by the TSV-to-Turtle step above, its output declared
+  generated. A row is a proposal until a reviewer sets its status; only accepted rows are
+  generated;
+- **a SKOS concept-scheme module type**, for vocabularies that are about terms rather than
+  types -- catalogs, code lists, taxonomies of business usage -- with shapes for the scheme's
+  structure: every concept `skos:inScheme` a declared scheme, top concepts declared,
+  `skos:broader` acyclic and within one scheme, an `altLabel` or `hiddenLabel` never
+  duplicating a `prefLabel`. Kept apart from the OWL hierarchy on purpose: a concept is not a
+  universal, and no OWL class is generated from one;
+- **governance**: `docs/governance/` with the naming convention (label casing, local-name
+  form), the deprecation policy (`owl:deprecated` plus a replacement or a reason, enforced by
+  the phase-4 shape), a term-request issue template, and a change log generated from the
+  corpus between releases rather than kept by hand;
+- **crosswalks**: `mappings/*.sssom.tsv`, mappings to external standards in SSSOM, the OBO
+  community's mapping format, with its metadata block (mapping set id, licence, creator). A
+  check requires every subject to be a declared authored term, every object to fall in a
+  namespace the mapping set declares, every predicate to be a SKOS mapping property or
+  `owl:equivalentClass`, and `skos:exactMatch` only between things of one kind (class to
+  class, concept to concept). Mappings are not loaded into the ontology graph: an
+  `exactMatch` to a vocabulary that is not BFO-aligned would otherwise become a claim about
+  the ontology's types;
 - `research/`: the project's own notes and summaries of sources, with a README saying what
   goes there and what does not. Project content under the project licence. The sources
   themselves, when licensed, stay in `docs/Reference/`, which is never tracked; a test
@@ -154,13 +189,16 @@ byte-identical.
 
 ## 7. Public site
 
-Carry the BCO's site whole: `tools/site/build_site.py` and `check_site.py`, the page
+Carry the BCO's site whole -- the documentation an ontology pipeline would generate with
+PyLODE or Widoco, here a checked and reproducible build: `tools/site/build_site.py` and
+`check_site.py`, the page
 fragments, copy and assets (stylesheet, explorer and ranking scripts), and
 `.github/workflows/pages.yml` -- build, check, prove the build reproducible, deploy from the
 artifact the checks ran against, preview artifacts on pull requests. Generalized: every
 project value from `config/project.yaml`, the spec and review pages optional (rendered when
 a `specification` component exists), a competency-question page (each question and whether
-it is answered), and a release page. Documented in DEVELOPMENT.md: enabling Pages, the
+it is answered), a crosswalk page (the SSSOM mappings, by target), a vocabulary page (concept
+schemes, browsable as trees), and a release page. Documented in DEVELOPMENT.md: enabling Pages, the
 local preview, what the build refuses. `Markdown` is pinned again in the commit that adds
 it.
 
@@ -188,5 +226,25 @@ Then a real "Use this template" run, to green CI, in one sitting.
 | ROBOT templates, DOSDP | phase 6 (TSV to Turtle) |
 | ID ranges | not needed: readable local IRIs (decision 4) |
 | mkdocs | phase 7, a checked and reproducible site, with its Pages workflow |
-| (no ODK counterpart) | competency questions as checked queries (phase 4); a research record (phase 6) |
+| (no ODK counterpart) | competency questions as checked queries over example instances (phase 4); a research record (phase 6) |
+| mappings (SSSOM) | crosswalks in `mappings/`, checked, kept out of the ontology graph (phase 6) |
 | Docker | not used: a pinned Python environment, plus a pinned ROBOT jar in phase 5 |
+
+## Layers compared with the ontology pipeline
+
+The pipeline a colleague brought, attributed to Jessica Talisman: six layers from controlled
+vocabulary to knowledge graph, as numbered directories. Weighed here for what each layer
+contributes; its layout is not adopted, for the reasons in the last column. DEVELOPMENT.md
+will carry this table, so someone who knows the pipeline can find each layer.
+
+| Pipeline layer | Here | Not adopted, and why |
+|---|---|---|
+| 1 controlled vocabulary (`terms.csv`, expert intake) | `vocabulary/terms.tsv`, a review status, generated Turtle (phase 6) | -- |
+| 2 metadata schemas (LinkML, SHACL) | SHACL shapes now; the realist library (phase 4) | LinkML as the source of truth: it generates schema-shaped, closed-world OWL rather than BFO-anchored types, and would bypass the checks on authored Turtle. Fine for a data-exchange schema built on the ontology, in another repository |
+| 3 taxonomy (SKOS schemes) | concept-scheme modules with structural shapes (phase 6) | Deriving the OWL hierarchy from it. In a realist ontology the `rdfs:subClassOf` tree under BFO is the classification of types; a SKOS scheme is a vocabulary about terms, kept beside it, never upstream of it |
+| 4 thesaurus (altLabel, related, crosswalks) | SKOS labels in concept schemes; SSSOM crosswalks (phase 6) | -- |
+| 5 ontology (OWL, imports, axioms) | `ontology/`, the pinned vendored extracts, reasoning (phase 5) | Imports by git submodule or download script: the pinned, digest-checked extracts are stronger |
+| 6 knowledge graph (RML mappings, instances, competency queries) | `examples/` instances and competency questions (phase 4) | RML/R2RML lifting pipelines: they belong to an application repository built on the ontology, not to the ontology's template |
+| numbered stage directories | roles in the layout contract | A numbered order says the ontology is built from the taxonomy. The layers coexist; the contract's roles say what each file is and what is checked |
+| CI with `robot.jar` from "latest" and tag-pinned actions | a pinned ROBOT jar with its digest (phase 5); actions pinned to commit SHAs | Unpinned tools make a check's result depend on the day it ran |
+| PyLODE / Widoco documentation | the phase-7 site | -- |

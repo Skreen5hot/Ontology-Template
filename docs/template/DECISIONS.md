@@ -63,3 +63,16 @@ Effect: the roadmap keeps its phase order. Competency questions, as checked SPAR
 expected answers, are added to phase 4; a `research/` record to phase 6; and phase 7 now
 names the GitHub Pages workflow, the site tools and assets explicitly, with the
 competency questions on the site. Phase 1 is committed and pushed, and phase 2 begins.
+
+**9. "Agree with your recommendaitons. Update roadmap"**
+
+In answer to a colleague's question whether the repository should be structured on the
+ontology pipeline attributed to Jessica Talisman (controlled vocabulary, metadata schemas,
+taxonomy, thesaurus, ontology, knowledge graph, as numbered directories). The
+recommendation agreed to: weigh the layers for what they add, and do not adopt the numbered
+layout, LinkML as the source of truth, OWL derived from SKOS, unpinned tooling, submodule
+imports, or RML pipelines. Effect, in the roadmap with its phase order unchanged: example
+instance data for competency questions (phase 4); a vocabulary intake, SKOS concept-scheme
+modules, governance documents and SSSOM crosswalks (phase 6); crosswalk and vocabulary pages
+on the site (phase 7); and a layer-by-layer comparison table, to be carried into
+DEVELOPMENT.md.
