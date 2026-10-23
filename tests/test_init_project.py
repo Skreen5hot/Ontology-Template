@@ -68,16 +68,21 @@ def copy_of(repo, target):
     assert copied > 30, "only %d files were copied" % copied
     git(target, "init", "-q")
     git(target, "add", "-A")
-    # Carry the executable bit over from the index. "Use this template"
-    # copies git objects, modes included; a file copy on a filesystem git
-    # does not trust for modes (Windows, core.filemode=false) loses it,
-    # and the copy would then fail a check the real one passes.
+    # Carry the executable bit over from the index, to both places git
+    # reads it. "Use this template" copies git objects, modes included. A
+    # plain file copy loses the bit: on Windows (core.filemode=false) git
+    # takes the mode from the index, so it is set there; on Linux git
+    # compares the index with the file on disk, so it is set there too --
+    # setting only the index made CI's copy look modified, and init
+    # refused it as a dirty tree.
     staged = subprocess.run(["git", "ls-files", "-s"], cwd=str(repo),
                             check=True, capture_output=True
                             ).stdout.decode("utf-8").splitlines()
     for row in staged:
         mode, _blob, _stage, name = row.split(None, 3)
         if mode == "100755":
+            path = target / name
+            path.chmod(path.stat().st_mode | 0o111)
             git(target, "update-index", "--chmod=+x", name)
     git(target, "commit", "-q", "-m", "copy")
     return target
