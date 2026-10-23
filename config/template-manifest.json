@@ -1,5 +1,5 @@
 {
-  "digest": "6d82080a4d7a88df171c65cdbd812187e424f17d1a5793e0024d7f8b49563185",
+  "digest": "fb7cba5595c978c992084d419430b3c0fb3ca703681e9d33cb20e8cef945facf",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".githooks/pre-commit": "e39d41b2b6c3a892468a61de9fd62c8fc0c1c69cb5cfba4bcfd5e141bdddd679",
@@ -13,7 +13,7 @@
     "tests/fixtures/iri_lint/dirty.ttl": "f8eed998da216942795004ab184deda0c9ffa8d0419a846bf635e0aad81be26c",
     "tests/fixtures/iri_lint/module2.ttl": "df4fa111c76c1c8b8ba346aeddf86285180806853d06e4a840633b98c441b385",
     "tests/test_communications.py": "ca36f5fda61c9348e6e5e28fa1bacd14486c43618bedc524f0377156e2631135",
-    "tests/test_iri_lint.py": "e257f305581fe6d107604efc335f288e63c874564ea9a901dde3771f7e9f07f6",
+    "tests/test_iri_lint.py": "9f9f3a80cfbef92cf74819bce04ab2e31ced77c6ac20d44c5b6f997a2ae57e46",
     "tests/test_licensing.py": "605724138e7143e496ff86f9631f24e83ed62587e265b3f218e1e2ac946fe2c1",
     "tests/test_namespace.py": "90bf310c321bf0caf65262d60a1dcfd8a4bf9b3e234d8ce01b69df633e6b123a",
     "tests/test_ontology_checks.py": "c23dc83c8d0ef98d82f57930ccda1c844a1f0730e52688b537052927dd02774c",
