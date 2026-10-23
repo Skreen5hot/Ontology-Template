@@ -1,0 +1,32 @@
+# The annotation profile: what every authored class carries beyond a
+# label and a definition.
+#
+# The wellformedness shapes require rdfs:label and skos:definition. This
+# file is for the project's own additions -- the annotations its review
+# process needs on every class -- and tools/ontology/profile_shapes.py
+# generates shapes/annotation_profile_shapes.ttl from it. Edit this file,
+# then regenerate; never the shapes.
+#
+# Each entry:
+#   property   the full IRI of the annotation property. Must be a term of
+#              a pinned upstream (it is checked against the registers) or
+#              of a W3C or Dublin Core vocabulary.
+#   label      what the message calls it
+#   severity   violation | warning. A warning is reported; a violation is
+#              gated (config/validation-baseline.json).
+#   why        one sentence: why this project asks for it.
+#
+# The default is CCO v2.0's own convention: a definition says where it
+# comes from. A warning, because a new project's definitions are often
+# its own; raise it to a violation once every definition has a source.
+
+version: 1
+
+annotations:
+
+  - property: https://www.commoncoreontologies.org/ont00001754
+    label: definition source
+    severity: warning
+    why: >-
+      CCO cites the source of each definition with this annotation; a
+      definition that says where it came from can be checked against it.

@@ -48,6 +48,23 @@ components:
       first term is written. Declared from the first commit so that term
       is in the corpus digest and under the shapes on the day it lands.
 
+  - id: examples
+    path: examples
+    role: example-data
+    description: >-
+      Instance data the competency questions are answered against, one
+      file per scenario, in the examples namespace under the IRI base.
+      Linted with the modules; never in the corpus digest or the SHACL
+      ladder.
+
+  - id: competency-questions
+    path: competency-questions
+    role: competency-question
+    description: >-
+      What the ontology must be able to answer: one YAML file per question,
+      with its SPARQL and the answer it must give.
+      tools/ontology/competency.py runs every answerable one.
+
   # ---- Validation ---------------------------------------------------
 
   - id: validation.wellformedness
@@ -60,6 +77,25 @@ components:
       authored namespace only, so the vendored extracts in the same data
       graph are never asked the question.
 
+  - id: validation.realist
+    path: shapes/realist_shapes.ttl
+    role: ontology-validation
+    description: >-
+      What a realist BFO/CCO term must be: anchored in BFO, under one
+      asserted parent, under no two disjoint categories, defined by its
+      genus, fitting the domains and ranges of the relations it is
+      restricted on; plus complete ontology headers and deprecations that
+      name a way forward.
+
+  - id: validation.annotation-profile
+    path: shapes/annotation_profile_shapes.ttl
+    role: ontology-validation
+    generator: tool.profile-shapes
+    description: >-
+      The annotations the project requires on every authored class beyond
+      a label and a definition. Generated from
+      config/annotation-profile.yaml.
+
   # ---- Deliberately invalid ------------------------------------------
 
   - id: fixture.wellformedness-bad-examples
@@ -70,6 +106,16 @@ components:
       controls beside them -- including the multilingual label pair that
       sh:maxCount 1 would have rejected, so the false positive is a test
       rather than something somebody remembers.
+
+  - id: fixture.realist-bad-examples
+    path: shapes/realist_bad_examples.ttl
+    role: test-fixture
+    description: >-
+      Cases built to break the realist shapes and the annotation profile,
+      one per constraint, with positive controls. Validated with the
+      vendored extracts in scope, so a case can sit under a real BFO
+      category -- including the one only BFO's AllDisjointClasses, through
+      the derived disjointness file, can catch.
 
   # ---- Documentation -------------------------------------------------
 
@@ -183,6 +229,17 @@ components:
       ancestry. Grows as the ontology names more of CCO; the offline
       check fails until it is rebuilt.
 
+  - id: vendor.bfo-disjointness
+    path: vendor/bfo/bfo-disjointness.ttl
+    role: vendored-ontology
+    generator: tool.vendor-upstream
+    redistributable: true
+    description: >-
+      BFO's owl:AllDisjointClasses axioms written as the pairwise
+      owl:disjointWith triples they are equivalent to. Derived, not copied:
+      the axioms are blank-node lists the extract drops, and without them a
+      class under both an independent and a dependent continuant would pass.
+
   - id: vendor.bfo-register
     path: vendor/bfo/bfo-register.json
     role: vendored-register
@@ -273,6 +330,14 @@ components:
       The project's own values: id, code, title, namespace, prefix,
       repository. Written by tools/init_project.py; read by every tool
       through tools/project.py.
+
+  - id: config.annotation-profile
+    path: config/annotation-profile.yaml
+    role: configuration
+    description: >-
+      The annotations every authored class must carry beyond a label and a
+      definition, with severity and reason. CCO's definition source, as a
+      warning, by default.
 
   - id: config.layout
     path: config/repository-layout.yaml
@@ -404,6 +469,24 @@ components:
       Git hooks, enabled per clone with `git config core.hooksPath
       .githooks`: pre-commit runs the IRI linter when a commit touches
       Turtle.
+
+  - id: tool.competency
+    path: tools/ontology/competency.py
+    role: tool
+    template: owned
+    description: >-
+      Runs every answerable competency question against the modules, the
+      vendored extracts and the examples it names, and refuses an
+      expectation a query matching nothing would meet.
+
+  - id: tool.profile-shapes
+    path: tools/ontology/profile_shapes.py
+    role: tool
+    template: owned
+    description: >-
+      Generates the annotation-profile shapes from
+      config/annotation-profile.yaml, refusing a property no pinned
+      upstream or W3C vocabulary defines.
 
   - id: tool.corpus-digest
     path: tools/ontology/corpus_digest.py

@@ -1,0 +1,9 @@
+id: CQ-108
+question: Names an example file that does not exist.
+status: answerable
+depends_on: []
+examples: [examples/absent.ttl]
+query: |
+  ASK { obo:BFO_0000015 rdfs:subClassOf* obo:BFO_0000003 }
+expect:
+  ask: true

@@ -64,6 +64,21 @@ mistyped opaque id from a readable name and to suggest the right IRI,
 offline. It carries the upstream's own labels, so it is the upstream's
 content under the upstream's licence, like the extract.
 
+DISJOINTNESS, DERIVED
+
+BFO states the disjointness a realist check leans on hardest --
+independent, specifically dependent and generically dependent continuant;
+process, process boundary, temporal and spatiotemporal region -- as
+owl:AllDisjointClasses, whose members are an RDF list of blank nodes. The
+extract drops blank nodes, so without more those axioms are gone, and a
+shape refusing a class under two disjoint categories would never see the
+commonest case. A source pinned with `disjointness:` therefore gets a
+second file: each AllDisjointClasses axiom over vendored terms, written as
+the pairwise owl:disjointWith triples it is equivalent to. It is derived,
+not copied, and its header says so. An axiom asserted by several pinned
+files (CCO's merged file repeats BFO's) is credited to the first whose
+namespace holds all its members.
+
 WHAT IS NOT SELECTED, AND WHAT THAT COSTS
 
 Every axiom whose object is a blank node is dropped: OWL restrictions,
@@ -186,6 +201,7 @@ def sources() -> list[dict]:
                 raise Refused("a source in %s declares no %r: %r"
                               % (PINS, required, entry.get("id", entry)))
         entry["files"] = files_of(entry)
+        entry.setdefault("disjointness", None)
         entry.setdefault("select", "named")
         if entry["select"] not in SELECT_MODES:
             raise Refused("%s declares select %r; the modes are %s"
@@ -325,6 +341,9 @@ def seed_terms(namespaces: tuple) -> set:
     data = rdflib.Graph()
     for path in layout.ontology_files():
         data.parse(path, format="turtle")
+    for entry in layout.components("example-data"):
+        for path in entry.members("*.ttl"):
+            data.parse(path, format="turtle")
     harvest(data)
 
     for entry in layout.components("ontology-validation"):
@@ -332,10 +351,29 @@ def seed_terms(namespaces: tuple) -> set:
         shapes = rdflib.Graph()
         shapes.parse(path, format="turtle")
         harvest(shapes)
-        text = path.read_text(encoding="utf-8")
-        for namespace in namespaces:
-            found.update(re.findall(re.escape(namespace) + r"[A-Za-z0-9_]+",
-                                    text))
+        found |= named_in_text(path.read_text(encoding="utf-8"))
+
+    # A competency question names its terms in SPARQL, which is text: the
+    # terms it depends on must be vendored for the question to be asked.
+    for entry in layout.components("competency-question"):
+        for path in entry.members("*.yaml"):
+            found |= named_in_text(path.read_text(encoding="utf-8"))
+    return found
+
+
+def named_in_text(text: str) -> set:
+    """Upstream IRIs written in text: in full, or as `prefix:local` with a
+    pinned prefix. Shape SPARQL and competency queries use prefixed names
+    (`obo:BFO_0000001`), which a scan for full IRIs alone misses -- the
+    shape scan here did, until competency questions made it matter."""
+    found = set()
+    for source in sources():
+        found.update(re.findall(
+            re.escape(source["namespace"]) + r"[A-Za-z0-9_]+", text))
+        pattern = (r"(?<![A-Za-z0-9_/#:<])" + re.escape(source["prefix"])
+                   + r":([A-Za-z_][A-Za-z0-9_]*)")
+        found.update(source["namespace"] + local
+                     for local in re.findall(pattern, text))
     return found
 
 
@@ -736,6 +774,7 @@ def build(cache: Path) -> dict:
                       "%r" % (triple,))
 
     owners = {triple: owner(triple) for triple in selected}
+    groups = disjoint_groups(declared, per_source, full)
 
     built = {}
     for entry in declared:
@@ -754,8 +793,21 @@ def build(cache: Path) -> dict:
         text = serialise(mine, header_lines(entry, stated, counts))
         round_trip(text, mine)
         register = register_of(entry, per_source[entry["id"]], stated)
+        mine_groups = groups.get(entry["id"], [])
+        if mine_groups and not entry["disjointness"]:
+            raise Refused(
+                "%s asserts %d owl:AllDisjointClasses axiom(s) over vendored "
+                "terms and declares no `disjointness:` file to derive them "
+                "into; without it the extract silently loses them"
+                % (entry["id"], len(mine_groups)))
+        disjointness = (disjointness_text(entry, stated, mine_groups)
+                        if entry["disjointness"] else None)
         built[entry["id"]] = {
             "source": entry,
+            "disjointness_text": disjointness,
+            "disjointness_axioms": len(mine_groups),
+            "disjointness_pairs": sum(len(g) * (len(g) - 1) // 2
+                                      for g in mine_groups),
             "text": text,
             "register_text": register_bytes(register).decode("utf-8"),
             "register_terms": len(register["terms"]),
@@ -778,6 +830,98 @@ def build(cache: Path) -> dict:
                         "full": len(full),
                         "stubs": len(stubs), "dropped": dropped}
     return built
+
+
+# -------------------------------------------------------- disjointness
+
+
+def disjoint_groups(declared: list, per_source: dict, full: set) -> dict:
+    """{source id: [sorted member IRIs, ...]} from owl:AllDisjointClasses.
+
+    Only members vendored here count; an axiom left with fewer than two
+    is nothing to say. Each distinct member set is credited once: to the
+    first pinned source whose namespace holds every member and whose
+    file asserts it, else to the first source that asserts it.
+    """
+    import rdflib
+    from rdflib.collection import Collection
+
+    kind = rdflib.URIRef(OWL + "AllDisjointClasses")
+    members_of = rdflib.URIRef(OWL + "members")
+    asserted: dict[frozenset, list[str]] = {}
+    for entry in declared:
+        graph = per_source[entry["id"]]
+        for axiom in graph.subjects(rdflib.RDF.type, kind):
+            head = graph.value(axiom, members_of)
+            if head is None:
+                continue
+            members = frozenset(str(m) for m in Collection(graph, head)
+                                if isinstance(m, rdflib.URIRef)
+                                and str(m) in full)
+            if len(members) >= 2:
+                asserted.setdefault(members, [])
+                if entry["id"] not in asserted[members]:
+                    asserted[members].append(entry["id"])
+    out: dict[str, list] = {}
+    order = [entry["id"] for entry in declared]
+    namespace = {entry["id"]: entry["namespace"] for entry in declared}
+    for members, sources in sorted(asserted.items(),
+                                   key=lambda kv: sorted(kv[0])):
+        home = [s for s in order if s in sources
+                and all(m.startswith(namespace[s]) for m in members)]
+        owner = home[0] if home else min(sources, key=order.index)
+        out.setdefault(owner, []).append(sorted(members))
+    return out
+
+
+def disjointness_text(source: dict, stated: str, groups: list) -> str:
+    import rdflib
+
+    iri = rdflib.URIRef(extract_base() + Path(source["disjointness"]).stem)
+    disjoint = rdflib.URIRef(OWL + "disjointWith")
+    triples = [
+        (iri, rdflib.RDF.type, rdflib.URIRef(OWL + "Ontology")),
+        (iri, rdflib.URIRef(RDFS + "comment"), rdflib.Literal(
+            "Derived, not copied: the owl:AllDisjointClasses axioms of %s "
+            "%s over the terms vendored here, as the pairwise "
+            "owl:disjointWith triples each is equivalent to. Upstream "
+            "licence as stated by the source: %s"
+            % (source["project"], source["release"], stated), lang="en")),
+        (iri, rdflib.URIRef(DCTERMS + "license"),
+         rdflib.URIRef(source["licence"]["url"])),
+        (rdflib.URIRef(DCTERMS + "license"), rdflib.RDF.type,
+         rdflib.URIRef(OWL + "AnnotationProperty")),
+    ]
+    pairs = 0
+    for members in groups:
+        for i, a in enumerate(members):
+            for b in members[i + 1:]:
+                triples.append((rdflib.URIRef(a), disjoint, rdflib.URIRef(b)))
+                pairs += 1
+    header = [
+        "Generated by %s -- do not edit." % GENERATOR,
+        "",
+        "Disjointness DERIVED from %s, pinned." % source["project"],
+        "",
+        "  release     %s" % source["release"],
+        "  commit      %s" % source["commit"],
+    ] + ["  source      %s" % pinned["url"] for pinned in source["files"]] + [
+        "  licence     %s (%s)" % (source["licence"]["spdx"],
+                                   source["licence"]["url"]),
+        "",
+        source["licence"]["attribution"].strip(),
+        "",
+        "The source states these as %d owl:AllDisjointClasses axiom(s), whose"
+        % len(groups),
+        "member lists are blank nodes and so are absent from the extract. Each",
+        "is written here as its %d pairwise owl:disjointWith triple(s):" % pairs,
+        "AllDisjointClasses(A, B, C) holds exactly when every pair is",
+        "disjoint, so this says what the source says, in a form the source",
+        "does not use. Only members vendored here are included.",
+    ]
+    text = serialise(triples, header)
+    round_trip(text, triples)
+    return text
 
 
 # ------------------------------------------------------------ register
@@ -888,6 +1032,17 @@ def manifest_of(built: dict) -> dict:
             "extract_on_disk_matches": (
                 path.is_file()
                 and sha256_of(path.read_bytes()) == sha256_of(data)),
+            "disjointness": entry["disjointness"],
+            "disjointness_axioms": record["disjointness_axioms"],
+            "disjointness_pairs": record["disjointness_pairs"],
+            "disjointness_sha256": (
+                sha256_of(record["disjointness_text"].encode("utf-8"))
+                if record["disjointness_text"] is not None else None),
+            "disjointness_on_disk_matches": (
+                record["disjointness_text"] is None
+                or ((root / entry["disjointness"]).is_file()
+                    and (root / entry["disjointness"]).read_bytes()
+                    == record["disjointness_text"].encode("utf-8"))),
             "register": entry["register"],
             "register_terms": record["register_terms"],
             "register_sha256": sha256_of(register_data),
@@ -1024,6 +1179,23 @@ def verify() -> dict:
                    (want or "nothing")[:16]))
         vendored.parse(data=data.decode("utf-8"), format="turtle")
 
+        if entry["disjointness"]:
+            derived = root / entry["disjointness"]
+            want = recorded["extracts"].get(entry["id"], {}).get(
+                "disjointness_sha256")
+            if not derived.is_file():
+                findings.append("%s: %s is missing"
+                                % (entry["id"], entry["disjointness"]))
+            else:
+                data = derived.read_bytes()
+                if sha256_of(data) != want:
+                    findings.append(
+                        "%s: %s digests to %s but %s records %s"
+                        % (entry["id"], entry["disjointness"],
+                           sha256_of(data)[:16], MANIFEST,
+                           (want or "nothing")[:16]))
+                vendored.parse(data=data.decode("utf-8"), format="turtle")
+
         register = root / entry["register"]
         want = recorded["extracts"].get(entry["id"], {}).get("register_sha256")
         if not register.is_file():
@@ -1129,6 +1301,9 @@ def main(argv=None) -> int:
     differing += [record["register"]
                   for record in manifest["extracts"].values()
                   if not record["register_on_disk_matches"]]
+    differing += [record["disjointness"]
+                  for record in manifest["extracts"].values()
+                  if not record["disjointness_on_disk_matches"]]
 
     for key, record in sorted(manifest["extracts"].items()):
         print("    %-4s %-40s %6d triple(s)  %s"
@@ -1164,6 +1339,13 @@ def main(argv=None) -> int:
         target.parent.mkdir(parents=True, exist_ok=True)
         target.write_bytes(record["text"].encode("utf-8"))
         print("  wrote %s" % record["source"]["extract"])
+        if record["disjointness_text"] is not None:
+            derived = root / record["source"]["disjointness"]
+            derived.write_bytes(record["disjointness_text"].encode("utf-8"))
+            print("  wrote %s (%d pairs from %d axioms)"
+                  % (record["source"]["disjointness"],
+                     record["disjointness_pairs"],
+                     record["disjointness_axioms"]))
         register = root / record["source"]["register"]
         register.parent.mkdir(parents=True, exist_ok=True)
         register.write_bytes(record["register_text"].encode("utf-8"))

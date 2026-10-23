@@ -80,13 +80,15 @@ def extract(layout, component_id):
     return graph
 
 
-def constructed_upstreams(vendoring, monkeypatch, upstreams, seeds):
+def constructed_upstreams(vendoring, monkeypatch, upstreams, seeds,
+                          disjointness=None):
     """Pins and bytes built here, so `build` runs without the network.
 
     `upstreams` is [(id, namespace, select, turtle)], where turtle is one
     string for a one-file source or a list of strings, one per file.
     Afterwards `vendoring.build(tmp)` builds from these.
     """
+    disjointness = disjointness or {}
     licence = "<http://purl.org/dc/terms/license>"
     pins = []
     for key, namespace, select, text in upstreams:
@@ -105,6 +107,7 @@ def constructed_upstreams(vendoring, monkeypatch, upstreams, seeds):
             "select": select,
             "extract": "vendor/%s.ttl" % key,
             "register": "vendor/%s-register.json" % key, "_texts": texts,
+            "disjointness": disjointness.get(key),
             "licence": {"spdx": "MIT", "url": "https://l.invalid/",
                         "licence_statement_contains": "licence-" + key.upper(),
                         "attribution": key}})
@@ -813,8 +816,9 @@ def test_each_extract_says_in_its_own_header_that_it_is_partial(
         layout, vendoring):
     """The manifest is a file somebody has to go and read. The extract is
     the file they already have open."""
-    paths = layout.vendored_files()
-    assert len(paths) == len(vendoring.sources()), paths
+    root = layout.repository_root()
+    paths = [root / entry["extract"] for entry in vendoring.sources()]
+    assert len(paths) == len(vendoring.sources()) >= 2, paths
     for path in paths:
         head = path.read_text(encoding="utf-8")[:3000]
         assert "partial extract" in head.lower(), path.name
@@ -910,3 +914,102 @@ def test_the_corpus_digest_does_not_measure_the_vendored_extracts():
     digest = load_tool("t_digest_scope",
                        "tools/ontology/corpus_digest.py").measure()
     assert not [p for p in digest["scope"]["paths"] if p.startswith("vendor/")]
+
+
+# ---------------------------------------------------------- disjointness
+
+
+def test_bfos_alldisjointclasses_are_derived_pairwise(layout, manifest):
+    """BFO 2020 states five owl:AllDisjointClasses axioms -- 3, 3, 4, 4
+    and 3 members -- which are 3 + 3 + 6 + 6 + 3 = 21 pairs. Measured when
+    the template was built; the count is a floor so a BFO that adds axioms
+    passes. The pair a realist check leans on hardest must be among them:
+    independent continuant and specifically dependent continuant."""
+    import rdflib
+
+    record = manifest["extracts"]["bfo"]
+    assert record["disjointness_axioms"] >= 5, record
+    assert record["disjointness_pairs"] >= 21, record
+    graph = extract(layout, "vendor.bfo-disjointness")
+    pairs = {frozenset((str(a), str(b))) for a, b in
+             graph.subject_objects(rdflib.OWL.disjointWith)}
+    assert len(pairs) == record["disjointness_pairs"]
+    assert frozenset((OBO + "BFO_0000004", OBO + "BFO_0000020")) in pairs
+
+
+def test_the_derived_pairs_are_not_in_the_extract(layout):
+    """The extract carries only triples its source asserts; derived ones
+    live in their own file and say so in its header."""
+    import rdflib
+
+    extract_pairs = {frozenset((str(a), str(b))) for a, b in extract(
+        layout, "vendor.bfo").subject_objects(rdflib.OWL.disjointWith)}
+    derived = {frozenset((str(a), str(b))) for a, b in extract(
+        layout, "vendor.bfo-disjointness").subject_objects(
+            rdflib.OWL.disjointWith)}
+    assert not (extract_pairs & derived), extract_pairs & derived
+    head = layout.path("vendor.bfo-disjointness").read_text(
+        encoding="utf-8")[:2500]
+    assert "DERIVED" in head and "AllDisjointClasses" in head
+
+
+def test_an_alldisjointclasses_axiom_becomes_its_pairs(
+        vendoring, monkeypatch, tmp_path):
+    """Constructed: A asserts AllDisjointClasses(x, y, z); B, whose file
+    repeats the axiom, gets no credit for it -- the members are A's."""
+    a_ns, b_ns = "https://a.invalid/", "https://b.invalid/"
+    axiom = ("[ a <%sAllDisjointClasses> ; <%smembers> "
+             "( <%sx> <%sy> <%sz> ) ] .\n" % (OWL, OWL, a_ns, a_ns, a_ns))
+    labels = "".join("<%s%s> <%slabel> \"%s\" .\n" % (a_ns, n, RDFS, n)
+                     for n in "xyz")
+    constructed_upstreams(vendoring, monkeypatch, [
+        ("a", a_ns, "all", labels + axiom),
+        ("b", b_ns, "named", "<%sq> <%slabel> \"q\" .\n" % (b_ns, RDFS)
+         + axiom),
+    ], seeds=set(), disjointness={"a": "vendor/a-disjointness.ttl",
+                                  "b": "vendor/b-disjointness.ttl"})
+    built = vendoring.build(tmp_path)
+    assert built["a"]["disjointness_pairs"] == 3
+    assert built["b"]["disjointness_pairs"] == 0
+    graph = parsed(built["a"]["disjointness_text"])
+    import rdflib
+
+    pairs = {frozenset((str(s), str(o))) for s, o in
+             graph.subject_objects(rdflib.OWL.disjointWith)}
+    assert pairs == {frozenset((a_ns + p, a_ns + q))
+                     for p, q in ("xy", "xz", "yz")}
+
+
+def test_a_source_with_alldisjointclasses_and_no_file_is_refused(
+        vendoring, monkeypatch, tmp_path):
+    """Without a file to derive into, the axioms would be dropped with the
+    blank nodes and nothing would say so."""
+    a_ns = "https://a.invalid/"
+    axiom = ("[ a <%sAllDisjointClasses> ; <%smembers> ( <%sx> <%sy> ) ] .\n"
+             % (OWL, OWL, a_ns, a_ns))
+    labels = "".join("<%s%s> <%slabel> \"%s\" .\n" % (a_ns, n, RDFS, n)
+                     for n in "xy")
+    constructed_upstreams(vendoring, monkeypatch, [
+        ("a", a_ns, "all", labels + axiom)], seeds=set())
+    with pytest.raises(SystemExit) as error:
+        vendoring.build(tmp_path)
+    assert "declares no `disjointness:` file" in str(error.value)
+
+
+def test_a_tampered_disjointness_file_is_found_offline(vendoring, repo):
+    entry = next(e for e in vendoring.sources() if e["id"] == "bfo")
+    path = repo / entry["disjointness"]
+    original = path.read_bytes()
+    lines = original.split(b"\n")
+    pair = next(i for i, line in enumerate(lines)
+                if b"owl:disjointWith" in line)
+    tampered = b"\n".join(lines[:pair] + lines[pair + 1:])
+    assert tampered != original
+    try:
+        path.write_bytes(tampered)
+        record = vendoring.verify()
+        assert any(entry["disjointness"] in f and "digests to" in f
+                   for f in record["findings"]), record["findings"]
+    finally:
+        path.write_bytes(original)
+    assert path.read_bytes() == original

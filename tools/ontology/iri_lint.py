@@ -26,6 +26,8 @@ THE RULES
                       (cco:ont00001180 a owl:Class). The term is CCO's;
                       declaring it here makes this file a second, divergent
                       source for it.
+  annotated_upstream  an authored file saying anything else about one --
+                      a comment, a label, a parent. Same reason.
   dangling_ref        an IRI in this project's namespace that nothing in the
                       linted files declares -- in any position, including a
                       restriction filler.
@@ -86,13 +88,16 @@ DECLARING = {OWL + "Class", OWL + "ObjectProperty", OWL + "DatatypeProperty",
              "http://www.w3.org/1999/02/22-rdf-syntax-ns#Property",
              SKOS + "Concept", SKOS + "ConceptScheme"}
 
-#: The roles linted when no file is named: what this project authors.
-#: Not the fixtures, which are invalid on purpose.
+#: The roles linted when no file is named: what this project authors,
+#: example instance data included -- an example individual typed with a
+#: class nothing declares is a dangling reference like any other. Not the
+#: fixtures, which are invalid on purpose.
 SCOPE_ROLES = ("ontology-module", "ontology-module-set",
-               "ontology-validation")
+               "ontology-validation", "example-data")
 
 RULES = ("readable_label", "case_mismatch", "unverified",
-         "deprecated_upstream", "redeclared_upstream", "dangling_ref")
+         "deprecated_upstream", "redeclared_upstream", "annotated_upstream",
+         "dangling_ref")
 
 #: A source is "opaque" -- mints ids, not names -- when this share of its
 #: register's local names contains a run of four or more digits. BFO and
@@ -384,6 +389,26 @@ def redeclarations(path, graph, code, prefixes, upstream_ns, judged) -> list:
                       "type": "redeclared_upstream", "subject": iri}
             if record not in out:
                 out.append(record)
+
+    # Anything else said about an upstream term: a comment, a label, a
+    # subClassOf. Phase 4's plan had this as a shape; a shape cannot see
+    # which file a triple came from, because the validation graph merges
+    # the authored modules with the extracts, so it is checked here, where
+    # each file is its own graph. A term already reported as redeclared is
+    # not reported again for the triples of the same declaration.
+    redeclared = {r["subject"] for r in out}
+    rows = code.split("\n")
+    for subject in sorted({s for s in graph.subjects()
+                           if isinstance(s, rdflib.URIRef)}, key=str):
+        iri = str(subject)
+        if (not iri.startswith(upstream_ns) or iri in redeclared
+                or judged.get(iri) is not None):
+            continue
+        leading = [n for n in lines_of(code, prefixes, iri)
+                   if re.match(r"\s*" + spelled(prefixes, iri), rows[n - 1])]
+        for line in leading or [0]:
+            out.append({"file": path.as_posix(), "line": line,
+                        "type": "annotated_upstream", "subject": iri})
     return out
 
 

@@ -1,0 +1,9 @@
+id: CQ-004
+question: A draft whose query would fail. Not run.
+status: draft
+depends_on: []
+examples: []
+query: |
+  ASK { obo:BFO_0000015 rdfs:subClassOf obo:BFO_0000002 }
+expect:
+  ask: true

@@ -1,6 +1,6 @@
 # Handoff — state of the template
 
-Written 2026-10-23, at the end of roadmap phase 1; §2 and §3 updated at the ends of phases 2 and 3. It is a snapshot: where this file and a
+Written 2026-10-23, at the end of roadmap phase 1; §2 and §3 updated at the ends of phases 2, 3 and 4. It is a snapshot: where this file and a
 test disagree, the test is right and this file is stale. In a project made from the
 template, init replaces this file with the project's own.
 
@@ -13,8 +13,8 @@ method with every project-specific value taken out, so a new BFO/CCO ontology re
 starts with them on its first commit. Its own project is a placeholder called `example`
 that exists so every check has something to run against. Phase 1 of
 [`docs/template/ROADMAP.md`](template/ROADMAP.md) — extract and generalize — is done; phase 2
-and phase 3 (the IRI linter) are done; phase 4 (realist shapes and competency questions) is
-next. The
+phase 3 (the IRI linter) and phase 4 (realist shapes, competency questions, examples) are
+done; phase 5 (reasoning and release, in its own CI job) is next. The
 repository is published, private and marked as a template, at
 https://github.com/Skreen5hot/Ontology-Template.
 
@@ -39,6 +39,15 @@ https://github.com/Skreen5hot/Ontology-Template.
   suggested, unknown ids, wrong-case ids, deprecated and redeclared upstream terms, dangling
   authored references; a parse failure exits 2. Run in CI, by a git hook, and by a Claude Code
   hook after each `.ttl` edit (`tests/test_iri_lint.py`).
+- **Realist shapes** (`shapes/realist_shapes.ttl`): anchored in BFO, no two disjoint
+  categories -- BFO's `AllDisjointClasses` included, through
+  `vendor/bfo/bfo-disjointness.ttl` -- domain and range fit, genus in the definition, one
+  asserted parent, complete headers, deprecations with a way forward; and a generated
+  annotation profile. Every constraint fires on its named fixture case, and no positive
+  control is reported (`tests/test_ontology_checks.py`).
+- **Competency questions** over **example instance data**, a right answer passing, a wrong
+  one failing, an expectation a query matching nothing would meet refused
+  (`tests/test_competency.py`). A fresh project has none, and the tool says so.
 - Everything the BCO's suite asserted about the layout contract, licensing, the SHACL ladder
   and the corpus digest, carried over and generalized.
 
@@ -58,7 +67,12 @@ https://github.com/Skreen5hot/Ontology-Template.
 - **The git hook is opt-in** (`git config core.hooksPath .githooks`); the Claude Code hook
   runs for any agent session in the repository, using `python` on the PATH. Both were run for
   real once (§4); neither can run in CI, so a change to either is re-run by hand.
-- **No reasoner, no release artefacts, no realist shapes, no site.** Phases 4–8.
+- **The realist shapes check asserted triples, not entailments.** BFO's relations give
+  their domains and ranges as unions, which the extract drops, so the domain/range checks
+  run only on relations with a named domain or range. A reasoner (phase 5) is what finds an
+  unsatisfiable class the triples do not spell out.
+- **No reasoner, no release artefacts, no vocabulary layer or crosswalks, no site.**
+  Phases 5–8.
 
 ## 4. Evidence outside the suite
 

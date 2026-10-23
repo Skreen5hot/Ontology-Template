@@ -1,0 +1,7 @@
+id: CQ-105
+question: No query at all.
+status: answerable
+depends_on: []
+examples: []
+expect:
+  ask: true

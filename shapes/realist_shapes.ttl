@@ -1,0 +1,296 @@
+@prefix sh:      <http://www.w3.org/ns/shacl#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix rs:      <https://fandaws.com/ontology/example/shapes/realist#> .
+
+# What a realist BFO/CCO ontology must be, asked of every authored term.
+#
+# The wellformedness set asks whether a term is labelled and defined.
+# This one asks whether it is placed: anchored in BFO, under one asserted
+# parent, under no two categories that cannot share an instance, defined
+# by its genus, and used with relations whose domains and ranges it fits.
+#
+# SCOPE
+#
+# Authored terms only -- the targets filter on the project namespace,
+# https://fandaws.com/ontology/example#, which tools/init_project.py writes
+# here -- validated over the authored modules plus the vendored BFO and
+# CCO extracts and BFO's derived disjointness. The chains the constraints
+# walk run through those files; without them every class would "reach no
+# BFO category", and the report would describe the scope.
+#
+# SEVERITY, AND WHY THERE ARE TWO CLASS SHAPES
+#
+# sh:Violation for what is wrong: no anchor, disjoint categories, a
+# filler or bearer disjoint with what the relation allows, an
+# incomplete ontology header, a deprecation with no way forward.
+# sh:Warning for what a reviewer should look at: a second asserted
+# parent (BCO's spec asserts one on purpose), a definition that does not
+# name its genus, a filler or bearer not known to fit. The gate counts
+# violations; warnings are reported.
+#
+# Severity is a property of a shape, not of a SPARQL constraint: pyshacl
+# gives every sh:sparql result the severity of the node shape holding
+# it. The first draft put sh:severity sh:Warning on four constraints
+# inside one node shape, and every one of them was reported as a
+# Violation. So the warnings live in a node shape of their own, with the
+# same target.
+#
+# HOW THE QUERIES ARE WRITTEN
+#
+# Every query binds $this in a triple pattern before any FILTER. A query
+# whose WHERE is filters alone is evaluated oddly by rdflib when $this is
+# pre-bound, as pyshacl does: `{ FILTER(false) }` returned a row for every
+# focus node, found by a mutation meant to make a constraint fire on none.
+# The constraints here were right as written, but they should not depend
+# on how a filter-only group is evaluated.
+#
+# Each property path sits in the same block as the pattern that binds its
+# subject, alternatives are path alternatives rather than UNION, and the
+# FILTERs come last. rdflib evaluates a block separated by a FILTER or a
+# UNION on its own: written the obvious way, `?filler rdfs:subClassOf* ?x`
+# ran with ?filler unbound -- every node in the graph, at zero length --
+# and the range check did not finish in sixty seconds on the fixture. In
+# this form it takes under a second.
+#
+# WHAT IT CANNOT SEE
+#
+# BFO 2020's relations declare their domains and ranges as unions, which
+# the extract drops, so the domain/range checks evaluate only relations
+# with a named domain or range -- CCO's and the project's. Inheritance of
+# a range from a super-property is not followed. These are structural
+# checks over asserted triples, not reasoning: phase 5's ELK job is what
+# finds an unsatisfiable class the triples do not spell out.
+
+rs:prefixes
+    a owl:Ontology ;
+    sh:declare
+        [ sh:prefix "rdfs"    ; sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ] ,
+        [ sh:prefix "owl"     ; sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ] ,
+        [ sh:prefix "skos"    ; sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ] ,
+        [ sh:prefix "dcterms" ; sh:namespace "http://purl.org/dc/terms/"^^xsd:anyURI ] ,
+        [ sh:prefix "obo"     ; sh:namespace "http://purl.obolibrary.org/obo/"^^xsd:anyURI ] .
+
+
+# ---------------------------------------------------------------------
+# Authored classes: what is wrong (sh:Violation)
+# ---------------------------------------------------------------------
+
+rs:AuthoredClassPlacementShape
+    a sh:NodeShape ;
+    sh:severity sh:Violation ;
+
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT ?this WHERE {
+          ?this a owl:Class .
+          FILTER(STRSTARTS(STR(?this), "https://fandaws.com/ontology/example#"))
+        }""" ] ;
+
+    # Anchored. Everything in a realist ontology is an entity of some BFO
+    # kind; a class whose named parents lead nowhere is not yet one.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Class reaches no BFO category: no chain of named rdfs:subClassOf leads to obo:BFO_0000001 (entity)." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT $this WHERE {
+          $this a owl:Class .
+          FILTER NOT EXISTS { $this rdfs:subClassOf+ obo:BFO_0000001 }
+        }""" ] ;
+
+    # Disjoint categories. Read from every owl:disjointWith in scope: BFO's
+    # named pairs, the pairs derived from its AllDisjointClasses axioms,
+    # CCO's, and the project's own.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Class {$this} falls under {?a} and {?b}, which are declared disjoint: nothing can be both, so the class can have no instances." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT DISTINCT $this ?a ?b WHERE {
+          $this rdfs:subClassOf* ?a .
+          $this rdfs:subClassOf* ?b .
+          ?a owl:disjointWith ?b .
+        }""" ] ;
+
+    # Range: the filler of a restriction disjoint with what the relation
+    # relates to.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Class {$this} restricts {?property} to {?filler}, which is disjoint with the property's range {?range}." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT DISTINCT $this ?property ?filler ?range WHERE {
+          $this rdfs:subClassOf ?r .
+          ?r owl:onProperty ?property ;
+             owl:someValuesFrom|owl:allValuesFrom ?filler .
+          ?property rdfs:range ?range .
+          ?filler rdfs:subClassOf* ?x .
+          ?range rdfs:subClassOf* ?y .
+          ?x owl:disjointWith|^owl:disjointWith ?y .
+          FILTER(isIRI(?filler) && isIRI(?range))
+        }""" ] ;
+
+    # Domain: the restricted class disjoint with what the relation is said
+    # of.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Class {$this} is restricted on {?property}, whose domain {?domain} it is disjoint with." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT DISTINCT $this ?property ?domain WHERE {
+          $this rdfs:subClassOf ?r .
+          ?r owl:onProperty ?property .
+          ?property rdfs:domain ?domain .
+          $this rdfs:subClassOf* ?x .
+          ?domain rdfs:subClassOf* ?y .
+          ?x owl:disjointWith|^owl:disjointWith ?y .
+          FILTER(isIRI(?domain))
+        }""" ] .
+
+
+# ---------------------------------------------------------------------
+# Authored classes: what a reviewer should look at (sh:Warning)
+# ---------------------------------------------------------------------
+
+rs:AuthoredClassReviewShape
+    a sh:NodeShape ;
+    sh:severity sh:Warning ;
+
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT ?this WHERE {
+          ?this a owl:Class .
+          FILTER(STRSTARTS(STR(?this), "https://fandaws.com/ontology/example#"))
+        }""" ] ;
+
+    # Asserted single inheritance. A warning, because a deliberate second
+    # parent exists (the BCO's CD3 asserts disposition beside its CCO
+    # parent); usually it is a defined class written as a primitive one.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Class asserts more than one named parent. Asserted single inheritance is the realist default; a second parent is usually a defined class written as a primitive one." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT $this WHERE {
+          $this rdfs:subClassOf ?p1, ?p2 .
+          FILTER(isIRI(?p1) && isIRI(?p2) && STR(?p1) < STR(?p2))
+        }""" ] ;
+
+    # Genus. "An X is a G that D": the definition names the parent it is
+    # placed under. Compared case-insensitively against the parent's
+    # untagged or English label.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "The definition of {$this} does not name its parent, \"{?label}\". A genus-differentia definition reads: a(n) <parent> that ..." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT $this ?label WHERE {
+          $this rdfs:subClassOf ?parent .
+          FILTER(isIRI(?parent))
+          ?parent rdfs:label ?label .
+          FILTER(LANG(?label) = "" || LANGMATCHES(LANG(?label), "en"))
+          FILTER EXISTS { $this skos:definition ?any }
+          FILTER NOT EXISTS {
+            $this skos:definition ?definition .
+            FILTER(CONTAINS(LCASE(STR(?definition)), LCASE(STR(?label))))
+          }
+        }""" ] ;
+
+    # Range: the filler not known to fall under it, and not known not to.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Class {$this} restricts {?property} to {?filler}, which is not known to fall under the property's range {?range}." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT DISTINCT $this ?property ?filler ?range WHERE {
+          $this rdfs:subClassOf ?r .
+          ?r owl:onProperty ?property ;
+             owl:someValuesFrom|owl:allValuesFrom ?filler .
+          ?property rdfs:range ?range .
+          FILTER(isIRI(?filler) && isIRI(?range))
+          FILTER NOT EXISTS { ?filler rdfs:subClassOf* ?range }
+          FILTER NOT EXISTS {
+            ?filler rdfs:subClassOf* ?x .
+            ?range rdfs:subClassOf* ?y .
+            ?x owl:disjointWith|^owl:disjointWith ?y .
+          }
+        }""" ] ;
+
+    # Domain: not known to fall under it, and not known not to.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Class {$this} is restricted on {?property}, whose domain {?domain} it is not known to fall under." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT DISTINCT $this ?property ?domain WHERE {
+          $this rdfs:subClassOf ?r .
+          ?r owl:onProperty ?property .
+          ?property rdfs:domain ?domain .
+          FILTER(isIRI(?domain))
+          FILTER NOT EXISTS { $this rdfs:subClassOf* ?domain }
+          FILTER NOT EXISTS {
+            $this rdfs:subClassOf* ?x .
+            ?domain rdfs:subClassOf* ?y .
+            ?x owl:disjointWith|^owl:disjointWith ?y .
+          }
+        }""" ] .
+
+
+# ---------------------------------------------------------------------
+# Deprecated authored terms
+# ---------------------------------------------------------------------
+
+rs:DeprecatedTermShape
+    a sh:NodeShape ;
+    sh:severity sh:Violation ;
+
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT ?this WHERE {
+          ?this owl:deprecated ?flag .
+          FILTER(LCASE(STR(?flag)) = "true")
+          FILTER(STRSTARTS(STR(?this), "https://fandaws.com/ontology/example#"))
+        }""" ] ;
+
+    # A deprecated term somebody still uses has to say where to go.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Deprecated term names neither a replacement (dcterms:isReplacedBy) nor a reason (skos:historyNote)." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT $this WHERE {
+          $this owl:deprecated ?flag .
+          FILTER NOT EXISTS { $this dcterms:isReplacedBy ?replacement }
+          FILTER NOT EXISTS { $this skos:historyNote ?reason }
+        }""" ] .
+
+
+# ---------------------------------------------------------------------
+# Ontology headers
+# ---------------------------------------------------------------------
+#
+# Every owl:Ontology the project publishes: under its IRI base, and not a
+# vendored extract's header (the vendoring tool writes those, about
+# somebody else's terms) or a shape file's prefix holder.
+
+rs:OntologyHeaderShape
+    a sh:NodeShape ;
+
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT ?this WHERE {
+          ?this a owl:Ontology .
+          FILTER(STRSTARTS(STR(?this), "https://fandaws.com/ontology/example"))
+          FILTER(!STRSTARTS(STR(?this), "https://fandaws.com/ontology/example/vendor/"))
+          FILTER(!STRSTARTS(STR(?this), "https://fandaws.com/ontology/example/shapes/"))
+        }""" ] ;
+
+    sh:property [ sh:path dcterms:title ; sh:minCount 1 ; sh:severity sh:Violation ;
+                  sh:message "Ontology header has no dcterms:title." ] ;
+    sh:property [ sh:path dcterms:license ; sh:minCount 1 ; sh:severity sh:Violation ;
+                  sh:message "Ontology header has no dcterms:license." ] ;
+    sh:property [ sh:path dcterms:creator ; sh:minCount 1 ; sh:severity sh:Violation ;
+                  sh:message "Ontology header has no dcterms:creator." ] ;
+    sh:property [ sh:path owl:versionIRI ; sh:minCount 1 ; sh:severity sh:Violation ;
+                  sh:message "Ontology header has no owl:versionIRI." ] ;
+    sh:property [ sh:path owl:versionInfo ; sh:minCount 1 ; sh:severity sh:Violation ;
+                  sh:message "Ontology header has no owl:versionInfo." ] .

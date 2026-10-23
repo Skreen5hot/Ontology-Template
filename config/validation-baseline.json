@@ -3,6 +3,12 @@
   "generated_by": "tools/ontology/validate.py",
   "note": "Findings this repository is known to carry. The gate requires reality to match: more is a regression, fewer means re-record so the reduction appears in a diff. These are defects in the ontology, not in the tools.",
   "rungs": {
+    "validation.annotation-profile": {
+      "authored_findings": 0
+    },
+    "validation.realist": {
+      "authored_findings": 0
+    },
     "validation.wellformedness": {
       "authored_findings": 0
     }

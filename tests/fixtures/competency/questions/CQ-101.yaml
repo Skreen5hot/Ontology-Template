@@ -1,0 +1,10 @@
+id: CQ-101
+question: Wrong answer -- the process is expected where the material entity is.
+status: answerable
+depends_on: [obo:BFO_0000040]
+examples: [examples/widgets.ttl]
+query: |
+  SELECT ?thing WHERE { ?thing a obo:BFO_0000040 }
+expect:
+  rows:
+    - [eg:assembly-1]

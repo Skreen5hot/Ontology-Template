@@ -1,0 +1,9 @@
+id: CQ-106
+question: Depends on a CCO id no pinned release has.
+status: answerable
+depends_on: [cco:ont99999999]
+examples: []
+query: |
+  ASK { ?x a cco:ont99999999 }
+expect:
+  ask: true

@@ -19,5 +19,7 @@
 <https://fandaws.com/ontology/example> a owl:Ontology ;
     dcterms:title "Example Ontology" ;
     dcterms:license <https://opensource.org/licenses/MIT> ;
+    dcterms:creator "Aaron Damiano" ;
+    owl:versionIRI <https://fandaws.com/ontology/example/0.0.0> ;
     owl:versionInfo "0.0.0" ;
     rdfs:comment "A placeholder project. The template repository carries it so that every check has something to run against; init replaces it." .

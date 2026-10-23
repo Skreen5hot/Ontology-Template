@@ -1,0 +1,10 @@
+id: CQ-003
+question: What takes part in which process?
+status: answerable
+depends_on: [obo:BFO_0000057]
+examples: [examples/widgets.ttl]
+query: |
+  SELECT ?process ?thing WHERE { ?process obo:BFO_0000057 ?thing }
+expect:
+  includes:
+    - [eg:assembly-1, eg:widget-1]

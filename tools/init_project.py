@@ -73,13 +73,14 @@ RENDERED = {
 
 #: Roles whose Turtle carries the namespace or the prefix.
 TURTLE_ROLES = ("ontology-module", "ontology-module-set",
-                "ontology-validation", "test-fixture")
+                "ontology-validation", "test-fixture", "example-data")
 
 MARK_BEGIN = "  # >>> template-only"
 MARK_END = "  # <<< template-only"
 
 GENERATORS = (
     ("tools/ontology/vendor_upstream.py", "--rebuild"),
+    ("tools/ontology/profile_shapes.py",),
     ("tools/ontology/corpus_digest.py", "-o", "config/corpus-digest.json"),
     ("tools/ontology/validate.py", "--record"),
 )
@@ -198,6 +199,9 @@ def turtle(text: str, old: dict, new: dict) -> str:
     text = text.replace("# %s --" % old["title"], "# %s --" % new["title"])
     text = text.replace('"%s"' % old["description"],
                         '"%s"' % new["description"].replace('"', "'"))
+    text = text.replace('dcterms:creator "%s"' % old["licence_holder"],
+                        'dcterms:creator "%s"'
+                        % new["licence_holder"].replace('"', "'"))
     return text
 
 

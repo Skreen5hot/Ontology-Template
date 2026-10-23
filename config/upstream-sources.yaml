@@ -65,6 +65,14 @@
 # linter reads it to tell a real term from a mistyped one and to suggest
 # the opaque IRI for a readable name. Declare it in the layout contract
 # as `vendored-register`.
+#
+# DISJOINTNESS
+#
+# `disjointness`, for a source that states owl:AllDisjointClasses, is
+# where those axioms are written out as pairwise owl:disjointWith -- they
+# are blank-node lists, which the extract drops. BFO needs it; CCO's
+# copies of BFO's axioms are credited to BFO. The vendoring tool refuses a
+# source that asserts such axioms over vendored terms and names no file.
 
 version: 1
 
@@ -82,6 +90,7 @@ sources:
     select: all
     extract: vendor/bfo/bfo-core-extract.ttl
     register: vendor/bfo/bfo-register.json
+    disjointness: vendor/bfo/bfo-disjointness.ttl
     licence:
       spdx: CC-BY-4.0
       url: https://creativecommons.org/licenses/by/4.0/

@@ -35,4 +35,4 @@ Common Core Ontologies v2.0. Copyright (c) 2017 CUBRC, Inc., licensed BSD-3-Clau
 - commit: `510dad76be0ef710b65a421075af912af25342b7`
 - licence: BSD-3-Clause -- https://github.com/CommonCoreOntology/CommonCoreOntologies/blob/510dad76be0ef710b65a421075af912af25342b7/LICENSE
 - as stated by the source: BSD 3-Clause: https://github.com/CommonCoreOntology/CommonCoreOntologies/blob/master/LICENSE
-- 1 terms in full, 1 stubs, 1 axioms dropped
+- 2 terms in full, 1 stubs, 1 axioms dropped

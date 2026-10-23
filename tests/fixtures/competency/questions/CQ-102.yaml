@@ -1,0 +1,10 @@
+id: CQ-102
+question: Matches nothing -- there is no quality in the scenario.
+status: answerable
+depends_on: [obo:BFO_0000019]
+examples: [examples/widgets.ttl]
+query: |
+  SELECT ?thing WHERE { ?thing a obo:BFO_0000019 }
+expect:
+  rows:
+    - [eg:widget-1]

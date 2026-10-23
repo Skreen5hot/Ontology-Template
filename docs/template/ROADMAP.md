@@ -21,7 +21,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 1 | Extract and generalize the core | **done** (gate held 2026-10-23) |
 | 2 | Upstreams: several files per source, sister ontologies, the upstream register | **done** (network `--confirm` passed on GitHub, run 40012716769) |
 | 3 | IRI lint, ported from IRI_Linter | **done** |
-| 4 | Realist shape library and competency questions | not started |
+| 4 | Realist shape library and competency questions | **done** |
 | 5 | Reasoning and release (ROBOT, own CI job) | not started |
 | 6 | Authoring ergonomics, the vocabulary and governance layer, crosswalks, the research record | not started |
 | 7 | Public site and its Pages workflow, generalized | not started |
@@ -138,6 +138,34 @@ controls conform. Fixtures that need BFO in scope load the BFO extract. A compet
 question with a wrong expected answer fails the check, and one whose query matches nothing
 is refused rather than passed. An example individual typed with a class nothing declares is
 refused.
+
+Built 2026-10-23. What changed from the plan, and why:
+
+- **Derived disjointness.** BFO states the disjointness a realist check leans on hardest --
+  independent, specifically dependent and generically dependent continuant; process and
+  the regions -- only as five `owl:AllDisjointClasses` axioms, blank-node lists the extract
+  drops. Without more, "no class under two disjoint categories" could never catch its own
+  headline case. The vendoring tool now writes `vendor/bfo/bfo-disjointness.ttl`: those
+  axioms as the 21 pairwise `owl:disjointWith` triples they are equivalent to, labelled as
+  derived. A test shows the independent/dependent case passes without that file and fails
+  with it.
+- **"Upstream terms not annotated" is a linter rule, not a shape** (`annotated_upstream`):
+  a shape sees the merged graph and cannot tell an authored triple from a vendored one.
+- **Severity belongs to a shape.** pyshacl ignores `sh:severity` on a SPARQL constraint
+  node; the first draft's four warnings all came out as violations, and the fixture run
+  showed it. Warnings now live in a node shape of their own, and the ladder reports them
+  without gating them.
+- **No competency-question baseline.** `status` already says which questions are expected
+  to pass; an answerable question that fails is a failure, and a known gap is a `draft`.
+- **The annotation profile is its own file** (`config/annotation-profile.yaml`), generating
+  `shapes/annotation_profile_shapes.ttl`; default, CCO's *definition source*, as a warning.
+- **Fixtures run with the extracts in scope**, so a fixture class can sit under a real BFO
+  category.
+- **Query shape.** The first range check did not finish in 60 seconds: a property path
+  separated from its binding pattern by a FILTER ran over every node. Rewritten; the ladder
+  takes about 17 seconds. And a WHERE made only of filters, with `$this` pre-bound, is
+  evaluated oddly by rdflib (`{ FILTER(false) }` returned every focus node), so every
+  constraint binds `$this` in a triple pattern first.
 
 ## 5. Reasoning and release
 

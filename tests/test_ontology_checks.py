@@ -169,6 +169,7 @@ def test_the_violations_are_attributed_to_whose_terms_they_are(validation):
     for name, rung in validation["rungs"].items():
         corpus = rung["corpus"]
         assert (corpus["against_authored_terms"]
+                + corpus["warnings_against_authored_terms"]
                 + corpus["against_vendored_terms"]
                 == corpus["violations"]), (name, corpus)
         assert corpus["against_vendored_terms"] == 0, (
@@ -405,3 +406,155 @@ def test_the_committed_digest_is_the_one_the_tool_produces(digest, repo):
     assert (recorded["merged"]["blank_nodes"]["shape_sha256"]
             == digest["merged"]["blank_nodes"]["shape_sha256"])
     assert recorded["scope"]["paths"] == digest["scope"]["paths"]
+
+
+# -------------------------------------------------- the realist library
+
+
+#: Every realist constraint, by the start of its message, and the fixture
+#: class built to trip it. Named, not counted.
+REALIST_CASES = {
+    "Class reaches no BFO category": ("Unanchored", "Violation"),
+    "Class asserts more than one named parent": ("TwoParents", "Warning"),
+    "falls under": ("ContinuantAndOccurrent", "Violation"),
+    "does not name its parent": ("VagueDefinition", "Warning"),
+    "which is disjoint with the property's range": ("RangeDisjoint",
+                                                    "Violation"),
+    "which is not known to fall under the property's range": (
+        "RangeUnknown", "Warning"),
+    "it is disjoint with": ("DomainDisjoint", "Violation"),
+    "it is not known to fall under": ("DomainUnknown", "Warning"),
+    "Deprecated term names neither": ("DeprecatedNoWayForward",
+                                      "Violation"),
+    "Ontology header has no dcterms:license": (
+        "realist-incomplete-header", "Violation"),
+    "Ontology header has no dcterms:creator": (
+        "realist-incomplete-header", "Violation"),
+    "Ontology header has no owl:versionIRI": (
+        "realist-incomplete-header", "Violation"),
+    "Ontology header has no owl:versionInfo": (
+        "realist-incomplete-header", "Violation"),
+}
+
+REALIST_CONTROLS = ("RealistGood", "RealistGoodChild",
+                    "RealistGoodRestriction",
+                    "RealistDeprecatedWithReplacement",
+                    "realist-complete-header")
+
+
+def results_for(validation, rung, focus_name):
+    out = []
+    for v in validation["rungs"][rung]["fixture"]["detail"]:
+        focus = v["focus"] or ""
+        if focus.endswith("#" + focus_name) or focus.endswith("/" + focus_name):
+            out.append(v)
+    return out
+
+
+def test_every_realist_constraint_fires_on_its_case(validation):
+    detail = validation["rungs"]["validation.realist"]["fixture"]["detail"]
+    assert len(detail) < 300, (
+        "the fixture detail is at its cap; a constraint could be hidden")
+    for message, (case, severity) in REALIST_CASES.items():
+        hits = [v for v in results_for(validation, "validation.realist", case)
+                if message in v["message"]]
+        assert hits, "%r did not fire on %s" % (message, case)
+        assert {v["severity"] for v in hits} == {severity}, (
+            message, case, {v["severity"] for v in hits})
+
+
+def test_the_realist_positive_controls_are_not_reported(validation):
+    for case in REALIST_CONTROLS:
+        for rung in ("validation.realist", "validation.annotation-profile",
+                     "validation.wellformedness"):
+            assert results_for(validation, rung, case) == [], (rung, case)
+
+
+def test_a_warning_is_reported_and_not_gated(validator):
+    """The constructed case: a rung whose corpus has only warnings is not
+    a regression against a baseline of zero."""
+    record = {"rungs": {"a": {
+        "evaluable": True, "can_still_fail": True,
+        "blocked_by_missing_vocabulary": [],
+        "corpus": {"against_authored_terms": 0,
+                   "warnings_against_authored_terms": 5,
+                   "against_vendored_terms": 0}}}}
+    assert validator.compare(record,
+                             {"rungs": {"a": {"authored_findings": 0}}}) == []
+
+
+def test_independent_and_dependent_is_caught_only_through_derived_disjointness(
+        validator, layout):
+    """BFO says independent and specifically dependent continuant are
+    disjoint only in an owl:AllDisjointClasses axiom, which the extract
+    drops. The derived disjointness file is what lets a shape see it:
+    run without that file, the case passes; with it, it fails on exactly
+    that pair."""
+    from pyshacl import validate as shacl
+    import rdflib
+
+    derived = layout.path("vendor.bfo-disjointness")
+    fixture = layout.path("fixture.realist-bad-examples")
+    shapes = validator.load([layout.path("validation.realist")])
+    others = [p for p in layout.vendored_files() if p != derived]
+
+    def disjoint_findings(paths):
+        data = validator.load([fixture] + paths)
+        report = validator.run(data, shapes)
+        return [v for v in report["violations"]
+                if (v["focus"] or "").endswith("#IndependentAndDependent")
+                and "falls under" in v["message"]]
+
+    without = disjoint_findings(others)
+    with_it = disjoint_findings(others + [derived])
+    assert without == [], without
+    assert len(with_it) == 1, with_it
+    assert ("BFO_0000004" in with_it[0]["message"]
+            and "BFO_0000020" in with_it[0]["message"]), with_it[0]["message"]
+
+
+def test_the_profile_shapes_are_what_the_profile_generates(repo):
+    tool = load_tool("t_profile", "tools/ontology/profile_shapes.py")
+    assert tool.main(["--check"]) == 0
+
+
+def test_the_profile_refuses_a_property_nobody_defines(tmp_path, monkeypatch):
+    tool = load_tool("t_profile_refuse", "tools/ontology/profile_shapes.py")
+    real = tool.upstream_terms
+    (tmp_path / "config").mkdir()
+    for text, expect in (
+        ("annotations:\n  - property: https://www.commoncoreontologies.org/"
+         "ont99999999\n    label: x\n    severity: warning\n    why: y\n",
+         "not a term of any pinned upstream"),
+        ("annotations: []\n", "lists no annotation"),
+        ("annotations:\n  - property: http://purl.org/dc/terms/source\n"
+         "    label: x\n    severity: fatal\n    why: y\n",
+         "is not violation or warning"),
+    ):
+        (tmp_path / "config/annotation-profile.yaml").write_text(
+            text, encoding="utf-8")
+        monkeypatch.setattr(tool, "upstream_terms", lambda root: real(
+            tool.layout.repository_root()))
+        with pytest.raises(SystemExit) as error:
+            tool.profile(tmp_path)
+        assert expect in str(error.value), (expect, str(error.value))
+
+
+def test_every_profile_annotation_fires_on_the_fixture(validation):
+    hits = results_for(validation, "validation.annotation-profile",
+                       "NoDefinitionSource")
+    assert hits and all(v["severity"] == "Warning" for v in hits), hits
+
+
+def test_warnings_and_violations_are_split_on_a_real_report(validation,
+                                                           validator):
+    """The split the gate depends on, run on the realist fixture's own
+    results: the vague definition is a warning, the unanchored class a
+    violation, and the warning is not among what the gate would count."""
+    detail = validation["rungs"]["validation.realist"]["fixture"]["detail"]
+    violations, warnings, _upstream = validator.partition(detail)
+    def foci(rows):
+        return {(r["focus"] or "").rsplit("#", 1)[-1] for r in rows}
+    assert "Unanchored" in foci(violations)
+    assert "VagueDefinition" in foci(warnings)
+    assert "VagueDefinition" not in foci(violations)

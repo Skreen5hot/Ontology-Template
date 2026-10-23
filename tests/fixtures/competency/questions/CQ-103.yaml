@@ -1,0 +1,9 @@
+id: CQ-103
+question: An empty expectation, which a query matching nothing would meet.
+status: answerable
+depends_on: [obo:BFO_0000019]
+examples: [examples/widgets.ttl]
+query: |
+  SELECT ?thing WHERE { ?thing a obo:BFO_0000019 }
+expect:
+  rows: []

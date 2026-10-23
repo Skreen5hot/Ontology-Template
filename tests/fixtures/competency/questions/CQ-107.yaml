@@ -1,0 +1,9 @@
+id: CQ-999
+question: An id that is not its filename.
+status: answerable
+depends_on: []
+examples: []
+query: |
+  ASK { obo:BFO_0000015 rdfs:subClassOf* obo:BFO_0000003 }
+expect:
+  ask: true

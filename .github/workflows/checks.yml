@@ -90,6 +90,12 @@ jobs:
       - name: Every IRI is a real term or a declared one
         run: python tools/ontology/iri_lint.py
 
+      # What the ontology must be able to answer. A fresh project has no
+      # questions, and says so; an answerable question with a wrong answer
+      # fails here.
+      - name: Every answerable competency question gives its answer
+        run: python tools/ontology/competency.py
+
       - name: The communications record follows its protocol
         run: python tools/communications.py
 

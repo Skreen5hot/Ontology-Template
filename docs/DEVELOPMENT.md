@@ -53,6 +53,8 @@ python tools/licensing/disposition.py --check # nothing unpublishable is tracked
 python tools/ontology/vendor_upstream.py      # the extracts cover what is named
 python tools/ontology/validate.py --gate      # no new ontology findings
 python tools/ontology/iri_lint.py             # every IRI is a real term or a declared one
+python tools/ontology/competency.py           # every answerable competency question gives its answer
+python tools/ontology/profile_shapes.py --check   # the profile shapes are what the profile generates
 python tools/communications.py                # the communications record follows its protocol
 python tools/template_status.py               # where this has diverged from the template
 python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsifications
@@ -68,6 +70,8 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `validate.py --gate` | a rung with more findings than `config/validation-baseline.json` records, a rung with fewer that has not been re-recorded, a shape set the fixture does not exercise, a rung blocked on missing vocabulary, a violation against a vendored term, and a rung the baseline does not mention |
 | `validate.py --record` | raising any recorded count without `--accept-regression "<why>"`. Lowering is always free |
 | `iri_lint.py` | an upstream IRI its pinned release does not have (`unverified`), a readable name where the upstream mints ids (`readable_label`, with the id suggested), an id in the wrong case (`case_mismatch`), a deprecated upstream term, an authored file typing an upstream term (`redeclared_upstream`), an authored IRI nothing declares (`dangling_ref`); and, as exit 2, a file it cannot read or parse |
+| `competency.py` | an answerable question whose query gives a different answer, or none where rows were expected; an expectation nothing can fail (`rows: []`, `count: 0`, `ask: false`); a question depending on a term nobody defines; an example file that does not exist or lies outside `examples/` |
+| `profile_shapes.py --check` | `shapes/annotation_profile_shapes.ttl` differing from what `config/annotation-profile.yaml` generates; a profile property no pinned upstream or W3C vocabulary defines |
 | `template_status.py --check` | in the template only: a manifest that does not describe the owned files. A project's divergence is reported, never refused |
 
 `validate.py` writes a report with `-o config/validation-report.json`. That file is
@@ -169,6 +173,8 @@ the licensing tool so the two cannot drift:
 | `vendored-register` | the list of every term a pinned upstream describes; its labels, so its licence; JSON, never loaded as ontology |
 | `third-party-reference` | somebody else's, **not** redistributable |
 | `site-source` | a public site's pages, copy and assets |
+| `example-data` | instance data the competency questions are answered against; linted, never in the digest or the ladder |
+| `competency-question` | one YAML file per question, run by `tools/ontology/competency.py` |
 | `communication` | the communications record |
 | `documentation`, `configuration`, `tool`, `project-licence` | as they sound |
 
@@ -207,6 +213,72 @@ List the new constraint messages by name in a test, as `WELLFORMEDNESS_CONSTRAIN
 A shape that filters on the project namespace must spell it exactly as
 `config/project.yaml` does; `tests/test_namespace.py` checks every `STRSTARTS` in every
 shape set.
+
+**Severity belongs to a shape, not to a SPARQL constraint.** pyshacl gives a `sh:sparql`
+result the severity of the node shape that holds it, so a warning needs a node shape of its
+own (see `rs:AuthoredClassReviewShape`). The gate counts `sh:Violation` results; warnings
+are reported beside them and never block.
+
+**Write SPARQL so each property path is in the block that binds its subject.** rdflib
+evaluates a group split by a `FILTER` or a `UNION` on its own; a `?x rdfs:subClassOf* ?y`
+there runs with `?x` unbound over every node in the graph. Use path alternatives (`|`, `^`)
+instead of `UNION`, and put filters last.
+
+---
+
+## The realist shapes
+
+`shapes/realist_shapes.ttl`, over the modules plus the vendored extracts:
+
+| Constraint | Severity |
+|---|---|
+| every authored class reaches `obo:BFO_0000001` through named `rdfs:subClassOf` | violation |
+| no class under two categories declared disjoint — BFO's named pairs, the pairs derived from its `owl:AllDisjointClasses`, CCO's, the project's | violation |
+| a restriction's filler not disjoint with the property's range, the restricted class not disjoint with its domain | violation |
+| the filler, or the class, not known to fall under that range or domain | warning |
+| one asserted named parent | warning |
+| the definition names the parent's label (genus–differentia) | warning |
+| a deprecated term names `dcterms:isReplacedBy` or a `skos:historyNote` | violation |
+| every ontology header under the IRI base has a title, licence, creator, version IRI and version info | violation |
+
+The disjointness the hardest check leans on — independent, specifically dependent and
+generically dependent continuant — BFO states only as `owl:AllDisjointClasses`, a blank-node
+list the extract drops. `vendor/bfo/bfo-disjointness.ttl` is those axioms written as the
+pairwise `owl:disjointWith` they are equivalent to, generated and labelled as derived.
+
+What it cannot see: BFO 2020's relations give their domains and ranges as unions, which
+the extract drops, so the domain and range checks run on relations with a named domain or
+range — CCO's and yours. These are checks over asserted triples, not reasoning.
+
+**Saying something about an upstream term** — a comment, a label, a parent on `cco:` or
+`obo:` IRI — is the IRI linter's `annotated_upstream`, not a shape: a shape sees the merged
+graph and cannot tell an authored triple from a vendored one.
+
+## The annotation profile
+
+`config/annotation-profile.yaml` lists what every authored class must carry beyond a label
+and a definition — by default CCO's *definition source* (`cco:ont00001754`), as a warning.
+Edit the YAML and regenerate; never the shapes:
+
+```bash
+python tools/ontology/profile_shapes.py
+```
+
+## Competency questions and examples
+
+What the ontology must be able to answer, as SPARQL with the answer it must give — one YAML
+file per question in `competency-questions/` (format in its README) — answered against the
+modules, the vendored extracts, and the instance files in `examples/` the question names.
+
+```bash
+python tools/ontology/competency.py           # run every answerable question
+python tools/ontology/competency.py --list    # every question and its status
+```
+
+Only `status: answerable` runs. An expectation a query matching nothing would meet —
+`rows: []`, `count: 0`, `ask: false` — is refused, not passed. Example individuals live in
+`<iri_base>/examples/` (`eg:` in queries), never in the ontology's namespace; the IRI linter
+checks their types like any module's.
 
 ---
 
@@ -277,6 +349,26 @@ made from.
 python tools/template_status.py                                 # what this project changed
 python tools/template_status.py --against ../Ontology-Template  # what the template changed since
 ```
+
+---
+
+## The ontology-pipeline layers, and where each lives here
+
+For someone who knows the layered pipeline associated with Jessica Talisman — controlled
+vocabulary, metadata schemas, taxonomy, thesaurus, ontology, knowledge graph. The layers
+coexist here rather than as numbered stages: in a realist ontology the `rdfs:subClassOf`
+tree under BFO is the classification of types, and a SKOS scheme is a vocabulary about
+terms, kept beside it rather than upstream of it. The reasoning, layer by layer, is in the
+template's roadmap.
+
+| Layer | Here |
+|---|---|
+| controlled vocabulary | the vocabulary intake, `vocabulary/terms.tsv` (template roadmap, phase 6) |
+| metadata schemas | SHACL in `shapes/`: wellformedness, the realist library, the annotation profile |
+| taxonomy | SKOS concept-scheme modules (phase 6); the OWL hierarchy is the ontology's own |
+| thesaurus | SKOS labels in concept schemes; SSSOM crosswalks in `mappings/` (phase 6) |
+| ontology | `ontology/`, with BFO and CCO vendored and pinned |
+| knowledge graph | `examples/` and `competency-questions/`; data-lifting pipelines belong in an application repository |
 
 ---
 

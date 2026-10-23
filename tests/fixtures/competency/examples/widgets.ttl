@@ -1,0 +1,10 @@
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix eg:  <{{iri_base}}/examples/> .
+
+# A scenario for the competency fixtures: one material entity, one
+# process it takes part in. Typed with BFO classes only, so the fixture
+# depends on no project term. Serves CQ-001, CQ-003, CQ-101, CQ-102.
+
+eg:widget-1 a obo:BFO_0000040 .
+eg:assembly-1 a obo:BFO_0000015 ;
+    obo:BFO_0000057 eg:widget-1 .

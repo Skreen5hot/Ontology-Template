@@ -1,0 +1,10 @@
+id: CQ-001
+question: Which material entities are there?
+status: answerable
+depends_on: [obo:BFO_0000040]
+examples: [examples/widgets.ttl]
+query: |
+  SELECT ?thing WHERE { ?thing a obo:BFO_0000040 }
+expect:
+  rows:
+    - [eg:widget-1]

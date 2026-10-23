@@ -1,0 +1,9 @@
+id: CQ-002
+question: Is a process an occurrent? Answered by the classes alone.
+status: answerable
+depends_on: [obo:BFO_0000015, obo:BFO_0000003]
+examples: []
+query: |
+  ASK { obo:BFO_0000015 rdfs:subClassOf* obo:BFO_0000003 }
+expect:
+  ask: true

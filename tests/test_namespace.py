@@ -180,12 +180,16 @@ def test_every_declared_prefix_is_authored_or_pinned(turtle, namespace,
 
 
 def test_the_sparql_inside_the_shapes_targets_the_current_namespace(
-        layout, namespace):
+        layout, namespace, project):
     """The vacuous-pass trap.
 
     A constraint that filters on a namespace prefix string still runs
     when the string is stale. It simply selects nothing, reports no
     violation, and is indistinguishable from a shape that holds.
+
+    A filter may name the namespace (a term target) or the IRI base (the
+    ontology-header target, which also selects module IRIs); either way it
+    must be this project's.
     """
     import rdflib
 
@@ -196,13 +200,13 @@ def test_the_sparql_inside_the_shapes_targets_the_current_namespace(
         for _s, _p, obj in graph:
             if not isinstance(obj, rdflib.Literal) or "STRSTARTS" not in str(obj):
                 continue
-            if namespace in str(obj):
+            if project.iri_base() in str(obj):
                 citing.append(entry.id)
             else:
                 pytest.fail(
                     "%s carries a SPARQL namespace filter that does not name "
                     "%s; it would run, match nothing, and report no "
-                    "violations:\n%s" % (entry.id, namespace, obj))
+                    "violations:\n%s" % (entry.id, project.iri_base(), obj))
 
     assert len(citing) >= 2, (
         "expected the wellformedness targets to name the namespace in their "

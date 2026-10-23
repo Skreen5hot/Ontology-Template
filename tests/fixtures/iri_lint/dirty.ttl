@@ -41,6 +41,9 @@ p:A9 a owl:Class ; rdfs:subClassOf obo:BFO_9999999 .              # expect: unve
 # redeclared_upstream: CCO's Organization, typed here
 cco:ont00001180 a owl:Class .                                     # expect: redeclared_upstream
 
+# annotated_upstream: saying something about CCO's UPC Barcode here
+cco:ont00000326 rdfs:comment "a note that belongs in CCO, not here" .   # expect: annotated_upstream
+
 # dangling_ref, in a restriction filler
 p:B1 a owl:Class ; rdfs:subClassOf [ a owl:Restriction ;
     owl:onProperty cco:ont00001986 ;

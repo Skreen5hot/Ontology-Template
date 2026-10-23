@@ -3,6 +3,11 @@
     "bfo": {
       "axioms_dropped_anonymous_object": 104,
       "commit": "044490fc5100ffed6df7d4d15cbc167698b6fdee",
+      "disjointness": "vendor/bfo/bfo-disjointness.ttl",
+      "disjointness_axioms": 5,
+      "disjointness_on_disk_matches": true,
+      "disjointness_pairs": 21,
+      "disjointness_sha256": "a4447e93b2024d8f93c06800cf0e35580ec097246fe08f984593272c43bdbfa5",
       "extract": "vendor/bfo/bfo-core-extract.ttl",
       "extract_on_disk_matches": true,
       "extract_sha256": "8bbeda8fe261f74e766fb186e51e9b28e1c42948403c66c776247f84e641ecd2",
@@ -95,7 +100,9 @@
         "http://purl.obolibrary.org/obo/BFO_0000223",
         "http://purl.obolibrary.org/obo/BFO_0000224"
       ],
-      "seed_terms_from_corpus_and_shapes": [],
+      "seed_terms_from_corpus_and_shapes": [
+        "http://purl.obolibrary.org/obo/BFO_0000001"
+      ],
       "select": "all",
       "source_files": [
         {
@@ -110,9 +117,14 @@
     "cco": {
       "axioms_dropped_anonymous_object": 1,
       "commit": "510dad76be0ef710b65a421075af912af25342b7",
+      "disjointness": null,
+      "disjointness_axioms": 0,
+      "disjointness_on_disk_matches": true,
+      "disjointness_pairs": 0,
+      "disjointness_sha256": null,
       "extract": "vendor/cco/cco-extract.ttl",
       "extract_on_disk_matches": true,
-      "extract_sha256": "05de764c43efb680672b9cc50bdc307396b787ec6d8d8da05c351df7d68589db",
+      "extract_sha256": "6deeea27246c7483c145f4e6c93af69d5fd1e365788cbab40c19ed67607c7ccc",
       "licence_as_stated_by_source": "BSD 3-Clause: https://github.com/CommonCoreOntology/CommonCoreOntologies/blob/master/LICENSE",
       "licence_spdx": "BSD-3-Clause",
       "licence_url": "https://github.com/CommonCoreOntology/CommonCoreOntologies/blob/510dad76be0ef710b65a421075af912af25342b7/LICENSE",
@@ -124,8 +136,12 @@
       "register_sha256": "6ae382fafc5b3b1098ec155bf8d5f956921a8219a282ccbda79f3ce22d61185c",
       "register_terms": 1995,
       "release": "v2.0-2024-11-06",
-      "seed_terms": [],
-      "seed_terms_from_corpus_and_shapes": [],
+      "seed_terms": [
+        "https://www.commoncoreontologies.org/ont00001754"
+      ],
+      "seed_terms_from_corpus_and_shapes": [
+        "https://www.commoncoreontologies.org/ont00001754"
+      ],
       "select": "named",
       "source_files": [
         {
@@ -134,8 +150,8 @@
         }
       ],
       "terms_declared_as_stubs": 1,
-      "terms_described_in_full": 1,
-      "triples": 32
+      "terms_described_in_full": 2,
+      "triples": 36
     }
   },
   "format_version": 1,
@@ -150,9 +166,9 @@
   "pins": "config/upstream-sources.yaml",
   "totals": {
     "dropped": 105,
-    "full": 77,
-    "seeds": 76,
-    "seeds_from_corpus_and_shapes": 0,
+    "full": 78,
+    "seeds": 77,
+    "seeds_from_corpus_and_shapes": 2,
     "seeds_from_specification": 0,
     "seeds_from_whole_sources": 76,
     "spec_terms_unresolved": 0,

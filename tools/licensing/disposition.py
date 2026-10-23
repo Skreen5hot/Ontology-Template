@@ -122,8 +122,9 @@ def vendored_sources() -> dict:
                               % (UPSTREAM_SOURCES, required,
                                  entry["extract"]))
         found[entry["extract"]] = entry
-        if entry.get("register"):
-            found[entry["register"]] = entry
+        for derived in ("register", "disjointness"):
+            if entry.get(derived):
+                found[entry[derived]] = entry
     return found
 
 
@@ -170,7 +171,8 @@ ADJUDICATIONS = "config/licensing-adjudications.yaml"
 CONTENT_ROLES = {"ontology-module", "ontology-module-set",
                  "ontology-validation", "test-fixture", "documentation",
                  "generated-artifact", "specification", "historical-draft",
-                 "site-source", "communication"}
+                 "site-source", "communication", "example-data",
+                 "competency-question"}
 
 #: Roles that are software rather than published content.
 SOFTWARE_ROLES = {"tool", "configuration"}

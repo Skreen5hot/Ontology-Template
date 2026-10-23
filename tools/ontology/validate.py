@@ -37,6 +37,19 @@ Loading the extracts creates the opposite risk, so violations are split
 by whose term the focus node is. A violation against an upstream IRI is a
 finding about the extract; only violations against terms this repository
 authored are findings about this ontology.
+
+The fixtures are validated with the extracts in scope too. A realist
+shape asks whether a class reaches a BFO category, or sits under two
+disjoint ones; a fixture loaded alone has no BFO to reach, and every case
+would fail for the wrong reason -- the positive controls included.
+
+SEVERITY
+
+A result of severity sh:Warning or sh:Info is reported, and is not a
+finding the gate counts. A warning that blocks a commit is a violation
+with a softer name; the realist library uses warnings for what a
+reviewer should look at (two asserted parents, a definition that does
+not name its genus) and violations for what is wrong.
 """
 
 from __future__ import annotations
@@ -101,7 +114,7 @@ def run(data, shapes) -> dict:
     conforms, results_graph, results_text = shacl(
         data_graph=data, shacl_graph=shapes, inference="none",
         abort_on_first=False, meta_shacl=False, advanced=True,
-        debug=False)
+        allow_warnings=True, debug=False)
 
     import rdflib
 
@@ -121,7 +134,11 @@ def run(data, shapes) -> dict:
             # identifies the constraint, so the digest is taken of that.
             "shape": (stable_shape(source, message) if source else None),
             "severity": str(severity).rsplit("#", 1)[-1] if severity else None,
-            "message": (str(message)[:200] if message else None),
+            # 600, not the 200 this was: a message with two or three full
+            # IRIs substituted in ran past 200 before the words saying
+            # which constraint it was, and the realist test could not find
+            # the range check in its own report.
+            "message": (str(message)[:600] if message else None),
         })
     violations.sort(key=lambda v: (v["shape"] or "", v["focus"] or ""))
     return {"conforms": bool(conforms), "violations": violations,
@@ -255,6 +272,24 @@ def passed_of(rungs: dict) -> bool:
                     for r in rungs.values() if r["evaluable"]))
 
 
+def partition(results: list) -> tuple[list, list, list]:
+    """(authored violations, authored warnings, against vendored terms).
+
+    A result whose focus node is an upstream term is a finding about the
+    vendored extract, not about this ontology; counting the two together
+    would let a defect in the extract be reported as a defect in the
+    corpus, and the reverse. Of the rest, only sh:Violation is a finding
+    the gate counts. Lifted out of `measure` so the split can be tested on
+    a real report rather than only on a constructed record.
+    """
+    upstream = [v for v in results
+                if v["focus"] and v["focus"].startswith(tuple(UPSTREAM))]
+    authored = [v for v in results if v not in upstream]
+    return ([v for v in authored if v["severity"] == "Violation"],
+            [v for v in authored if v["severity"] != "Violation"],
+            upstream)
+
+
 def measure() -> dict:
     root = layout.repository_root()
     scope = layout.ontology_files()
@@ -269,7 +304,7 @@ def measure() -> dict:
             "below would report a green result with nothing behind it")
 
     data = load(list(scope) + list(vendored))
-    bad = load(fixture_paths)
+    bad = load(list(fixture_paths) + list(vendored))
     vocabularies = unresolved_vocabularies(data)
     missing = sorted(name for name, info in vocabularies.items()
                      if not info["resolvable"])
@@ -281,15 +316,8 @@ def measure() -> dict:
         blocked = sorted(set(depends) & set(missing))
         corpus = run(data, shapes)
         against_fixture = run(bad, shapes)
-        # A violation whose focus node is an upstream term is a finding
-        # about the vendored extract, not about this ontology. Counting
-        # the two together would let a defect in the extract be reported
-        # as a defect in the corpus, and the reverse.
-        upstream_focus = [v for v in corpus["violations"]
-                          if v["focus"] and v["focus"].startswith(
-                              tuple(UPSTREAM))]
-        authored_focus = [v for v in corpus["violations"]
-                          if v not in upstream_focus]
+        authored_focus, authored_warnings, upstream_focus = partition(
+            corpus["violations"])
         rungs[name] = {
             "shapes": path.relative_to(root).as_posix(),
             "depends_on": depends,
@@ -303,8 +331,10 @@ def measure() -> dict:
                 "conforms": corpus["conforms"],
                 "violations": len(corpus["violations"]),
                 "against_authored_terms": len(authored_focus),
+                "warnings_against_authored_terms": len(authored_warnings),
                 "against_vendored_terms": len(upstream_focus),
                 "detail": authored_focus[:20],
+                "warning_detail": authored_warnings[:20],
                 "vendored_detail": upstream_focus[:10],
             },
             "fixture": {
@@ -314,12 +344,14 @@ def measure() -> dict:
                 # This list is the evidence that each constraint fires,
                 # and a cap short enough to hide one of them would make
                 # the falsification report a subset of itself.
-                "detail": against_fixture["violations"][:60],
+                "detail": against_fixture["violations"][:300],
             },
-            # The fixture conforming means the shapes did not fire on data
-            # built to break them, which is a broken check reporting
-            # success.
-            "can_still_fail": not against_fixture["conforms"],
+            # No result against the fixture means the shapes did not fire
+            # on data built to break them, which is a broken check
+            # reporting success. Counted as results rather than read from
+            # `conforms`, which allow_warnings makes true for a set whose
+            # fixture raises only warnings.
+            "can_still_fail": len(against_fixture["violations"]) > 0,
             "fixture_exercises_these_shapes":
                 len(against_fixture["violations"]) > 0,
         }
@@ -541,13 +573,14 @@ def main(argv=None) -> int:
             print("    %d reported violation(s) describe the scope, not the "
                   "ontology" % corpus["violations"])
             continue
-        print("    corpus  %-9s %d violation(s)  (%d authored, %d "
-              "vendored)"
+        print("    corpus  %-9s %d result(s)  (%d authored, %d warning(s), "
+              "%d vendored)"
               % ("conforms" if corpus["conforms"] else "VIOLATIONS",
                  corpus["violations"], corpus["against_authored_terms"],
+                 corpus["warnings_against_authored_terms"],
                  corpus["against_vendored_terms"]))
-        print("    fixture %-9s %d violation(s)  %s"
-              % ("conforms" if fixture["conforms"] else "rejected",
+        print("    fixture %-9s %d result(s)  %s"
+              % ("rejected" if rung["can_still_fail"] else "conforms",
                  fixture["violations"],
                  "" if rung["can_still_fail"]
                  else "<- the shapes did not fire on data built to break "
