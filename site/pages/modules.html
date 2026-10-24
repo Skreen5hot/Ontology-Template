@@ -1,0 +1,19 @@
+<h1>Modules</h1>
+<p class="lead">What is authored here, and what is taken from upstream.
+  Every title, count, namespace and digest on this page is read from the
+  files at build time.</p>
+
+<h2>Authored modules</h2>
+{{authored_modules}}
+
+<h2>Shapes</h2>
+<p>The SHACL constraints every authored term is checked against, each with a
+  fixture built to break it.</p>
+{{shape_sets}}
+
+<h2>Upstream extracts</h2>
+<p>Partial extracts of the ontologies this one builds on. They are not the
+  upstream ontologies: every axiom whose object is an anonymous class
+  expression is dropped, so these files cannot support a claim of
+  consistency with them. The reasoner runs over the full pinned files.</p>
+{{upstream_sources}}

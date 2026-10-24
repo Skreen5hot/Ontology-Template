@@ -1,0 +1,174 @@
+# Build the site, check it, and publish it to GitHub Pages -- when the
+# project says to.
+#
+# Carried from the Business Capability Ontology's pages.yml, which
+# carried it from BFO-Aligned ValueNet. The site is for external
+# validators: the terms, the competency questions, the status, and the
+# files, without cloning anything.
+#
+# A custom workflow rather than publishing a directory, because the site
+# has a build: the term index, the download manifest and the bundle are
+# generated, and serving a committed copy of them would let the pages and
+# the data they describe come from different commits.
+#
+# Every run builds, checks, and proves the build reproducible, whether or
+# not anything is published: a project finds out the site is broken when
+# it breaks, not on the day it decides to publish. Publishing is
+# `"publish": true` in site/content/site.json, read here, and nothing
+# else. It starts false, because a Pages site is public even when the
+# repository is private, and making one public is the project's decision.
+# Turning it on also needs Pages enabled in the repository's settings
+# (Settings > Pages > Source: GitHub Actions); docs/DEVELOPMENT.md says
+# how.
+#
+# Pull requests build and check without deploying, and upload the site as
+# a preview artifact. main deploys the artifact it just built -- not a
+# rebuild, so what is served is what the checks ran against.
+#
+# Actions are pinned to commit SHAs -- the same SHAs the BCO and the
+# Checks workflow use. A tag can be moved; a commit cannot.
+
+name: Pages
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Least privilege by default. The deploy job widens this for itself and
+# nothing else does.
+permissions:
+  contents: read
+
+# One deployment at a time, and never cancel one in flight: a cancelled
+# deploy can leave Pages serving a half-published artifact.
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build and check
+    runs-on: ubuntu-latest
+    # configure-pages reads the repository's Pages settings, which
+    # contents: read does not cover: the BCO's first run failed with
+    # "Resource not accessible by integration" at that step. Read only;
+    # the write is the deploy job's alone.
+    permissions:
+      contents: read
+      pages: read
+    outputs:
+      publish: ${{ steps.publish.outputs.publish }}
+    steps:
+      - name: Check out the full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install the pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+          python -m pip list
+
+      - name: Does the project publish its site?
+        id: publish
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          site = json.load(open("site/content/site.json", encoding="utf-8"))
+          print("publish=%s" % ("true" if site.get("publish") is True else "false"))
+          PY
+          cat "$GITHUB_OUTPUT"
+
+      - name: Run the site and licensing suites
+        run: python -m pytest tests/test_site.py tests/test_licensing.py tests/test_repository_layout.py -q -p no:randomly
+
+      - name: Build the site
+        run: python tools/site/build_site.py
+
+      - name: Check the built artifact
+        run: python tools/site/check_site.py
+
+      - name: Prove the build is reproducible on this runner
+        run: |
+          python tools/site/build_site.py -o _site_again
+          python - <<'PY'
+          import hashlib, pathlib, sys
+
+          def digest(root):
+              rows = []
+              for path in sorted(pathlib.Path(root).rglob("*")):
+                  if path.is_file():
+                      rows.append("%s %s" % (
+                          path.relative_to(root).as_posix(),
+                          hashlib.sha256(path.read_bytes()).hexdigest()))
+              return hashlib.sha256("\n".join(rows).encode()).hexdigest()
+
+          first, second = digest("_site"), digest("_site_again")
+          print("first  %s" % first)
+          print("second %s" % second)
+          if first != second:
+              sys.exit("two builds of this commit differ on this runner")
+          print("identical")
+          PY
+          rm -rf _site_again
+
+      - name: Record what is being built
+        run: |
+          python - <<'PY'
+          import json, pathlib
+
+          manifest = json.loads(
+              pathlib.Path("_site/data/downloads.json").read_text("utf-8"))
+          terms = json.loads(
+              pathlib.Path("_site/data/terms.json").read_text("utf-8"))
+          print("source commit :", manifest["source_commit"])
+          print("terms         :", terms["counts"])
+          print("bundle sha256 :", manifest["bundle"]["sha256"])
+          PY
+
+      - name: Configure Pages
+        if: steps.publish.outputs.publish == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+
+      - name: Upload the Pages artifact
+        if: steps.publish.outputs.publish == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: _site
+
+      - name: Upload a preview artifact
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: site-preview-${{ github.sha }}
+          path: _site
+          retention-days: 7
+
+  deploy:
+    name: Deploy to Pages
+    needs: build
+    if: needs.build.outputs.publish == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy the artifact the checks ran against
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
+
+      - name: Report the deployment
+        run: |
+          echo "commit ${{ github.sha }}"
+          echo "url    ${{ steps.deployment.outputs.page_url }}"

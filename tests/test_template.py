@@ -184,8 +184,9 @@ def test_the_dependabot_workflow_rerecords_the_manifest_and_nothing_else(repo):
     push = steps["Push the one-file commit"]["run"]
     assert "git add config/template-manifest.json" in push
     assert "git add -A" not in push and "git add ." not in push
-    rerun = steps["Run Checks and Reasoning on the new commit"]["run"]
-    assert "checks.yml" in rerun and "reasoning.yml" in rerun
+    rerun = steps["Run Checks, Reasoning and Pages on the new commit"]["run"]
+    for workflow_file in ("checks.yml", "reasoning.yml", "pages.yml"):
+        assert workflow_file in rerun, workflow_file
     text = (repo / ".github/workflows/dependabot-manifest.yml").read_text(
         encoding="utf-8")
     for forbidden in ("gh pr merge", "gh pr review", "--admin"):

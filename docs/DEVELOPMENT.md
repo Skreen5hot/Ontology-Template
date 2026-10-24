@@ -67,6 +67,7 @@ python tools/ontology/term_diff.py --base origin/main   # which terms this branc
 python tools/ontology/normalize.py --check    # modules declared canonical are canonical
 python tools/communications.py                # the communications record follows its protocol
 python tools/template_status.py               # where this has diverged from the template
+python tools/site/build_site.py && python tools/site/check_site.py   # the public site builds and holds
 python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsifications
 ```
 
@@ -489,6 +490,51 @@ The header's ontology IRI is `<iri_base>/<id>-base` (or `-full`), the version IR
 come from the main module's header. To build locally: `python tools/release.py --version
 1.2.0` (into `dist/`, gitignored). RDF/XML and JSON-LD are written by the tool, flat and
 sorted, because rdflib's writers for both are not deterministic across processes.
+
+---
+
+## The public site
+
+`python tools/site/build_site.py` builds it into `_site/` (gitignored); `python
+tools/site/check_site.py` checks what was built. To look at it locally, serve the
+directory, not the files -- every link is relative, and a browser opening `index.html` from
+disk will not run the explorer's scripts: `python -m http.server -d _site 8000`.
+
+| Page | Read from |
+|---|---|
+| Home, Status | the project file, the term counts, the validation baseline, the lint and competency results, `docs/decisions/`, the latest `v*` tag |
+| Explore | every authored term and every upstream term, as `data/terms.json`; category from the `rdfs:subClassOf` chain, never a name |
+| Modules, Downloads | the modules, the shape sets, the pins and the extracts, with checksums; a byte-reproducible bundle of the authored files |
+| Vocabulary | each authored `skos:ConceptScheme`, as a tree |
+| Competency | each question, its query, and its verdict at this commit |
+| Crosswalks | each SSSOM mapping set |
+| Releases | the `v*` tags reachable from the built commit |
+| Specification, Review | only when a component with role `specification` or `review` is declared; otherwise left out of the navigation |
+
+`site/content/site.json` holds only what a person chooses -- the tagline, the navigation
+labels, the reviewer guidance, the notices -- and no figure the build can read. The
+fragments in `site/pages/` and the assets in `site/src/` are the template's.
+
+**What the build refuses**: an authored term with no label or definition, or two in one
+language; a class reaching two unrelated BFO categories; a placeholder nothing fills; a page
+fragment no navigation entry names; an asset that is not `.css` or `.js`; and a source file
+with CRLF line endings, because the downloads are those bytes and would differ from CI's.
+**What the checker refuses**: a page without its structure (lang, one title, one `<h1>`,
+`<main id="main">`), a resource from another origin, an inline script or `on*` handler, a
+root-absolute or unresolved link or fragment, and a download or bundle that does not match
+its checksums.
+
+**Publishing.** The Pages workflow builds, checks and proves the build reproducible on every
+push and pull request (pull requests get the site as a preview artifact). It deploys only
+when `site/content/site.json` says `"publish": true`, which starts false: **a Pages site is
+public even when the repository is private.** To publish:
+
+1. Settings > Pages > Build and deployment > Source: **GitHub Actions**. (For a private
+   repository, Pages needs a plan that allows it.)
+2. Set `"publish": true` in `site/content/site.json`, and decide the notices: `draft.show`,
+   and `iri_resolution.resolve` once the namespace actually resolves.
+3. Merge to main. The deploy job publishes the artifact the checks ran against, at
+   `https://<owner>.github.io/<repository>/`.
 
 ---
 

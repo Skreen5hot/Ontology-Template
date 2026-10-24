@@ -1,0 +1,409 @@
+/* SPDX-License-Identifier: MIT
+ *
+ * Ontology site shell. Carried from the Business Capability Ontology.
+ *
+ * Carried from BFO-Aligned ValueNet, whose palette was contrast-checked in
+ * both themes and reviewed in four browser engines. Additions for this
+ * site are at the end, under their own heading, so the carried rules can
+ * be compared against ValueNet's file directly.
+ *
+ * No web font, no CDN, no third-party stylesheet: the site must work with no
+ * external request, and a font that fails to load must not change layout.
+ *
+ * Colours are declared as tokens so contrast can be checked in one place.
+ * Both themes are defined explicitly; a transparent body would borrow
+ * whatever the host paints behind it.
+ */
+
+:root {
+  --bg: #fbfbf9;
+  --surface: #ffffff;
+  --ink: #1b1c1a;
+  --ink-soft: #55574f;
+  --rule: #d9d8d0;
+  --accent: #3a5a40;
+  --accent-ink: #ffffff;
+  --notice-bg: #f4f1e8;
+  --focus: #1b4d89;
+  /* Declared, because an undeclared link takes the browser's default
+   * blue, and that default does not change with this palette: under the
+   * dark theme it was 1.9:1 against --bg, on every link in the page body. */
+  --link: #1b4d89;
+  /* --rule draws decorative separators, which WCAG exempts. The edge of a
+   * text input is not decorative: it is what tells a sighted user where the
+   * control is, so 1.4.11 asks 3:1 of it. --rule gives 1.43. */
+  --field-edge: #84867d;
+  --measure: 42rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #16171a;
+    --surface: #1e2024;
+    --ink: #e9e8e3;
+    --ink-soft: #b0b2ab;
+    --rule: #34363b;
+    --accent: #9dbfa4;
+    --accent-ink: #16171a;
+    --notice-bg: #232529;
+    --focus: #8ab4f8;
+    --link: #8ab4f8;
+    --field-edge: #767880;
+  }
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 1rem/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "Helvetica Neue", Arial, sans-serif;
+}
+
+/* Keyboard users need to reach content without walking the whole nav, and
+ * need to see where they are once they get there. */
+.skip {
+  position: absolute;
+  left: -9999px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  padding: 0.6rem 1rem;
+}
+.skip:focus { left: 0.5rem; top: 0.5rem; z-index: 10; }
+
+:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.masthead {
+  border-bottom: 1px solid var(--rule);
+  background: var(--surface);
+  padding: 1rem 1.25rem;
+}
+
+.wordmark { margin: 0 0 0.5rem; font-weight: 700; letter-spacing: 0.01em; }
+.wordmark a { color: inherit; text-decoration: none; }
+.wordmark a:hover { text-decoration: underline; }
+
+.masthead nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1.1rem;
+}
+
+.masthead nav a {
+  color: var(--ink-soft);
+  text-decoration: none;
+  padding: 0.2rem 0;
+  border-bottom: 2px solid transparent;
+}
+.masthead nav a:hover { color: var(--ink); text-decoration: underline; }
+.masthead nav a[aria-current="page"] {
+  color: var(--ink);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+main {
+  max-width: var(--measure);
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+}
+
+h1 { font-size: 1.9rem; line-height: 1.2; margin: 0 0 0.75rem; }
+h2 { font-size: 1.25rem; margin: 2rem 0 0.5rem; }
+
+.lead { font-size: 1.1rem; color: var(--ink-soft); margin: 0 0 1.5rem; }
+
+/* Links in running text. Visited links take the same colour: the
+ * browser's visited purple is no more legible on the dark ground than
+ * its blue. The underline is the browser's and is kept, so a link is
+ * never told from its sentence by colour alone. */
+main a, .footer a { color: var(--link); }
+
+/* An attributed statement. Marked off so that a first-person passage
+ * reads as one person's, on a site otherwise written impersonally. */
+.statement {
+  border-left: 3px solid var(--accent);
+  padding-left: 1rem;
+}
+.statement .byline { color: var(--ink-soft); font-size: 0.9rem;
+  margin: 0 0 0.75rem; }
+.statement p:last-child { margin-bottom: 0; }
+
+.reasons dt { font-weight: 650; margin-top: 1rem; }
+.reasons dd { margin: 0.25rem 0 0; color: var(--ink-soft); }
+
+.placeholder {
+  border: 1px dashed var(--rule);
+  border-radius: 6px;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+}
+.placeholder h2 { margin-top: 0; font-size: 1.05rem; }
+
+.footer {
+  border-top: 1px solid var(--rule);
+  background: var(--surface);
+  padding: 1.5rem 1.25rem;
+}
+
+.footer .notice,
+.footer .build {
+  max-width: var(--measure);
+  margin: 0 auto 0.75rem;
+  color: var(--ink-soft);
+  font-size: 0.9rem;
+}
+
+.footer .notice {
+  background: var(--notice-bg);
+  border-left: 3px solid var(--accent);
+  padding: 0.7rem 0.9rem;
+}
+
+.footer .build { margin-bottom: 0; }
+
+code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+}
+
+/* Wide content scrolls inside its own container; the page body never does. */
+.scroll-x { overflow-x: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---- Explorer ------------------------------------------------- */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  clip-path: inset(50%);
+  overflow: hidden; white-space: nowrap;
+}
+
+.notice-block {
+  border-left: 3px solid var(--accent);
+  background: var(--notice-bg);
+  padding: 0.75rem 1rem;
+}
+.notice-block h2 { margin-top: 0; font-size: 1.05rem; }
+
+.explorer-controls {
+  display: flex; flex-wrap: wrap; gap: 0.75rem 1rem;
+  align-items: flex-end;
+  margin: 1.25rem 0 0.5rem;
+}
+/* min-width: 0 lets the field shrink past its content. Without it a flex
+ * item refuses to go below its intrinsic width and the row overflows the
+ * body instead of wrapping. */
+.explorer-controls .field { display: flex; flex-direction: column;
+  min-width: 0; }
+.explorer-controls label {
+  font-size: 0.85rem; color: var(--ink-soft); margin-bottom: 0.15rem;
+}
+.explorer-controls input,
+.explorer-controls select,
+.explorer-controls button {
+  font: inherit;
+  padding: 0.4rem 0.55rem;
+  border: 1px solid var(--field-edge);
+  border-radius: 4px;
+  background: var(--surface);
+  color: var(--ink);
+}
+/* width, not min-width: min-width beats max-width when they disagree, so
+ * `min-width: 20rem; max-width: 100%` held the input at 320px inside a
+ * 280px column and scrolled the whole page sideways below a 360px
+ * viewport. */
+.explorer-controls input { width: 20rem; max-width: 100%; }
+.explorer-controls button { cursor: pointer; }
+
+.status { color: var(--ink-soft); font-size: 0.9rem; margin: 0.25rem 0; }
+
+/* Shown only while a class is selected. Visible rather than
+ * reveal-on-focus: on a narrow viewport the detail is below the whole
+ * result list for everyone, not only for keyboard users. */
+.jump-wrap { margin: 0.25rem 0 0.75rem; }
+.jump {
+  font: inherit; font-size: 0.9rem;
+  color: var(--ink); background: var(--surface);
+  border: 1px solid var(--field-edge); border-radius: 4px;
+  padding: 0.3rem 0.6rem; cursor: pointer;
+}
+
+.explorer-panes { display: grid; gap: 1.5rem; }
+@media (min-width: 60rem) {
+  .explorer-panes { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  main { max-width: 72rem; }
+}
+
+.results { list-style: none; margin: 0; padding: 0; }
+.results li { border-bottom: 1px solid var(--rule); }
+.results li:last-child { border-bottom: 0; }
+a.result {
+  display: block; padding: 0.65rem 0.5rem;
+  color: inherit; text-decoration: none;
+}
+a.result:hover { background: var(--notice-bg); }
+.result-label { font-weight: 650; }
+.result-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em; color: var(--ink-soft); margin-left: 0.5rem;
+}
+.result-meta {
+  display: block; font-size: 0.8rem; color: var(--ink-soft);
+}
+.result-definition { margin: 0.25rem 0 0; color: var(--ink-soft); }
+
+.detail-pane {
+  border: 1px solid var(--rule); border-radius: 6px;
+  padding: 1rem 1.1rem; background: var(--surface);
+}
+.detail-pane:focus-visible { outline: 3px solid var(--focus); }
+.detail-id {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: var(--ink-soft); margin-top: 0;
+}
+.detail-meta { display: grid; grid-template-columns: auto 1fr;
+  gap: 0.15rem 0.75rem; }
+.detail-meta dt { color: var(--ink-soft); }
+.detail-meta dd { margin: 0; }
+
+.iri-row { display: flex; flex-wrap: wrap; align-items: center;
+  gap: 0.5rem; margin: 0.5rem 0; }
+.iri-label { color: var(--ink-soft); font-size: 0.85rem; }
+.iri-value, .iri-inline {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85em; word-break: break-all;
+  user-select: all;
+}
+.copy { font: inherit; padding: 0.2rem 0.5rem; cursor: pointer;
+  border: 1px solid var(--field-edge); border-radius: 4px;
+  background: var(--surface); color: var(--ink); }
+.copy-result { font-size: 0.8rem; color: var(--ink-soft); }
+.map-predicate { font-weight: 600; margin-right: 0.4rem; }
+.muted { color: var(--ink-soft); }
+.empty, .error { padding: 0.75rem 0.5rem; color: var(--ink-soft); }
+.error { color: var(--ink); }
+
+/* ---- Diagrams and generated cards ----------------------------- */
+
+/* Diagrams scale with the column and inherit the theme. No fixed pixel
+ * width: the viewBox does the scaling, so one drawing serves a phone and
+ * a wide screen without a second asset. */
+.diagram {
+  width: 100%; height: auto;
+  max-width: 48rem;
+  margin: 1rem 0;
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  background: var(--surface);
+}
+.dg-box { fill: var(--surface); stroke: var(--field-edge); stroke-width: 1.5; }
+.dg-upstream { stroke-dasharray: 5 3; }
+.dg-label { fill: var(--ink); font-size: 14px; text-anchor: middle;
+  font-family: inherit; }
+.dg-sub, .dg-edge-label, .dg-col {
+  fill: var(--ink-soft); font-size: 11px; text-anchor: middle;
+  font-family: inherit;
+}
+.dg-col { font-size: 12px; font-weight: 600; }
+.dg-edge { stroke: var(--ink-soft); stroke-width: 1.5; fill: none; }
+.dg-dashed { stroke-dasharray: 6 4; }
+.dg-head { fill: var(--ink-soft); }
+
+.alt-text li { margin-bottom: 0.4rem; }
+
+.module-group { margin-bottom: 2.5rem; }
+.lead-small { color: var(--ink-soft); margin-top: 0; }
+.module-card {
+  border: 1px solid var(--rule); border-radius: 6px;
+  padding: 1rem 1.1rem; margin: 1rem 0; background: var(--surface);
+}
+.module-card h3 { margin-top: 0; }
+.module-facts { display: grid; grid-template-columns: max-content 1fr;
+  gap: 0.2rem 1rem; margin: 0.75rem 0; }
+.module-facts dt { color: var(--ink-soft); }
+.module-facts dd { margin: 0; overflow-wrap: anywhere; }
+.module-actions { margin-bottom: 0; }
+
+table.downloads { border-collapse: collapse; width: 100%; }
+table.downloads caption { text-align: left; color: var(--ink-soft);
+  font-size: 0.9rem; margin-bottom: 0.4rem; }
+table.downloads th, table.downloads td {
+  border-bottom: 1px solid var(--rule); padding: 0.4rem 0.6rem;
+  text-align: left; vertical-align: top;
+}
+table.downloads td.num, table.downloads th:nth-child(2) { text-align: right; }
+.digest { font-size: 0.8em; word-break: break-all; }
+
+
+/* ---------------------------------------------------------------------
+ * Additions made for the Business Capability Ontology, kept
+ *
+ * The specification and the review are long documents with wide tables,
+ * and the explorer has two panes; all three get a wider measure than the
+ * prose pages. Tables scroll inside their own box (.scroll-x, above), so
+ * a 700-pixel requirements table never makes the page itself scroll
+ * sideways on a phone.
+ * --------------------------------------------------------------------- */
+
+main.page-specification, main.page-review, main.page-explore,
+main.page-status, main.page-downloads { max-width: 64rem; }
+
+dl.facts { display: grid; grid-template-columns: max-content 1fr;
+           gap: 0.35rem 1rem; margin: 0.75rem 0 1.25rem; }
+dl.facts dt { color: var(--ink-soft); }
+dl.facts dd { margin: 0; overflow-wrap: anywhere; }
+@media (max-width: 36rem) {
+  dl.facts { grid-template-columns: 1fr; }
+  dl.facts dd { margin-bottom: 0.5rem; }
+}
+
+.doc table, main table { border-collapse: collapse; width: 100%;
+                         font-size: 0.92rem; }
+.doc th, .doc td, main th, main td {
+  border: 1px solid var(--rule); padding: 0.4rem 0.55rem;
+  text-align: left; vertical-align: top;
+}
+.doc thead th, main thead th { background: var(--notice-bg); }
+.doc h2 { border-top: 1px solid var(--rule); padding-top: 1.25rem; }
+.doc h3 { font-size: 1.05rem; margin: 1.5rem 0 0.4rem; }
+.doc code, main td code { overflow-wrap: anywhere; }
+
+.doc-toc { background: var(--notice-bg); border: 1px solid var(--rule);
+           padding: 0.75rem 1rem; margin: 1rem 0 2rem; }
+.doc-toc h2 { margin-top: 0; font-size: 1.05rem; }
+.doc-toc ul { margin: 0.25rem 0; padding-left: 1.1rem; }
+.doc-toc li { margin: 0.15rem 0; }
+
+ul.checklist, ul.term-list { list-style: none; padding-left: 0; }
+ul.checklist li { margin: 0.4rem 0; }
+ul.term-list { columns: 16rem auto; column-gap: 1.5rem; }
+ul.term-list li { break-inside: avoid; margin: 0.15rem 0; }
+table.rp td:first-child { white-space: nowrap; }
+
+
+/* ---------------------------------------------------------------------
+ * Template additions: the competency, crosswalk, vocabulary and release
+ * pages.
+ * --------------------------------------------------------------------- */
+
+/* A verdict is a word, not a colour: no new colour enters a palette whose
+ * contrast was checked without it. */
+.verdict { font-weight: 600; }
+ul.tree, ul.tree ul { list-style: none; padding-left: 1.25em; }
+ul.tree li { margin: 0.15em 0; }
+pre.query { overflow-x: auto; white-space: pre; }

@@ -18,8 +18,9 @@
 #               and vendoring tools read the pins and adjudications
 #   rdflib      reading the ontology without a reasoner
 #   pyshacl     the SHACL validation ladder
+#   Markdown    the site build renders a specification and reviews
 #
-# Markdown (the BCO's site build), jsonschema and owlrl are not pinned:
+# jsonschema and owlrl are not pinned:
 # nothing here imports them, and the rule is to take out a pin nothing
 # exercises. Add each back in the commit that adds what needs it.
 
@@ -27,3 +28,4 @@ pytest==9.1.1
 PyYAML==6.0.3
 rdflib==7.6.0
 pyshacl==0.40.1
+Markdown==3.11

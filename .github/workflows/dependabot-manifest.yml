@@ -18,13 +18,15 @@
 #   3. Re-records the manifest, and refuses to push if any file other than
 #      config/template-manifest.json changed.
 #   4. Pushes that one-file commit to the Dependabot branch, and starts the
-#      Checks and Reasoning workflows on it by hand. A push made with this
+#      Checks, Reasoning and Pages workflows on it by hand. A push made with this
 #      job's token starts no workflow -- GitHub's guard against loops --
 #      and workflow_dispatch is the documented exception. Without it the
 #      pull request would go on showing the old commit's failure.
 #
 # It does not approve or merge anything, and it does not make a broken
-# update pass: Checks and Reasoning run in full on the new commit.
+# update pass: Checks, Reasoning and Pages run in full on the new commit.
+# Pages dispatched on a branch builds and checks; it deploys from main
+# only.
 #
 # PERMISSIONS
 #
@@ -115,10 +117,11 @@ jobs:
             -m "The workflows and requirements-dev.txt are template-owned; this pin change made config/template-manifest.json stale. Re-recorded by .github/workflows/dependabot-manifest.yml, which changes nothing else."
           git push origin "HEAD:${{ github.head_ref }}"
 
-      - name: Run Checks and Reasoning on the new commit
+      - name: Run Checks, Reasoning and Pages on the new commit
         if: steps.record.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           gh workflow run checks.yml --ref "${{ github.head_ref }}"
           gh workflow run reasoning.yml --ref "${{ github.head_ref }}"
+          gh workflow run pages.yml --ref "${{ github.head_ref }}"

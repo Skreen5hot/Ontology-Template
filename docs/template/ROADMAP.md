@@ -24,7 +24,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 4 | Realist shape library and competency questions | **done** |
 | 5 | Reasoning and release (ROBOT, own CI job) | **done** |
 | 6 | Authoring ergonomics, the vocabulary and governance layer, crosswalks, the research record | **done** |
-| 7 | Public site and its Pages workflow, generalized | not started |
+| 7 | Public site and its Pages workflow, generalized | **done**; the template's own site is not deployed (see §7) |
 | 8 | Prove the template works end to end | not started |
 
 ## 1. Extract and generalize the core
@@ -273,6 +273,22 @@ it.
 
 **Gate:** the BCO's site tests, generalized, pass in the template and in an initialized
 copy; two builds are byte-identical; the workflow deploys the template's own site once.
+
+Built 2026-10-24. What changed from the plan:
+
+- **Deploying is opt-in**: `"publish"` in `site/content/site.json`, false to start. A Pages
+  site is public even for a private repository, so every run builds, checks and proves the
+  build reproducible, and only a project that has decided to publish deploys. The gate's
+  last clause -- deploying the template's own site -- waits on that decision for the
+  template, which is the architect's.
+- **The spec and review pages** are built from any component with role `specification` or
+  `review`; the suite builds them from stand-in components so a project without either still
+  has them tested.
+- **The explorer's ranking is run under Node** on the shipped file, where the BCO's suite
+  did not run it at all.
+- **The footer composes its notices** from the project file, the pins and `LICENSE`; the
+  curated file says only whether the site is a draft, whether IRIs resolve, and whom else to
+  credit.
 
 ## 8. Prove it
 

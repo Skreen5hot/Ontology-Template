@@ -1,0 +1,56 @@
+<h1>Explore terms</h1>
+<p class="lead">Search the authored terms and the upstream terms they build on,
+  by label, identifier, IRI and definition. Every field shown is extracted
+  from the ontology files. Upstream terms are marked as such.</p>
+
+{{explore_notice}}
+
+<noscript>
+  <section class="notice-block">
+    <h2>Search needs JavaScript</h2>
+    <p>This page searches a generated index in your browser, so the search
+      itself does not work with scripting disabled. Nothing else on the site
+      depends on it.</p>
+    <ul>
+      <li><a href="../modules/">Modules</a> &mdash; what each module covers.</li>
+      <li><a href="../downloads/">Downloads</a> &mdash; the canonical Turtle
+        files, which are the authoritative source.</li>
+      <li><a href="../data/terms.json">The term index itself</a> &mdash; the
+        same JSON this page reads.</li>
+    </ul>
+  </section>
+</noscript>
+
+<form class="explorer-controls" id="explorer-controls" hidden>
+  <div class="field">
+    <label for="q">Search</label>
+    <input type="search" id="q" name="q" autocomplete="off"
+           placeholder="label, identifier, IRI, definition">
+  </div>
+  <div class="field">
+    <label for="module">Module</label>
+    <select id="module" name="module"></select>
+  </div>
+  <div class="field">
+    <label for="category">Category</label>
+    <select id="category" name="category"></select>
+  </div>
+  <button type="button" id="clear">Clear</button>
+</form>
+
+<p class="status" id="status" role="status" aria-live="polite"></p>
+
+<p class="jump-wrap" id="jump-wrap" hidden><button class="jump"
+  id="jump" type="button">Jump to the selected term</button></p>
+
+<div class="explorer-panes">
+  <section aria-labelledby="results-heading" class="results-pane">
+    <h2 id="results-heading" class="visually-hidden">Results</h2>
+    <ol class="results" id="results"></ol>
+  </section>
+  <section aria-labelledby="detail-heading" class="detail-pane"
+           id="detail" tabindex="-1" hidden>
+    <h2 id="detail-heading">Term detail</h2>
+    <div id="detail-body"></div>
+  </section>
+</div>

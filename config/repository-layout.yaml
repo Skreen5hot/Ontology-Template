@@ -372,6 +372,60 @@ components:
       while the README said they were not redistributed, and the history
       had to be rewritten.
 
+  # ---- Public site -----------------------------------------------------
+  #
+  # Built by tools/site/build_site.py into _site/ (gitignored) and deployed
+  # by .github/workflows/pages.yml from the artifact the checks ran
+  # against. Nothing generated is committed. The fragments and assets are
+  # the template's; site.json is the project's own words.
+
+  - id: site.pages
+    path: site/pages
+    role: site-source
+    template: owned
+    description: >-
+      One body fragment per page, with {{placeholders}} the builder fills
+      from the repository. A placeholder nothing fills, and a fragment no
+      navigation entry names, stop the build.
+
+  - id: site.content
+    path: site/content
+    role: site-source
+    description: >-
+      The curated copy: tagline, navigation, notices, whether to publish,
+      and the words a person has to choose. Holds no figure the build can
+      derive.
+
+  - id: site.assets
+    path: site/src
+    role: site-source
+    template: owned
+    description: >-
+      Stylesheet and the explorer's two scripts, copied verbatim. Carried
+      from BFO-Aligned ValueNet through the Business Capability Ontology,
+      where they were contrast-checked and reviewed in four browser
+      engines; template additions are at the end of the stylesheet. Only
+      .css and .js are allowed here.
+
+  - id: tool.site-build
+    path: tools/site/build_site.py
+    role: tool
+    template: owned
+    description: >-
+      Builds the site deterministically: term index, downloads with
+      checksums, a byte-reproducible bundle, competency questions,
+      crosswalks, concept schemes, and the specification and review when
+      a project has them.
+
+  - id: tool.site-check
+    path: tools/site/check_site.py
+    role: tool
+    template: owned
+    description: >-
+      Checks the built artifact: page structure, no external resources,
+      every internal link and fragment resolving, downloads matching their
+      checksums, the bundle matching its SHA256SUMS.
+
   # ---- Communications ------------------------------------------------
 
   - id: communications

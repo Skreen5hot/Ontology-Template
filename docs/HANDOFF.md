@@ -1,6 +1,6 @@
 # Handoff — state of the template
 
-Written 2026-10-23, at the end of roadmap phase 1; §2 and §3 updated at the ends of phases 2 to 6. It is a snapshot: where this file and a
+Written 2026-10-23, at the end of roadmap phase 1; §2 and §3 updated at the ends of phases 2 to 7. It is a snapshot: where this file and a
 test disagree, the test is right and this file is stale. In a project made from the
 template, init replaces this file with the project's own.
 
@@ -15,7 +15,8 @@ that exists so every check has something to run against. Phase 1 of
 [`docs/template/ROADMAP.md`](template/ROADMAP.md) — extract and generalize — is done; phase 2
 phase 3 (the IRI linter), phase 4 (realist shapes, competency questions, examples) and
 phase 5 (reasoning and releases) and phase 6 (authoring aids, vocabulary and governance,
-crosswalks) are done; phase 7 (the public site) is next. The
+crosswalks) and phase 7 (the public site, built and checked, deployed only when a project
+sets `"publish": true`) are done; phase 8 (the end-to-end proof) is next. The
 repository is published, private and marked as a template, at
 https://github.com/Skreen5hot/Ontology-Template.
 
@@ -28,6 +29,10 @@ https://github.com/Skreen5hot/Ontology-Template.
 - **init works on a copy.** `tests/test_init_project.py` initializes throwaway copies and runs
   the copy's own layout, namespace, licensing, project and communications suites in it.
 - **Owned files name no project**, and the manifest describes them (`tests/test_template.py`).
+- **A public site**, built twice byte-identical, checked for structure, origins, links,
+  fragments and checksums, and refused on an undefined or doubly-labelled term; it builds in
+  an initialized copy naming the new project (`tests/test_site.py`,
+  `tests/test_init_project.py`).
 - **BFO is vendored whole** — 36 classes, 40 relations, every class reaching *entity*,
   continuant/occurrent disjointness kept — and **CCO by reference**
   (`tests/test_upstream_vendoring.py`).
@@ -91,9 +96,14 @@ https://github.com/Skreen5hot/Ontology-Template.
   first run is a project's first tag.
 - **ELK is OWL 2 EL.** Universal restrictions, cardinality and most unions are ignored by it;
   an unsatisfiability that depends on them is not found.
-- **Dependabot's pull requests are open and unmerged** (setup-python 7.1.0, setup-java
-  6.1.0): merging is a person's call.
-- **No site, and no end-to-end proof in CI.** Phases 7–8.
+- **Dependabot**: setup-java 6.1.0 (#3) is merged; setup-python 7.1.0 (#2) is held until
+  after 2026-11-05. `.github/workflows/dependabot-manifest.yml` re-records the template
+  manifest on Dependabot's pull requests; it has been rehearsed locally and has not yet run
+  on GitHub. Merging is a person's call.
+- **The template's own site is not deployed.** The Pages workflow builds and checks it on
+  every push; deploying it would make it public, which is the architect's call
+  (`"publish"` in `site/content/site.json`, and Pages enabled in the settings).
+- **No end-to-end proof in CI.** Phase 8.
 
 ## 4. Evidence outside the suite
 

@@ -229,9 +229,23 @@ def test_the_copy_passes_its_own_suite(initialized):
                     "tests/test_competency.py",
                     "tests/test_release.py", "tests/test_vocabulary.py",
                     "tests/test_authoring.py", "tests/test_mappings.py",
+                    "tests/test_site.py",
                     "-m", "not reasoning",
                     env_extra=env)
     assert code == 0, out[-3000:]
+    code, out = run(initialized, "tools/site/build_site.py",
+                    env_extra=env)
+    assert code == 0, out[-3000:]
+    code, out = run(initialized, "tools/site/check_site.py",
+                    env_extra=env)
+    assert code == 0, out[-3000:]
+    home = (initialized / "_site/index.html").read_text(encoding="utf-8")
+    # The site names the new project, from the project file, and nothing
+    # of the template's: no step of init touched the site.
+    assert "<title>Widget Works Ontology</title>" in home
+    assert "https://github.com/owner/Widget-Works/issues" in home
+    assert "Example Ontology" not in home
+    assert (initialized / "_site/downloads/widget-works-ontology.zip").is_file()
 
 
 # -------------------------------------------------------- refusals

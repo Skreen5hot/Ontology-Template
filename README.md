@@ -26,10 +26,11 @@ project on its first commit:
 | Crosswalks to other vocabularies as checked SSSOM mapping sets, kept out of the ontology graph | `mappings/`, `tools/ontology/mappings.py` |
 | Reasoning: ROBOT and ELK over the modules plus the full pinned BFO and CCO -- consistency, unsatisfiable classes, examples -- in a CI job of its own | `tools/ontology/reason.py`, `.github/workflows/reasoning.yml` |
 | Releases on a version tag: base and full, as Turtle, RDF/XML and JSON-LD, byte-identical across builds, with checksums | `tools/release.py`, `.github/workflows/release.yml` |
+| A public site: term explorer, modules, concept schemes, competency questions, crosswalks, status, releases and checksummed downloads -- every figure read from the repository, byte-reproducible, checked, deployed to GitHub Pages only when the project says so | `tools/site/`, `site/`, `.github/workflows/pages.yml` |
 | CI with actions pinned to commit SHAs | `.github/workflows/checks.yml` |
 | The method, and the defects each rule exists because of | `docs/process/PROCESS.md` |
 
-What it does not have yet (a public site; an end-to-end proof in CI) is in [`docs/template/ROADMAP.md`](docs/template/ROADMAP.md).
+What it does not have yet (an end-to-end proof in CI) is in [`docs/template/ROADMAP.md`](docs/template/ROADMAP.md).
 
 ## Starting a project
 
