@@ -15,11 +15,17 @@
 # not anything is published: a project finds out the site is broken when
 # it breaks, not on the day it decides to publish. Publishing is
 # `"publish": true` in site/content/site.json, read here, and nothing
-# else. It starts false, because a Pages site is public even when the
-# repository is private, and making one public is the project's decision.
-# Turning it on also needs Pages enabled in the repository's settings
+# else. It starts true: an ontology is worth making only if it is public,
+# and a Pages site is public even when the repository is private
+# (template decision 10). A project that will not publish sets it false.
+# Publishing also needs Pages enabled in the repository's settings
 # (Settings > Pages > Source: GitHub Actions); docs/DEVELOPMENT.md says
 # how.
+#
+# A private repository can publish a public site: the ontology is public,
+# how it was made need not be. The build is told the repository's
+# visibility from the event, and for a private one writes no link into
+# the repository -- a public reader could follow none of them.
 #
 # Pull requests build and check without deploying, and upload the site as
 # a preview artifact. main deploys the artifact it just built -- not a
@@ -60,6 +66,8 @@ jobs:
       pages: read
     outputs:
       publish: ${{ steps.publish.outputs.publish }}
+    env:
+      SITE_REPOSITORY_PRIVATE: ${{ github.event.repository.private }}
     steps:
       - name: Check out the full history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1

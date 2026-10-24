@@ -243,7 +243,8 @@ def test_the_copy_passes_its_own_suite(initialized):
     # The site names the new project, from the project file, and nothing
     # of the template's: no step of init touched the site.
     assert "<title>Widget Works Ontology</title>" in home
-    assert "https://github.com/owner/Widget-Works/issues" in home
+    assert "github.com/owner/Widget-Works" not in home, (
+        "built as private by default, so no link into the repository")
     assert "Example Ontology" not in home
     assert (initialized / "_site/downloads/widget-works-ontology.zip").is_file()
 

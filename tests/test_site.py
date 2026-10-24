@@ -143,12 +143,90 @@ def test_an_optional_page_is_built_only_with_its_component(
     assert checker.check(built_with_documents) == []
 
 
-def test_the_name_and_repository_come_from_the_project_file(built, project):
+def test_the_name_and_namespace_come_from_the_project_file(built, project):
     out, _ = built
     home = (out / "index.html").read_text(encoding="utf-8")
     assert "<title>%s</title>" % project.load()["title"] in home
-    assert "https://github.com/%s/issues" % project.repository() in home
     assert project.namespace() in home, "the IRI notice names the namespace"
+
+
+def test_a_private_repository_is_never_linked(built, project, checker):
+    """The default build is for a private repository: the ontology is
+    public and how it was made is not, so no page links into the
+    repository -- not a source file, the commit, the issues or a release.
+    The checker agrees the clean build has none."""
+    out, _ = built
+    repository = "https://github.com/" + project.repository()
+    linked = [p.relative_to(out).as_posix() for p in out.rglob("*.html")
+              if 'href="%s' % repository in p.read_text(encoding="utf-8")]
+    assert linked == [], linked
+    manifest = json.loads((out / "data/downloads.json")
+                          .read_text(encoding="utf-8"))
+    assert manifest["repository_linked"] is False
+    assert checker.check(out) == []
+
+
+def test_a_public_repository_is_linked(builder, project, checker, tmp_path,
+                                       monkeypatch):
+    """Guards the test above: a builder that never linked would pass it."""
+    monkeypatch.setenv("SITE_REPOSITORY_PRIVATE", "false")
+    out = tmp_path / "_site"
+    builder.build(out)
+    home = (out / "index.html").read_text(encoding="utf-8")
+    assert "https://github.com/%s/issues" % project.repository() in home
+    assert "https://github.com/%s/tree/" % project.repository() in home
+    modules = (out / "modules/index.html").read_text(encoding="utf-8")
+    assert "https://github.com/%s/blob/" % project.repository() in modules
+    assert checker.check(out) == []
+
+
+def test_a_release_links_only_into_a_public_repository(builder):
+    """No tag exists in the template, so the releases page is tested on a
+    constructed one: a tag, linked to its GitHub release only when a
+    reader could open it."""
+    data = {"releases": [{"tag": "v1.0.0", "commit": "a" * 40}]}
+    for private, linked in ((True, False), (False, True)):
+        ctx = {"private": private, "repository": "https://github.com/o/r"}
+        html_out = builder.release_list(data, ctx)
+        assert "v1.0.0" in html_out
+        assert ("https://github.com/o/r/releases/tag/v1.0.0" in html_out)             is linked, (private, html_out)
+
+
+def test_a_contact_is_the_route_for_findings_when_private(builder, tmp_path,
+                                                          monkeypatch):
+    real = builder.read_json
+
+    def with_contact(path):
+        data = real(path)
+        if path == builder.CONTENT:
+            data = dict(data, contact="ontology@example.invalid")
+        return data
+
+    monkeypatch.setattr(builder, "read_json", with_contact)
+    out = tmp_path / "_site"
+    builder.build(out)
+    home = (out / "index.html").read_text(encoding="utf-8")
+    assert 'href="mailto:ontology@example.invalid">Report an issue' in home
+
+
+def test_the_checker_refuses_a_link_into_a_private_repository(
+        checker, copy, project):
+    damage(copy / "modules/index.html", "</main>",
+           '<a href="https://github.com/%s/blob/x/y">y</a></main>'
+           % project.repository())
+    problems = checker.check(copy)
+    assert any("links into the private repository" in p
+               for p in problems), problems
+
+
+def test_the_workflow_tells_the_build_the_visibility(repo):
+    import yaml
+
+    workflow = yaml.safe_load((repo / ".github/workflows/pages.yml")
+                              .read_text(encoding="utf-8"))
+    env = workflow["jobs"]["build"]["env"]
+    assert env["SITE_REPOSITORY_PRIVATE"] == \
+        "${{ github.event.repository.private }}"
 
 
 def test_downloads_are_the_repository_bytes(built, repo, layout):

@@ -524,17 +524,32 @@ with CRLF line endings, because the downloads are those bytes and would differ f
 root-absolute or unresolved link or fragment, and a download or bundle that does not match
 its checksums.
 
-**Publishing.** The Pages workflow builds, checks and proves the build reproducible on every
-push and pull request (pull requests get the site as a preview artifact). It deploys only
-when `site/content/site.json` says `"publish": true`, which starts false: **a Pages site is
-public even when the repository is private.** To publish:
+**Publishing.** The ontology is public; how it was made need not be. The Pages workflow
+builds, checks and proves the build reproducible on every push and pull request (pull
+requests get the site as a preview artifact), and on main deploys it when
+`site/content/site.json` says `"publish": true` -- which it does from the first commit. **A
+Pages site is public even when the repository is private**, which is the point: the
+repository can stay private and the ontology still be published.
 
-1. Settings > Pages > Build and deployment > Source: **GitHub Actions**. (For a private
-   repository, Pages needs a plan that allows it.)
-2. Set `"publish": true` in `site/content/site.json`, and decide the notices: `draft.show`,
-   and `iri_resolution.resolve` once the namespace actually resolves.
-3. Merge to main. The deploy job publishes the artifact the checks ran against, at
-   `https://<owner>.github.io/<repository>/`.
+1. Settings > Pages > Build and deployment > Source: **GitHub Actions** -- or `gh api -X
+   POST repos/<owner>/<repository>/pages -f build_type=workflow`. Until this is done, the
+   first push to main fails at *Configure Pages*, saying Pages is not enabled. (For a
+   private repository, Pages needs a plan that allows it.)
+2. Decide the notices in `site.json`: `draft.show`, and `iri_resolution.resolve` once the
+   namespace actually resolves. If the repository is private, set `contact` (an address or
+   an https URL) so a reader has somewhere to send a finding.
+3. The site is at `https://<owner>.github.io/<repository>/`.
+
+**A private repository is never linked.** The workflow tells the build the repository's
+visibility (`SITE_REPOSITORY_PRIVATE`, from the event). For a private one, the site shows
+source paths and the commit as text and releases as tags, and offers the `contact` instead
+of the issues; the checker refuses any link into the repository. A local build assumes
+private; `SITE_REPOSITORY_PRIVATE=false` builds the public form. The release artefacts on a
+private repository's GitHub releases are private too; the site's downloads are the public
+copy of the authored files.
+
+A project that will not publish sets `"publish": false`; the site is still built and
+checked on every run.
 
 ---
 

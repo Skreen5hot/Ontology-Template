@@ -442,6 +442,9 @@ def main(argv=None) -> int:
     print()
     print("  %s is set up. Review `git status` and `git diff`, run the "
           "suite, and commit." % new["title"])
+    print("  Then enable GitHub Pages (Settings > Pages > Source: GitHub "
+          "Actions): the site is published from the first push to main, and "
+          "that push fails until Pages is enabled.")
     return 0
 
 

@@ -57,6 +57,10 @@ What it does not have yet (an end-to-end proof in CI) is in [`docs/template/ROAD
    fetches BFO and CCO once). `--dry-run` shows what it would change.
 
 4. Run the suite, review `git diff`, commit.
+5. Enable GitHub Pages (Settings > Pages > Source: **GitHub Actions**). The site is published
+   from the first push to main, even from a private repository, and without Pages enabled
+   that push fails at *Configure Pages*. `"publish": false` in `site/content/site.json`
+   opts out.
 
 Until step 3 runs, `python tools/project.py --check` — the first step in CI — fails the copy:
 it still says it is the template, and every check would be about a placeholder ontology.

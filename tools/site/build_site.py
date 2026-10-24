@@ -44,6 +44,20 @@ stops the build: which one is published would otherwise be decided by
 traversal order. So does a placeholder nothing fills, a page fragment no
 navigation entry names, and an asset with a suffix no rule covers.
 
+A PRIVATE REPOSITORY, A PUBLIC SITE
+
+The ontology is published; how it was made need not be. A Pages site is
+public even when its repository is private, and every link into a
+private repository -- a source file, the commit, the issues, a release --
+is a 404 for the reader the site is for. So the build is told the
+repository's visibility (SITE_REPOSITORY_PRIVATE, which the Pages
+workflow sets from the event) and, for a private one, writes no link
+into it: paths and the commit are shown as text, releases as tags, and
+findings go to the `contact` in site.json if there is one. Unset, the
+build assumes private, so a local preview never shows links a reader
+could not follow. tools/site/check_site.py refuses a link into the
+repository on a site built that way.
+
 WHAT IS OPTIONAL
 
 The specification and review pages are built when a component with the
@@ -419,10 +433,49 @@ def code(text: str) -> str:
     return "<code>%s</code>" % esc(text)
 
 
+def repository_private() -> bool:
+    """Whether the repository is private: from the workflow, else assumed.
+
+    Anything but an explicit "false" is private. Assuming public would
+    put links on a local preview that a reader of a private project's
+    site could not follow."""
+    return os.environ.get("SITE_REPOSITORY_PRIVATE", "true").strip() \
+        .lower() != "false"
+
+
 def source_link(ctx: dict, path: str, label: str | None = None) -> str:
+    if ctx["private"]:
+        return esc(label) if label else code(path)
     url = "%s/blob/%s/%s" % (ctx["repository"], ctx["commit"], path)
     return '<a href="%s">%s</a>' % (esc(url, quote=True),
                                     esc(label or path))
+
+
+def commit_link(ctx: dict) -> str:
+    stamp_html = '<code data-build="commit">%s</code>' % ctx["commit"][:12]
+    if ctx["private"]:
+        return stamp_html
+    return '<a href="%s/tree/%s">%s</a>' % (
+        esc(ctx["repository"], quote=True), ctx["commit"], stamp_html)
+
+
+def contact_href(contact: str) -> str:
+    return contact if re.match(r"^(https|mailto):", contact) \
+        else "mailto:" + contact
+
+
+def report_route(ctx: dict) -> str:
+    """Where a reader sends a finding: the issues of a public repository,
+    else the contact in site.json, else nowhere -- never a private
+    repository's issues, which a reader cannot open."""
+    if not ctx["private"]:
+        return '<a href="%s">Report an issue</a>' % esc(
+            ctx["repository"] + "/issues", quote=True)
+    contact = (ctx["site"].get("contact") or "").strip()
+    if contact:
+        return '<a href="%s">Report an issue</a>' % esc(
+            contact_href(contact), quote=True)
+    return ""
 
 
 def notice_block(text: str) -> str:
@@ -497,8 +550,7 @@ def shell(ctx: dict, key: str, title: str, body: str, depth: int) -> str:
   <footer class="footer">
     %(notices)s
     <p class="build">Built from commit %(commit_link)s &middot;
-      <span data-build="label">%(label)s</span> &middot;
-      <a href="%(issues)s">Report an issue</a></p>
+      <span data-build="label">%(label)s</span>%(issues)s</p>
   </footer>%(scripts)s
 </body>
 </html>
@@ -511,11 +563,10 @@ def shell(ctx: dict, key: str, title: str, body: str, depth: int) -> str:
         "key": esc(key),
         "body": body,
         "notices": "\n    ".join(footer_notices(ctx)),
-        "commit_link": '<a href="%s/tree/%s"><code data-build="commit">%s'
-                       '</code></a>' % (esc(ctx["repository"], quote=True),
-                                        ctx["commit"], ctx["commit"][:12]),
+        "commit_link": commit_link(ctx),
         "label": esc(site["notices"]["build_label"]["text"]),
-        "issues": esc(ctx["repository"] + "/issues", quote=True),
+        "issues": (" &middot;\n      %s" % report_route(ctx)
+                   if report_route(ctx) else ""),
         "scripts": scripts,
     }
 
@@ -758,10 +809,15 @@ def release_list(data: dict, ctx: dict) -> str:
         return ("<p>No release yet. Tagging a commit v&lt;MAJOR&gt;.&lt;MINOR&gt;"
                 ".&lt;PATCH&gt; runs every check and the reasoner on it, "
                 "builds the artefacts twice, and publishes them.</p>")
+    def tag(name):
+        if ctx["private"]:
+            return esc(name)
+        return '<a href="%s">%s</a>' % (esc("%s/releases/tag/%s" % (
+            ctx["repository"], name), quote=True), esc(name))
+
     rows = "\n".join(
-        '<tr><td><a href="%s">%s</a></td><td>%s</td></tr>' % (
-            esc("%s/releases/tag/%s" % (ctx["repository"], r["tag"]),
-                quote=True), esc(r["tag"]), code(r["commit"][:12]))
+        "<tr><td>%s</td><td>%s</td></tr>" % (tag(r["tag"]),
+                                            code(r["commit"][:12]))
         for r in data["releases"])
     return ('<div class="scroll-x"><table>\n<thead><tr><th>Version</th>'
             "<th>Commit</th></tr></thead>\n<tbody>\n%s\n</tbody></table>"
@@ -783,6 +839,7 @@ def build(out: Path) -> list[tuple[str, str]]:
     ctx = {"site": site, "commit": commit, "navigation": navigation,
            "name": project.load()["title"],
            "repository": "https://github.com/" + project.repository(),
+           "private": repository_private(),
            "licence": disposition.project_licence()}
     files: dict[str, bytes] = {}
     known = data["known"]
@@ -863,6 +920,8 @@ def build(out: Path) -> list[tuple[str, str]]:
         "format_version": 1,
         "generated_by": "tools/site/build_site.py",
         "source_commit": commit,
+        "repository": ctx["repository"],
+        "repository_linked": not ctx["private"],
         "bundle": {"filename": bundle_name, "bytes": len(bundle),
                    "sha256": sha256(bundle), "root": pid + "/",
                    "members": sorted(name for name, _ in bundle_members)},
@@ -890,9 +949,13 @@ def build(out: Path) -> list[tuple[str, str]]:
             answered, answerable)),
         ("Latest release", '<a href="releases/">%s</a>' % esc(latest)),
     ])
-    for_reviewers = "<ol>\n%s\n</ol>" % "\n".join(
-        "  <li>%s</li>" % esc(item)
-        for item in site["home"]["for_reviewers"])
+    reviewer_items = ["  <li>%s</li>" % esc(item)
+                      for item in site["home"]["for_reviewers"]]
+    if report_route(ctx):
+        reviewer_items.append(
+            "  <li>%s for anything you find. A finding with the term it "
+            "concerns is the most useful kind.</li>" % report_route(ctx))
+    for_reviewers = "<ol>\n%s\n</ol>" % "\n".join(reviewer_items)
     related = "".join(
         ' Related: <a href="%s">%s</a>.' % (esc(r["url"], quote=True),
                                             esc(r["label"]))

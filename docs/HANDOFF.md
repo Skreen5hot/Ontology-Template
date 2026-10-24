@@ -16,7 +16,7 @@ that exists so every check has something to run against. Phase 1 of
 phase 3 (the IRI linter), phase 4 (realist shapes, competency questions, examples) and
 phase 5 (reasoning and releases) and phase 6 (authoring aids, vocabulary and governance,
 crosswalks) and phase 7 (the public site, built and checked, deployed only when a project
-sets `"publish": true`) are done; phase 8 (the end-to-end proof) is next. The
+publishes from a private repository without linking into it) are done; phase 8 (the end-to-end proof) is next. The
 repository is published, private and marked as a template, at
 https://github.com/Skreen5hot/Ontology-Template.
 
@@ -100,9 +100,8 @@ https://github.com/Skreen5hot/Ontology-Template.
   after 2026-11-05. `.github/workflows/dependabot-manifest.yml` re-records the template
   manifest on Dependabot's pull requests; it has been rehearsed locally and has not yet run
   on GitHub. Merging is a person's call.
-- **The template's own site is not deployed.** The Pages workflow builds and checks it on
-  every push; deploying it would make it public, which is the architect's call
-  (`"publish"` in `site/content/site.json`, and Pages enabled in the settings).
+- **The template's own site is public** at https://skreen5hot.github.io/Ontology-Template/,
+  from a private repository, with no link into it (decision 10).
 - **No end-to-end proof in CI.** Phase 8.
 
 ## 4. Evidence outside the suite

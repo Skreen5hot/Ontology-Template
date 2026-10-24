@@ -1,7 +1,8 @@
 {
   "format_version": 1,
   "note": "Curated public copy only: the words a person has to choose. The site's name, repository, namespace, licence, versions, counts and digests are read from config/project.yaml, the pins and the ontology at build time, because a figure typed here is a second description that can drift from the first.",
-  "publish": false,
+  "publish": true,
+  "contact": "",
   "tagline": "A realist ontology aligned to BFO 2020 and CCO v2.0",
   "related": [],
   "navigation": [
@@ -40,8 +41,7 @@
     "for_reviewers": [
       "Explore the terms: every authored term beside the BFO and CCO terms it builds on, each marked authored or upstream.",
       "Read the competency questions: what the ontology must be able to answer, and whether it does.",
-      "Check the status page for the decisions recorded, what the validation gate finds, and what is not done.",
-      "Raise anything you find as an issue in the repository. A finding with the term it concerns is the most useful kind."
+      "Check the status page for the decisions recorded, what the validation gate finds, and what is not done."
     ]
   }
 }

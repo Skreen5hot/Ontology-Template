@@ -76,3 +76,15 @@ instance data for competency questions (phase 4); a vocabulary intake, SKOS conc
 modules, governance documents and SSSOM crosswalks (phase 6); crosswalk and vocabulary pages
 on the site (phase 7); and a layer-by-layer comparison table, to be carried into
 DEVELOPMENT.md.
+
+**10. "Yes publish the site. My principle is an ontology is only worth making if it is public.
+The HOW it was made may be private"** (2026-10-24)
+
+In answer to whether the template's own site should be published, the Pages site of a
+private repository being public. Effect: Pages is enabled for the template (GitHub Actions
+as the source), and `"publish"` in `site/content/site.json` is true -- in the template and,
+through it, in every project from its first commit. Because the repository may stay private,
+the build is told the repository's visibility and, for a private one, writes no link into
+it (source files, commit, issues, releases); the checker refuses one, and an optional
+`contact` in `site.json` is the route for findings instead. A project that will not publish
+sets `"publish": false`.

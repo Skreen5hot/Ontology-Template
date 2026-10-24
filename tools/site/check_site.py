@@ -24,6 +24,8 @@ What it refuses, and why each one:
     in preview 404s in production;
   * a link to an insecure http: or a javascript: URL;
   * a build stamp still reading "unknown";
+  * on a site built for a private repository, any link into it -- the
+    reader the site is for cannot follow one;
   * a download whose bytes do not match the manifest's SHA-256, a bundle
     whose SHA256SUMS disagrees with its own members, or a term index whose
     counts disagree with its records.
@@ -231,6 +233,19 @@ def check_data(site: Path) -> list[str]:
             missing = sorted(set(names) - covered - {sums_name})
             if missing:
                 problems.append("bundle SHA256SUMS omits %s" % missing)
+
+    # A site built for a private repository links nowhere into it: every
+    # such link is a 404 for the public reader the site is for.
+    if manifest.get("repository_linked") is False and manifest.get(
+            "repository"):
+        private = manifest["repository"].rstrip("/")
+        for page in sorted(site.rglob("*.html")):
+            text = page.read_text(encoding="utf-8")
+            if 'href="%s/' % private in text or \
+                    'href="%s"' % private in text:
+                problems.append("%s links into the private repository %s"
+                                % (page.relative_to(site).as_posix(),
+                                   manifest["repository"]))
 
     records = terms.get("classes") or []
     if not records:
