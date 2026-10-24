@@ -65,6 +65,14 @@ components:
       reasoning before a decision. Notes, tables and bibliographies only;
       the sources themselves go in docs/Reference, never tracked.
 
+  - id: mappings
+    path: mappings
+    role: mapping-set
+    description: >-
+      Crosswalks to other vocabularies, one SSSOM mapping set per target.
+      Checked by tools/ontology/mappings.py; never loaded into the ontology
+      graph.
+
   - id: competency-questions
     path: competency-questions
     role: competency-question
@@ -597,6 +605,15 @@ components:
     description: >-
       Generates ontology/vocabulary.ttl from the accepted rows of
       vocabulary/terms.tsv, refusing a row that cannot be placed.
+
+  - id: tool.mappings
+    path: tools/ontology/mappings.py
+    role: tool
+    template: owned
+    description: >-
+      Checks every SSSOM mapping set: metadata, subjects declared here,
+      objects in a declared namespace and not BFO's or CCO's, SKOS mapping
+      predicates, kinds matched for exact matches, semapv justifications.
 
   - id: tool.protege
     path: tools/ontology/protege.py

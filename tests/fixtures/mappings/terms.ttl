@@ -1,0 +1,12 @@
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix p:    <{{namespace}}> .
+
+# The authored terms the mapping fixtures map from: a class, a property, a
+# scheme and a concept.
+
+p:Widget a owl:Class ; rdfs:label "widget" .
+p:hasPart a owl:ObjectProperty ; rdfs:label "has part" .
+p:Status a skos:ConceptScheme ; skos:prefLabel "status" .
+p:active a skos:Concept ; skos:prefLabel "active" ; skos:inScheme p:Status .

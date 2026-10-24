@@ -1,0 +1,23 @@
+# mapping_set_id: https://example.invalid/mappings/bad
+# license: https://creativecommons.org/licenses/by/4.0/
+# creator_id:
+#   - https://orcid.org/0000-0000-0000-0000
+# curie_map:
+#   p: {{namespace}}
+#   wd: http://www.wikidata.org/entity/
+#   skos: http://www.w3.org/2004/02/skos/core#
+#   owl: http://www.w3.org/2002/07/owl#
+#   semapv: https://w3id.org/semapv/vocab/
+#   cco: https://www.commoncoreontologies.org/
+subject_id	predicate_id	object_id	mapping_justification	object_type	comment
+p:NotDeclared	skos:closeMatch	wd:Q1	semapv:ManualMappingCuration		1 subject nobody declares
+p:Widget	skos:closeMatch	p:active	semapv:ManualMappingCuration		2 object in the project namespace
+p:Widget	skos:exactMatch	cco:ont00001180	semapv:ManualMappingCuration	owl class	3 object in a pinned upstream
+p:Widget	rdfs:seeAlso	wd:Q5	semapv:ManualMappingCuration		4 predicate rdfs, prefix undeclared
+p:Widget	owl:sameAs	wd:Q6	semapv:ManualMappingCuration		5 predicate not a mapping property
+p:Widget	skos:closeMatch	wd:Q7	Manual		6 justification not semapv
+p:Widget	skos:exactMatch	wd:Q8	semapv:ManualMappingCuration		7 exactMatch with no object_type
+p:Widget	skos:exactMatch	wd:Q9	semapv:ManualMappingCuration	skos concept	8 class matched exactly to a concept
+p:active	owl:equivalentClass	wd:Q10	semapv:ManualMappingCuration	skos concept	9 equivalentClass from a concept
+p:Widget	skos:closeMatch	wd:Q2	semapv:ManualMappingCuration		10 fine
+p:Widget	skos:closeMatch	wd:Q2	semapv:ManualMappingCuration		11 repeats row 10

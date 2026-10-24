@@ -96,6 +96,9 @@ jobs:
       - name: Every answerable competency question gives its answer
         run: python tools/ontology/competency.py
 
+      - name: Every crosswalk holds
+        run: python tools/ontology/mappings.py
+
       - name: The generated vocabulary, shapes and Protégé files are current
         run: |
           python tools/ontology/vocabulary.py --check

@@ -1,6 +1,6 @@
 # Handoff — state of the template
 
-Written 2026-10-23, at the end of roadmap phase 1; §2 and §3 updated at the ends of phases 2 to 5. It is a snapshot: where this file and a
+Written 2026-10-23, at the end of roadmap phase 1; §2 and §3 updated at the ends of phases 2 to 6. It is a snapshot: where this file and a
 test disagree, the test is right and this file is stale. In a project made from the
 template, init replaces this file with the project's own.
 
@@ -14,8 +14,8 @@ starts with them on its first commit. Its own project is a placeholder called `e
 that exists so every check has something to run against. Phase 1 of
 [`docs/template/ROADMAP.md`](template/ROADMAP.md) — extract and generalize — is done; phase 2
 phase 3 (the IRI linter), phase 4 (realist shapes, competency questions, examples) and
-phase 5 (reasoning and releases) are done; phase 6 (authoring ergonomics, vocabulary,
-governance, crosswalks) is next. The
+phase 5 (reasoning and releases) and phase 6 (authoring aids, vocabulary and governance,
+crosswalks) are done; phase 7 (the public site) is next. The
 repository is published, private and marked as a template, at
 https://github.com/Skreen5hot/Ontology-Template.
 
@@ -56,6 +56,14 @@ https://github.com/Skreen5hot/Ontology-Template.
 - **Releases** (`tools/release.py`, `.github/workflows/release.yml`): base and full, in
   three serialisations, byte-identical across hash seeds, each parsed back to its source
   graph (`tests/test_release.py`).
+- **Authoring aids**: a Protégé edit file and catalog, loaded offline through the OWL API
+  (`tests/test_authoring.py`); opt-in canonical form; issue and PR forms; Dependabot, already
+  proposing updates (#2, #3); `CITATION.cff`; `research/`, refusing sources.
+- **Vocabulary and governance**: reviewed TSV term intake (`tests/test_vocabulary.py`), SKOS
+  concept-scheme shapes, naming conventions, `docs/governance/`, and a term-level diff on
+  every pull request and in every release.
+- **Crosswalks**: SSSOM mapping sets, checked and kept out of the graph
+  (`tests/test_mappings.py`).
 - Everything the BCO's suite asserted about the layout contract, licensing, the SHACL ladder
   and the corpus digest, carried over and generalized.
 
@@ -83,7 +91,9 @@ https://github.com/Skreen5hot/Ontology-Template.
   first run is a project's first tag.
 - **ELK is OWL 2 EL.** Universal restrictions, cardinality and most unions are ignored by it;
   an unsatisfiability that depends on them is not found.
-- **No vocabulary layer or crosswalks, no site.** Phases 6–8.
+- **Dependabot's pull requests are open and unmerged** (setup-python 7.1.0, setup-java
+  6.1.0): merging is a person's call.
+- **No site, and no end-to-end proof in CI.** Phases 7–8.
 
 ## 4. Evidence outside the suite
 

@@ -23,12 +23,13 @@ project on its first commit:
 | Protégé: an edit file importing every module and vendored file, with a catalog resolving each offline; canonical Turtle for modules edited there | `protege/`, `tools/ontology/normalize.py` |
 | Term-request and defect forms, a pull-request checklist, Dependabot for the pinned actions and Python, a citation file, a research record | `.github/`, `CITATION.cff`, `research/` |
 | Term intake as reviewed TSV rows, generated into a module; SKOS concept-scheme shapes; naming and deprecation rules; a term-level diff on every pull request and in every release | `vocabulary/`, `shapes/skos_shapes.ttl`, `docs/governance/`, `tools/ontology/term_diff.py` |
+| Crosswalks to other vocabularies as checked SSSOM mapping sets, kept out of the ontology graph | `mappings/`, `tools/ontology/mappings.py` |
 | Reasoning: ROBOT and ELK over the modules plus the full pinned BFO and CCO -- consistency, unsatisfiable classes, examples -- in a CI job of its own | `tools/ontology/reason.py`, `.github/workflows/reasoning.yml` |
 | Releases on a version tag: base and full, as Turtle, RDF/XML and JSON-LD, byte-identical across builds, with checksums | `tools/release.py`, `.github/workflows/release.yml` |
 | CI with actions pinned to commit SHAs | `.github/workflows/checks.yml` |
 | The method, and the defects each rule exists because of | `docs/process/PROCESS.md` |
 
-What it does not have yet (SSSOM crosswalks; a public site) is in [`docs/template/ROADMAP.md`](docs/template/ROADMAP.md).
+What it does not have yet (a public site; an end-to-end proof in CI) is in [`docs/template/ROADMAP.md`](docs/template/ROADMAP.md).
 
 ## Starting a project
 

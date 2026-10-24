@@ -1,0 +1,17 @@
+# mapping_set_id: https://example.invalid/mappings/good
+# license: https://creativecommons.org/licenses/by/4.0/
+# creator_id:
+#   - https://orcid.org/0000-0000-0000-0000
+# curie_map:
+#   p: {{namespace}}
+#   wd: http://www.wikidata.org/entity/
+#   skos: http://www.w3.org/2004/02/skos/core#
+#   owl: http://www.w3.org/2002/07/owl#
+#   semapv: https://w3id.org/semapv/vocab/
+#   cco: https://www.commoncoreontologies.org/
+subject_id	predicate_id	object_id	mapping_justification	object_type	comment
+p:Widget	skos:exactMatch	wd:Q1	semapv:ManualMappingCuration	owl class	a class to a class
+p:Widget	skos:closeMatch	wd:Q2	semapv:ManualMappingCuration		close needs no type
+p:active	skos:exactMatch	wd:Q3	semapv:LexicalMatching	skos concept	a concept to a concept
+p:Widget	owl:equivalentClass	wd:Q4	semapv:ManualMappingCuration	owl class	equivalence between classes
+p:hasPart	skos:relatedMatch	wd:P527	semapv:ManualMappingCuration		a property

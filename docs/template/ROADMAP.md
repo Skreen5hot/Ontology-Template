@@ -23,7 +23,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 3 | IRI lint, ported from IRI_Linter | **done** |
 | 4 | Realist shape library and competency questions | **done** |
 | 5 | Reasoning and release (ROBOT, own CI job) | **done** |
-| 6 | Authoring ergonomics, the vocabulary and governance layer, crosswalks, the research record | not started |
+| 6 | Authoring ergonomics, the vocabulary and governance layer, crosswalks, the research record | **done** |
 | 7 | Public site and its Pages workflow, generalized | not started |
 | 8 | Prove the template works end to end | not started |
 
@@ -236,6 +236,25 @@ tag -- phase 8.
   goes there and what does not. Project content under the project licence. The sources
   themselves, when licensed, stay in `docs/Reference/`, which is never tracked; a test
   refuses a research note that embeds a file from there.
+
+Built 2026-10-24, in three commits (6a authoring aids, 6b vocabulary and governance, 6c
+crosswalks), each through CI on a scratch branch first. What changed from the plan:
+
+- **Pre-commit** was already done in phase 3 (`.githooks/`); not repeated.
+- **The Protégé entry point** is a generated `protege/edit.ttl` importing every module and
+  vendored file, with the catalog beside it -- the modules themselves import nothing,
+  because vendoring replaces imports. ROBOT (the OWL API) loads it through the catalog
+  offline; its first catalog did not load, for a `--` inside an XML comment.
+- **The canonical-form check is opt-in** (`format: canonical` on a module): canonical form
+  keeps no comments, and a hand-written module's reasoning lives in them.
+- **The semantic diff and the change log are one tool** (`term_diff.py`): a PR comment from
+  the Term diff workflow, and `CHANGES.md` in every release, inside the checksums.
+- **Naming is a linter rule** (`naming_convention`, patterns in `config/naming.yaml`); label
+  casing is left to each project's `docs/governance/naming.md`, because BFO and CCO differ.
+- **A concept-scheme module is an ordinary module**: the SKOS shapes apply to every authored
+  concept and scheme wherever written, so no new module type was needed.
+- **Crosswalks to BFO or CCO are refused**: relating a term to the foundation is an axiom.
+- **init `--offline`**: every generator but the vendoring rebuild.
 
 ## 7. Public site
 

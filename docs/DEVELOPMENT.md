@@ -62,6 +62,7 @@ python tools/ontology/profile_shapes.py --check   # the profile shapes are what 
 python tools/ontology/reason.py               # needs Java: consistent, nothing unsatisfiable
 python tools/ontology/protege.py --check      # the Protégé edit file and catalog are current
 python tools/ontology/vocabulary.py --check   # the vocabulary module is what the intake generates
+python tools/ontology/mappings.py             # every SSSOM crosswalk holds
 python tools/ontology/term_diff.py --base origin/main   # which terms this branch changes
 python tools/ontology/normalize.py --check    # modules declared canonical are canonical
 python tools/communications.py                # the communications record follows its protocol
@@ -82,6 +83,7 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `competency.py` | an answerable question whose query gives a different answer, or none where rows were expected; an expectation nothing can fail (`rows: []`, `count: 0`, `ask: false`); a question depending on a term nobody defines; an example file that does not exist or lies outside `examples/` |
 | `profile_shapes.py --check` | `shapes/annotation_profile_shapes.ttl` differing from what `config/annotation-profile.yaml` generates; a profile property no pinned upstream or W3C vocabulary defines |
 | `reason.py` | an unsatisfiable authored class; an ontology with no model; example individuals inconsistent with it; and, as exit 2, no Java, a ROBOT jar that is not the pinned one, or an answer from ROBOT it cannot read |
+| `mappings.py` | a mapping set without a set id, licence, creator or semapv prefix; a subject no module declares; an object outside the set's namespaces, in this project's, or in BFO's or CCO's; a predicate that is not a SKOS mapping property or `owl:equivalentClass`; an exact match or equivalence without a matching `object_type`; a row with no `semapv:` justification, or twice; and, as exit 2, a file that is not SSSOM |
 | `vocabulary.py --check` | `ontology/vocabulary.ttl` differing from what `vocabulary/terms.tsv` generates; an intake row with a bad status, an accepted row unsigned or unplaced, a local name off the class convention or used twice or already declared, a parent with no known prefix |
 | `protege.py --check` | `protege/edit.ttl` or its catalog differing from what the modules and the vendored files generate; a module with no ontology header, or two |
 | `normalize.py --check` | a module declared `format: canonical` that is not in canonical Turtle |
@@ -191,6 +193,7 @@ the licensing tool so the two cannot drift:
 | `competency-question` | one YAML file per question, run by `tools/ontology/competency.py` |
 | `research` | the project's own notes, tables and bibliographies; never a source itself |
 | `vocabulary-intake` | `vocabulary/terms.tsv`, term proposals as rows; accepted rows generate `ontology/vocabulary.ttl` |
+| `mapping-set` | SSSOM crosswalks in `mappings/`; checked, never loaded into the ontology graph |
 | `communication` | the communications record |
 | `documentation`, `configuration`, `tool`, `project-licence` | as they sound |
 
@@ -411,6 +414,14 @@ every concept in a declared scheme, no `skos:broader` cycle, no `broader` across
 concept that is also an `owl:Class`. The scheme sits beside the class hierarchy; no class is
 made from a concept.
 
+## Crosswalks
+
+Mappings from this ontology's terms to other vocabularies live in `mappings/`, one SSSOM
+set per target (format in its README), checked by `python tools/ontology/mappings.py`. A
+term related to BFO or CCO is not a mapping: it is placed under the upstream term, or is
+it. Mappings are never loaded into the ontology graph, so an `exactMatch` to a vocabulary
+that is not BFO-aligned never becomes a claim about this ontology's types.
+
 ## Naming, deprecation, and what changed
 
 `docs/governance/` holds the policy, each rule beside the check that holds it. Local names
@@ -488,10 +499,10 @@ template's roadmap.
 
 | Layer | Here |
 |---|---|
-| controlled vocabulary | the vocabulary intake, `vocabulary/terms.tsv` (template roadmap, phase 6) |
+| controlled vocabulary | the vocabulary intake, `vocabulary/terms.tsv` |
 | metadata schemas | SHACL in `shapes/`: wellformedness, the realist library, the annotation profile |
-| taxonomy | SKOS concept-scheme modules (phase 6); the OWL hierarchy is the ontology's own |
-| thesaurus | SKOS labels in concept schemes; SSSOM crosswalks in `mappings/` (phase 6) |
+| taxonomy | SKOS concept-scheme modules, held by `shapes/skos_shapes.ttl`; the OWL hierarchy is the ontology's own |
+| thesaurus | SKOS labels in concept schemes; SSSOM crosswalks in `mappings/` |
 | ontology | `ontology/`, with BFO and CCO vendored and pinned |
 | knowledge graph | `examples/` and `competency-questions/`; data-lifting pipelines belong in an application repository |
 
