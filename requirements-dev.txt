@@ -28,4 +28,4 @@ pytest==9.1.1
 PyYAML==6.0.3
 rdflib==7.6.0
 pyshacl==0.40.1
-Markdown==3.11
+Markdown==3.11.2
