@@ -8,9 +8,9 @@
       "shape_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "triples_touching": 0
     },
-    "ground_sha256": "9948ed3e0d4c00e8f62c6a137d697f88f43241ed7b42864e50b7efa7e7231fb4",
-    "ground_triples": 7,
-    "triples": 7
+    "ground_sha256": "e864cd8d48ea340125f2cf02e0c23a0d5cf2c66aab1818f199ea5d6a6297f619",
+    "ground_triples": 14,
+    "triples": 14
   },
   "note": "Ground triples and blank-node shape together cover every triple. Blank nodes are renamed by every parse, so their identities are erased and only their structure is digested.",
   "per_file": {
@@ -24,13 +24,25 @@
       "ground_sha256": "9948ed3e0d4c00e8f62c6a137d697f88f43241ed7b42864e50b7efa7e7231fb4",
       "ground_triples": 7,
       "triples": 7
+    },
+    "ontology/vocabulary.ttl": {
+      "blank_nodes": {
+        "blank_nodes": 0,
+        "distinct_shapes": 0,
+        "shape_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "triples_touching": 0
+      },
+      "ground_sha256": "2ebb137a22eeb5557a5583453a9ba014b477f19e882b10ad3578860247c81043",
+      "ground_triples": 7,
+      "triples": 7
     }
   },
   "scope": {
-    "files": 1,
+    "files": 2,
     "from": "config/repository-layout.yaml, roles ontology-module and ontology-module-set",
     "paths": [
-      "ontology/example.ttl"
+      "ontology/example.ttl",
+      "ontology/vocabulary.ttl"
     ]
   }
 }

@@ -8,10 +8,10 @@ asked the questions its own suite asks: does the layout contract describe
 the tree, does the namespace in the shapes agree with the project file,
 is every file's licence decided.
 
-What this does not cover: the generators. init regenerates the extracts,
-which needs the network or a warm cache, so the copy here is initialized
-with --no-regenerate and the suites that read the extracts are not run in
-it. A full init, regeneration included, is run by hand before a template
+What this does not cover: the vendoring rebuild. It needs the network or
+a warm cache, so the copy here is initialized with --offline -- every
+other generator runs -- and the suites that read the extracts are not run
+in it. A full init, rebuild included, is run by hand before a template
 release and recorded in docs/template/ROADMAP.md; a CI job doing the same
 is roadmap phase 8.
 
@@ -97,7 +97,7 @@ def in_template(project):
 @pytest.fixture(scope="module")
 def initialized(repo, tmp_path_factory):
     root = copy_of(repo, tmp_path_factory.mktemp("copy") / "r")
-    code, out = run(root, "tools/init_project.py", *ARGS, "--no-regenerate")
+    code, out = run(root, "tools/init_project.py", *ARGS, "--offline")
     assert code == 0, out
     git(root, "add", "-A")
     return root
@@ -150,28 +150,33 @@ def test_the_module_is_renamed_and_rewritten(initialized):
         initialized, "config/repository-layout.yaml")
 
 
-def test_the_template_namespace_survives_nowhere_but_generated_files(
+def test_the_template_namespace_survives_only_where_the_network_is_needed(
         initialized):
-    """The generated files still carry it -- --no-regenerate -- and are
-    the only ones that may: whatever a component with a generator holds,
-    read from the copy's own contract."""
-    import yaml
-
-    contract = yaml.safe_load(read(initialized,
-                                   "config/repository-layout.yaml"))
-    generated = tuple(c["path"] for c in contract["components"]
-                      if c.get("generator"))
-    assert "protege" in generated and "vendor/bfo/bfo-core-extract.ttl" in         generated, generated
+    """--offline runs every generator but the vendoring rebuild, so the
+    template's IRI base may survive in the vendored files and their
+    manifest -- the rebuild's output -- and nowhere else. Anything else
+    still naming it is a file a generator should have rewritten and did
+    not, or one no generator owns that init missed."""
+    allowed = ("vendor/", "config/upstream-extracts.json")
+    old = "fandaws.com/ontology/example"
     stray = []
     for path in initialized.rglob("*"):
         relative = path.relative_to(initialized).as_posix()
         if (not path.is_file() or relative.startswith(".git/")
-                or relative.startswith(generated)):
+                or relative.startswith(allowed)):
             continue
-        if "fandaws.com/ontology/example" in path.read_bytes().decode(
-                "utf-8", "replace"):
+        text = path.read_bytes().decode("utf-8", "replace")
+        # The Protégé files import the vendored files by their ontology
+        # IRIs, which only the rebuild changes: there, and only there, the
+        # old base may stand in front of /vendor/.
+        if relative.startswith("protege/"):
+            text = text.replace(old + "/vendor/", "")
+        if old in text:
             stray.append(relative)
     assert stray == [], stray
+    edit = read(initialized, "protege/edit.ttl")
+    assert "<https://fandaws.com/ontology/widget-works/edit>" in edit, (
+        "the Protégé generator did not run under --offline")
 
 
 def test_the_template_only_parts_are_gone(initialized):
@@ -222,7 +227,8 @@ def test_the_copy_passes_its_own_suite(initialized):
                     "tests/test_communications.py",
                     "tests/test_iri_lint.py",
                     "tests/test_competency.py",
-                    "tests/test_release.py", "-m", "not reasoning",
+                    "tests/test_release.py", "tests/test_vocabulary.py",
+                    "tests/test_authoring.py", "-m", "not reasoning",
                     env_extra=env)
     assert code == 0, out[-3000:]
 

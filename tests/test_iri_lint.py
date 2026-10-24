@@ -112,7 +112,7 @@ def test_the_positive_controls_report_nothing(linter, written):
 def test_the_dirty_fixture_reports_exactly_what_it_marks(linter, written,
                                                          project):
     want = expectations(written["dirty"], linter, project)
-    assert len(want) >= 14, (
+    assert len(want) >= 16, (
         "the fixture marks %d expectations; the markers are not being "
         "read" % len(want))
     findings = [f for f in linter.lint([written["dirty"], written["module2"]])

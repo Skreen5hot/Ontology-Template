@@ -1,0 +1,111 @@
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix ks:   <https://fandaws.com/ontology/example/shapes/skos#> .
+
+# The structure of the project's concept schemes.
+#
+# A concept scheme is a vocabulary about terms -- a catalogue, a code
+# list, a taxonomy of business usage -- and not a hierarchy of types. In
+# a realist ontology the rdfs:subClassOf tree under BFO is the
+# classification of what exists; a SKOS scheme sits beside it, and its
+# concepts are never owl:Classes. A module that holds a scheme is an
+# ordinary ontology-module; these shapes apply to every authored concept
+# and scheme wherever it is written.
+#
+# The wellformedness shapes already require a prefLabel on every concept,
+# and no two in one language. These add what makes a scheme a scheme.
+#
+# Every constraint binds $this in a triple pattern before its filters
+# (see realist_shapes.ttl for why), and every target filters on the
+# project namespace, https://fandaws.com/ontology/example#, which
+# tools/init_project.py writes here.
+
+ks:prefixes
+    a owl:Ontology ;
+    sh:declare
+        [ sh:prefix "skos" ; sh:namespace "http://www.w3.org/2004/02/skos/core#"^^xsd:anyURI ] ,
+        [ sh:prefix "owl"  ; sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ] .
+
+
+ks:AuthoredConceptStructureShape
+    a sh:NodeShape ;
+    sh:severity sh:Violation ;
+
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes ks:prefixes ;
+        sh:select """SELECT ?this WHERE {
+          ?this a skos:Concept .
+          FILTER(STRSTARTS(STR(?this), "https://fandaws.com/ontology/example#"))
+        }""" ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Concept is in no declared concept scheme." ;
+        sh:prefixes ks:prefixes ;
+        sh:select """SELECT $this WHERE {
+          $this a skos:Concept .
+          FILTER NOT EXISTS { $this skos:inScheme ?s . ?s a skos:ConceptScheme }
+        }""" ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Concept {$this} is its own broader concept through a cycle of skos:broader." ;
+        sh:prefixes ks:prefixes ;
+        sh:select """SELECT $this WHERE {
+          $this skos:broader+ ?ancestor .
+          FILTER(?ancestor = $this)
+        }""" ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Concept {$this} has a broader concept {?broader} in a scheme it is not in." ;
+        sh:prefixes ks:prefixes ;
+        sh:select """SELECT DISTINCT $this ?broader WHERE {
+          $this skos:broader ?broader .
+          ?broader skos:inScheme ?scheme .
+          FILTER NOT EXISTS { $this skos:inScheme ?scheme }
+        }""" ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Concept {$this} carries \"{?label}\" as both its prefLabel and an altLabel or hiddenLabel in the same language." ;
+        sh:prefixes ks:prefixes ;
+        sh:select """SELECT DISTINCT $this ?label WHERE {
+          $this skos:prefLabel ?label ;
+                skos:altLabel|skos:hiddenLabel ?other .
+          FILTER(STR(?label) = STR(?other) && LANG(?label) = LANG(?other))
+        }""" ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Concept is also an owl:Class. A concept is about a term and a class is a universal; a scheme sits beside the ontology's classes, and no class is made from a concept." ;
+        sh:prefixes ks:prefixes ;
+        sh:select """SELECT $this WHERE {
+          $this a skos:Concept , owl:Class .
+        }""" ] .
+
+
+ks:AuthoredSchemeShape
+    a sh:NodeShape ;
+    sh:severity sh:Violation ;
+
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes ks:prefixes ;
+        sh:select """SELECT ?this WHERE {
+          ?this a skos:ConceptScheme .
+          FILTER(STRSTARTS(STR(?this), "https://fandaws.com/ontology/example#"))
+        }""" ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Concept scheme has no top concept (skos:hasTopConcept or skos:topConceptOf)." ;
+        sh:prefixes ks:prefixes ;
+        sh:select """SELECT $this WHERE {
+          $this a skos:ConceptScheme .
+          FILTER NOT EXISTS { $this skos:hasTopConcept ?top }
+          FILTER NOT EXISTS { ?top skos:topConceptOf $this }
+        }""" ] .

@@ -61,6 +61,8 @@ python tools/ontology/competency.py           # every answerable competency ques
 python tools/ontology/profile_shapes.py --check   # the profile shapes are what the profile generates
 python tools/ontology/reason.py               # needs Java: consistent, nothing unsatisfiable
 python tools/ontology/protege.py --check      # the Protégé edit file and catalog are current
+python tools/ontology/vocabulary.py --check   # the vocabulary module is what the intake generates
+python tools/ontology/term_diff.py --base origin/main   # which terms this branch changes
 python tools/ontology/normalize.py --check    # modules declared canonical are canonical
 python tools/communications.py                # the communications record follows its protocol
 python tools/template_status.py               # where this has diverged from the template
@@ -80,6 +82,7 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `competency.py` | an answerable question whose query gives a different answer, or none where rows were expected; an expectation nothing can fail (`rows: []`, `count: 0`, `ask: false`); a question depending on a term nobody defines; an example file that does not exist or lies outside `examples/` |
 | `profile_shapes.py --check` | `shapes/annotation_profile_shapes.ttl` differing from what `config/annotation-profile.yaml` generates; a profile property no pinned upstream or W3C vocabulary defines |
 | `reason.py` | an unsatisfiable authored class; an ontology with no model; example individuals inconsistent with it; and, as exit 2, no Java, a ROBOT jar that is not the pinned one, or an answer from ROBOT it cannot read |
+| `vocabulary.py --check` | `ontology/vocabulary.ttl` differing from what `vocabulary/terms.tsv` generates; an intake row with a bad status, an accepted row unsigned or unplaced, a local name off the class convention or used twice or already declared, a parent with no known prefix |
 | `protege.py --check` | `protege/edit.ttl` or its catalog differing from what the modules and the vendored files generate; a module with no ontology header, or two |
 | `normalize.py --check` | a module declared `format: canonical` that is not in canonical Turtle |
 | `release.py` | a version that is not MAJOR.MINOR.PATCH; a file that does not parse back to the graph it was written from |
@@ -187,6 +190,7 @@ the licensing tool so the two cannot drift:
 | `example-data` | instance data the competency questions are answered against; linted, never in the digest or the ladder |
 | `competency-question` | one YAML file per question, run by `tools/ontology/competency.py` |
 | `research` | the project's own notes, tables and bibliographies; never a source itself |
+| `vocabulary-intake` | `vocabulary/terms.tsv`, term proposals as rows; accepted rows generate `ontology/vocabulary.ttl` |
 | `communication` | the communications record |
 | `documentation`, `configuration`, `tool`, `project-licence` | as they sound |
 
@@ -381,6 +385,40 @@ you edit only in Protégé, declare `format: canonical` on it in the layout cont
 `python tools/ontology/normalize.py` after saving: the module is then always in one form,
 and a diff shows the axioms that changed rather than every line Protégé reordered. A module
 written by hand, with its reasoning in comments, should not be canonical.
+
+## Proposing terms as rows
+
+`vocabulary/terms.tsv` is the intake for people who do not write Turtle: one row per term
+— `local_name`, `label`, `definition`, `parent`, `synonyms`, `status`, `requested_by`,
+`reviewed_by`, `notes`, and one column per annotation in the profile (`definition_source`
+by default). A row is a proposal until a reviewer sets `status` to `accepted` and signs
+`reviewed_by` in the pull request; then
+
+```bash
+python tools/ontology/vocabulary.py
+```
+
+generates `ontology/vocabulary.ttl`, an ordinary module every check reads. Whether the
+parent exists is the IRI linter's question, asked of the generated module; a new CCO parent
+needs `vendor_upstream.py --rebuild` like any other.
+
+## Concept schemes
+
+A vocabulary about terms — a catalogue, a code list, a taxonomy of business usage — is a
+SKOS concept scheme, in a module of its own. `shapes/skos_shapes.ttl` holds its structure:
+every concept in a declared scheme, no `skos:broader` cycle, no `broader` across schemes, no
+`altLabel` or `hiddenLabel` repeating the `prefLabel`, a top concept in every scheme, and no
+concept that is also an `owl:Class`. The scheme sits beside the class hierarchy; no class is
+made from a concept.
+
+## Naming, deprecation, and what changed
+
+`docs/governance/` holds the policy, each rule beside the check that holds it. Local names
+follow `config/naming.yaml` (the linter's `naming_convention`); a deprecated term names a
+replacement or a reason (the realist deprecated-term shape).
+`tools/ontology/term_diff.py` reports the terms added, removed, deprecated or changed
+between two commits — the Term diff workflow comments it on every pull request, and the
+Release workflow ships it as `CHANGES.md`, inside the checksums.
 
 ## Requests, reviews and records
 

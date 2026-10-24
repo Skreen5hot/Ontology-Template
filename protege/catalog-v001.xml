@@ -5,4 +5,5 @@
     <uri id="m2" name="https://fandaws.com/ontology/example/vendor/bfo-core-extract" uri="../vendor/bfo/bfo-core-extract.ttl"/>
     <uri id="m3" name="https://fandaws.com/ontology/example/vendor/bfo-disjointness" uri="../vendor/bfo/bfo-disjointness.ttl"/>
     <uri id="m4" name="https://fandaws.com/ontology/example/vendor/cco-extract" uri="../vendor/cco/cco-extract.ttl"/>
+    <uri id="m5" name="https://fandaws.com/ontology/example/vocabulary" uri="../ontology/vocabulary.ttl"/>
 </catalog>

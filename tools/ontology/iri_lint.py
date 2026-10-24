@@ -28,6 +28,9 @@ THE RULES
                       source for it.
   annotated_upstream  an authored file saying anything else about one --
                       a comment, a label, a parent. Same reason.
+  naming_convention   an authored term whose local name breaks the
+                      convention config/naming.yaml sets for its kind
+                      (UpperCamelCase classes, lowerCamelCase properties).
   dangling_ref        an IRI in this project's namespace that nothing in the
                       linted files declares -- in any position, including a
                       restriction filler.
@@ -97,7 +100,7 @@ SCOPE_ROLES = ("ontology-module", "ontology-module-set",
 
 RULES = ("readable_label", "case_mismatch", "unverified",
          "deprecated_upstream", "redeclared_upstream", "annotated_upstream",
-         "dangling_ref")
+         "dangling_ref", "naming_convention")
 
 #: A source is "opaque" -- mints ids, not names -- when this share of its
 #: register's local names contains a run of four or more digits. BFO and
@@ -340,6 +343,8 @@ def lint(paths: list[Path], root: Path | None = None) -> list[dict]:
                                    else ("dangling_ref", []))
         findings.extend(redeclarations(path, graph, code, prefixes,
                                        upstream_ns, judged))
+        findings.extend(naming(path, graph, code, prefixes, authored_ns,
+                               conventions(root)))
 
         for iri, verdict in judged.items():
             if verdict is None:
@@ -356,6 +361,58 @@ def lint(paths: list[Path], root: Path | None = None) -> list[dict]:
     findings.sort(key=lambda r: (r["file"], r["line"], r["type"],
                                  r["subject"]))
     return findings
+
+
+#: The kinds config/naming.yaml names, and the types that make a term one.
+NAMING_KINDS = {
+    "classes": {OWL + "Class"},
+    "properties": {OWL + "ObjectProperty", OWL + "DatatypeProperty",
+                   OWL + "AnnotationProperty"},
+    "concepts": {SKOS + "Concept", SKOS + "ConceptScheme"},
+    "individuals": {OWL + "NamedIndividual"},
+}
+
+
+def conventions(root: Path | None = None) -> dict:
+    """{kind: compiled pattern} from config/naming.yaml; a kind set to
+    null is not checked, and a project without the file checks nothing."""
+    import yaml
+
+    path = (root or layout.repository_root()) / "config/naming.yaml"
+    if not path.is_file():
+        return {}
+    raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    return {kind: re.compile(raw[kind]) for kind in NAMING_KINDS
+            if raw.get(kind)}
+
+
+def naming(path, graph, code, prefixes, authored_ns, patterns) -> list:
+    """An authored term whose local name breaks the convention for its
+    kind, reported where it is declared."""
+    import rdflib
+
+    out = []
+    for kind, pattern in sorted(patterns.items()):
+        types = NAMING_KINDS[kind]
+        for subject, kind_iri in graph.subject_objects(
+                rdflib.URIRef(RDF_TYPE)):
+            iri = str(subject)
+            if (not isinstance(subject, rdflib.URIRef)
+                    or str(kind_iri) not in types
+                    or not iri.startswith(authored_ns)):
+                continue
+            if pattern.match(iri[len(authored_ns):]):
+                continue
+            lines = lines_of(code, prefixes, iri,
+                             r"\s+(?:a|rdf:type|<%s>)(?=\s)"
+                             % re.escape(RDF_TYPE)) or [0]
+            for line in lines:
+                record = {"file": path.as_posix(), "line": line,
+                          "type": "naming_convention", "subject": iri,
+                          "convention": "%s %s" % (kind, pattern.pattern)}
+                if record not in out:
+                    out.append(record)
+    return out
 
 
 def redeclarations(path, graph, code, prefixes, upstream_ns, judged) -> list:

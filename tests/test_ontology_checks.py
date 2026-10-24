@@ -558,3 +558,31 @@ def test_warnings_and_violations_are_split_on_a_real_report(validation,
     assert "Unanchored" in foci(violations)
     assert "VagueDefinition" in foci(warnings)
     assert "VagueDefinition" not in foci(violations)
+
+
+# ------------------------------------------------------- concept schemes
+
+
+SKOS_CASES = {
+    "Concept is in no declared concept scheme": "SkosOrphan",
+    "is its own broader concept": "SkosCycleA",
+    "in a scheme it is not in": "SkosAcrossSchemes",
+    "as both its prefLabel and an altLabel": "SkosRepeatedLabel",
+    "Concept is also an owl:Class": "SkosAlsoClass",
+    "Concept scheme has no top concept": "SkosTopless",
+}
+
+SKOS_CONTROLS = ("SkosGoodScheme", "SkosGoodTop", "SkosGoodChild",
+                 "SkosOtherScheme", "SkosOtherTop")
+
+
+def test_every_skos_constraint_fires_on_its_case(validation):
+    for message, case in SKOS_CASES.items():
+        hits = [v for v in results_for(validation, "validation.skos", case)
+                if message in v["message"]]
+        assert hits, "%r did not fire on %s" % (message, case)
+
+
+def test_the_skos_positive_controls_are_not_reported(validation):
+    for case in SKOS_CONTROLS:
+        assert results_for(validation, "validation.skos", case) == [], case

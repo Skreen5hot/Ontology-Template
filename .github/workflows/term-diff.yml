@@ -1,0 +1,60 @@
+# Term diff: on a pull request, which authored terms it adds, removes,
+# deprecates or changes -- label, definition, parents -- rather than which
+# lines moved. A Protégé save reorders most of a module; this is what a
+# reviewer needs instead.
+#
+# Written to the job summary always, and posted as a comment on the pull
+# request when the token may (a pull request from a fork has a read-only
+# token; the summary is still there). The comment is updated in place on
+# each push rather than added again.
+#
+# Actions pinned to commit SHAs, the same ones the Checks workflow uses.
+
+name: Term diff
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: term-diff-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  diff:
+    name: Terms added, removed, changed
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the full history
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.12'
+
+      - name: Install the pinned dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements-dev.txt
+
+      - name: Diff the authored terms against the base branch
+        run: |
+          python tools/ontology/term_diff.py \
+            --base "origin/${{ github.base_ref }}" --head HEAD -o term-diff.md
+          cat term-diff.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post it on the pull request
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh pr comment "${{ github.event.pull_request.number }}" \
+            --body-file term-diff.md --edit-last \
+          || gh pr comment "${{ github.event.pull_request.number }}" \
+            --body-file term-diff.md \
+          || echo "Could not comment (a fork's read-only token?); the job summary has the diff."

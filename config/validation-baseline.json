@@ -9,6 +9,9 @@
     "validation.realist": {
       "authored_findings": 0
     },
+    "validation.skos": {
+      "authored_findings": 0
+    },
     "validation.wellformedness": {
       "authored_findings": 0
     }

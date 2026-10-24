@@ -1,0 +1,27 @@
+# Naming conventions for authored terms, checked by the IRI linter
+# (`naming_convention`) and by tools/ontology/vocabulary.py.
+#
+# Local names only -- the part after the namespace. Readable local names
+# are this template's decision 4; these say what readable means here.
+# A pattern is a Python regular expression matched against the whole
+# local name; null turns the check off for that kind.
+#
+# Labels are not checked. BFO writes them in lower case ("material
+# entity"), CCO in Title Case ("Organization"); which a project follows
+# is its own call, written in docs/governance/naming.md.
+
+version: 1
+
+#: owl:Class -- UpperCamelCase: MaintenanceAct.
+classes: '^[A-Z][A-Za-z0-9]*$'
+
+#: owl:ObjectProperty, owl:DatatypeProperty, owl:AnnotationProperty --
+#: lowerCamelCase: hasMaintainer.
+properties: '^[a-z][A-Za-z0-9]*$'
+
+#: skos:Concept and skos:ConceptScheme -- codes and names both occur in
+#: catalogues; letters, digits, hyphens and underscores.
+concepts: '^[A-Za-z0-9][A-Za-z0-9_\-]*$'
+
+#: owl:NamedIndividual -- not checked by default.
+individuals: null

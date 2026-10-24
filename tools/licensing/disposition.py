@@ -172,7 +172,7 @@ CONTENT_ROLES = {"ontology-module", "ontology-module-set",
                  "ontology-validation", "test-fixture", "documentation",
                  "generated-artifact", "specification", "historical-draft",
                  "site-source", "communication", "example-data",
-                 "competency-question", "research"}
+                 "competency-question", "research", "vocabulary-intake"}
 
 #: Roles that are software rather than published content.
 SOFTWARE_ROLES = {"tool", "configuration"}

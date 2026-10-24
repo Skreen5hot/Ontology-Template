@@ -53,5 +53,9 @@ p:B1 a owl:Class ; rdfs:subClassOf [ a owl:Restriction ;
 p:B2 a owl:Class ; rdfs:subClassOf p:AlsoUndeclared .             # expect: dangling_ref
 p:B3 a owl:Class ; rdfs:subClassOf p:AlsoUndeclared .             # expect: dangling_ref
 
+# naming_convention: a class and a property against config/naming.yaml
+p:lowercaseClass a owl:Class .                                    # expect: naming_convention
+p:BadProperty a owl:ObjectProperty .                              # expect: naming_convention
+
 # positive control inside the dirty file: real, and not reported
 p:C1 a owl:Class ; rdfs:subClassOf cco:ont00001180 .

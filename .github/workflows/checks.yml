@@ -96,8 +96,9 @@ jobs:
       - name: Every answerable competency question gives its answer
         run: python tools/ontology/competency.py
 
-      - name: The generated shapes and Protégé files are current
+      - name: The generated vocabulary, shapes and Protégé files are current
         run: |
+          python tools/ontology/vocabulary.py --check
           python tools/ontology/profile_shapes.py --check
           python tools/ontology/protege.py --check
 

@@ -73,6 +73,21 @@ components:
       with its SPARQL and the answer it must give.
       tools/ontology/competency.py runs every answerable one.
 
+  - id: ontology.vocabulary
+    path: ontology/vocabulary.ttl
+    role: ontology-module
+    generator: tool.vocabulary
+    description: >-
+      The accepted rows of vocabulary/terms.tsv, as classes. Generated; an
+      ordinary module to every check.
+
+  - id: vocabulary.intake
+    path: vocabulary
+    role: vocabulary-intake
+    description: >-
+      Term proposals as rows, for people who do not write Turtle. Reviewed
+      in pull requests; a row is generated only once accepted and signed.
+
   # ---- Validation ---------------------------------------------------
 
   - id: validation.wellformedness
@@ -104,6 +119,15 @@ components:
       a label and a definition. Generated from
       config/annotation-profile.yaml.
 
+  - id: validation.skos
+    path: shapes/skos_shapes.ttl
+    role: ontology-validation
+    description: >-
+      The structure of the project's concept schemes: every concept in a
+      declared scheme, no broader cycles, no broader across schemes, no
+      label repeated as an altLabel, no concept that is also a class, a
+      top concept in every scheme.
+
   # ---- Deliberately invalid ------------------------------------------
 
   - id: fixture.wellformedness-bad-examples
@@ -124,6 +148,13 @@ components:
       vendored extracts in scope, so a case can sit under a real BFO
       category -- including the one only BFO's AllDisjointClasses, through
       the derived disjointness file, can catch.
+
+  - id: fixture.skos-bad-examples
+    path: shapes/skos_bad_examples.ttl
+    role: test-fixture
+    description: >-
+      Cases built to break the SKOS shapes, one per constraint, with a
+      well-formed scheme as the positive control.
 
   # ---- Documentation -------------------------------------------------
 
@@ -163,6 +194,23 @@ components:
       How a repository made from this template is built, and why. Carried
       from BFO-Aligned ValueNet, where the method was worked out, through
       ARO and the BCO.
+
+  - id: docs.governance
+    path: docs/governance
+    role: documentation
+    description: >-
+      How a term gets in, what it must be called, how it leaves, and what
+      changed -- each rule beside the check that holds it. The project's
+      own policy; the template ships defaults.
+
+  - id: tool.term-diff
+    path: tools/ontology/term_diff.py
+    role: tool
+    template: owned
+    description: >-
+      The authored terms added, removed, deprecated or changed between two
+      commits, each side read through its own layout contract. A comment on
+      every pull request; CHANGES.md in every release.
 
   - id: docs.decisions
     path: docs/decisions
@@ -361,6 +409,13 @@ components:
       The ROBOT pin (version, url, sha256, the commit its tag named), the
       reasoner, and the Java version the CI jobs install.
 
+  - id: config.naming
+    path: config/naming.yaml
+    role: configuration
+    description: >-
+      The local-name conventions for authored classes, properties and
+      concepts, checked by the IRI linter and the vocabulary generator.
+
   - id: config.layout
     path: config/repository-layout.yaml
     role: configuration
@@ -534,6 +589,14 @@ components:
     description: >-
       Builds <id>-base and <id>-full as Turtle, RDF/XML and JSON-LD with
       NOTICE, LICENSE and SHA256SUMS, byte-identical across builds.
+
+  - id: tool.vocabulary
+    path: tools/ontology/vocabulary.py
+    role: tool
+    template: owned
+    description: >-
+      Generates ontology/vocabulary.ttl from the accepted rows of
+      vocabulary/terms.tsv, refusing a row that cannot be placed.
 
   - id: tool.protege
     path: tools/ontology/protege.py

@@ -1,0 +1,75 @@
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix example:  <https://fandaws.com/ontology/example#> .
+
+# Cases built to break skos_shapes.ttl, with a positive control scheme
+# beside them. Each concept has a prefLabel, so the wellformedness shapes
+# stay quiet and each case trips the constraint it is named for.
+
+# -- positive control: a well-formed scheme ---------------------------
+
+example:SkosGoodScheme a skos:ConceptScheme ;
+    skos:prefLabel "good scheme" ;
+    skos:hasTopConcept example:SkosGoodTop .
+
+example:SkosGoodTop a skos:Concept ;
+    skos:prefLabel "good top" ;
+    skos:inScheme example:SkosGoodScheme ;
+    skos:topConceptOf example:SkosGoodScheme .
+
+example:SkosGoodChild a skos:Concept ;
+    skos:prefLabel "good child" ;
+    skos:altLabel "a different name" ;
+    skos:inScheme example:SkosGoodScheme ;
+    skos:broader example:SkosGoodTop .
+
+# -- K1 in no declared scheme -----------------------------------------
+
+example:SkosOrphan a skos:Concept ;
+    skos:prefLabel "orphan" ;
+    skos:inScheme example:NotADeclaredScheme .
+
+# -- K2 a cycle of broader --------------------------------------------
+
+example:SkosCycleA a skos:Concept ;
+    skos:prefLabel "cycle a" ;
+    skos:inScheme example:SkosGoodScheme ;
+    skos:broader example:SkosCycleB .
+
+example:SkosCycleB a skos:Concept ;
+    skos:prefLabel "cycle b" ;
+    skos:inScheme example:SkosGoodScheme ;
+    skos:broader example:SkosCycleA .
+
+# -- K3 broader across schemes ------------------------------------------
+
+example:SkosOtherScheme a skos:ConceptScheme ;
+    skos:prefLabel "other scheme" ;
+    skos:hasTopConcept example:SkosOtherTop .
+
+example:SkosOtherTop a skos:Concept ;
+    skos:prefLabel "other top" ;
+    skos:inScheme example:SkosOtherScheme .
+
+example:SkosAcrossSchemes a skos:Concept ;
+    skos:prefLabel "across schemes" ;
+    skos:inScheme example:SkosGoodScheme ;
+    skos:broader example:SkosOtherTop .
+
+# -- K4 an altLabel that repeats the prefLabel --------------------------
+
+example:SkosRepeatedLabel a skos:Concept ;
+    skos:prefLabel "repeated" ;
+    skos:altLabel "repeated" ;
+    skos:inScheme example:SkosGoodScheme .
+
+# -- K5 a concept that is also a class ----------------------------------
+
+example:SkosAlsoClass a skos:Concept , owl:Class ;
+    skos:prefLabel "also a class" ;
+    skos:inScheme example:SkosGoodScheme .
+
+# -- K6 a scheme with no top concept -----------------------------------
+
+example:SkosTopless a skos:ConceptScheme ;
+    skos:prefLabel "topless scheme" .

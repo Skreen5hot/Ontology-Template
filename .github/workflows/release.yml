@@ -96,10 +96,23 @@ jobs:
           python tools/ontology/competency.py
           python tools/ontology/reason.py
 
+      # The terms that changed since the previous release tag, or, for the
+      # first release, every term. Shipped as CHANGES.md, inside the
+      # checksums.
+      - name: What changed since the previous release
+        run: |
+          previous=$(git describe --tags --abbrev=0 --match 'v*' "${GITHUB_REF_NAME}^" 2>/dev/null || true)
+          if [ -n "$previous" ]; then
+            python tools/ontology/term_diff.py --base "$previous" --head "$GITHUB_REF_NAME" -o CHANGES.md
+          else
+            python tools/ontology/term_diff.py --head "$GITHUB_REF_NAME" -o CHANGES.md
+          fi
+          cat CHANGES.md
+
       - name: Build twice, with different hash seeds, and compare
         run: |
-          PYTHONHASHSEED=1 python tools/release.py --version "${{ steps.what.outputs.version }}" --out dist
-          PYTHONHASHSEED=2 python tools/release.py --version "${{ steps.what.outputs.version }}" --out dist-again
+          PYTHONHASHSEED=1 python tools/release.py --version "${{ steps.what.outputs.version }}" --out dist --changes CHANGES.md
+          PYTHONHASHSEED=2 python tools/release.py --version "${{ steps.what.outputs.version }}" --out dist-again --changes CHANGES.md
           diff -r dist dist-again
           cat "dist/${{ steps.what.outputs.id }}-${{ steps.what.outputs.version }}/SHA256SUMS"
 

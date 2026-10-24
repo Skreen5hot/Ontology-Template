@@ -6,6 +6,8 @@
         --repository owner/Widget-Ontology
 
     python tools/init_project.py ... --dry-run     # say what would change
+    python tools/init_project.py ... --offline     # every generator but the
+                                                   # vendoring rebuild
     python tools/init_project.py ... --no-regenerate
                                                    # skip the generators
                                                    # (they need the network
@@ -79,7 +81,13 @@ TURTLE_ROLES = ("ontology-module", "ontology-module-set",
 MARK_BEGIN = "  # >>> template-only"
 MARK_END = "  # <<< template-only"
 
+#: The one generator that needs the network (or a warm cache): the
+#: extracts' headers name the project, so it runs at init, but --offline
+#: leaves it for later and runs everything else.
+NETWORK_GENERATORS = (("tools/ontology/vendor_upstream.py", "--rebuild"),)
+
 GENERATORS = (
+    ("tools/ontology/vocabulary.py",),
     ("tools/ontology/vendor_upstream.py", "--rebuild"),
     ("tools/ontology/profile_shapes.py",),
     ("tools/ontology/protege.py",),
@@ -360,6 +368,9 @@ def main(argv=None) -> int:
     ap.add_argument("--licence-holder", default=None)
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--no-regenerate", action="store_true")
+    ap.add_argument("--offline", action="store_true",
+                    help="run every generator but the vendoring rebuild, "
+                         "which needs the network or a warm cache")
     ap.add_argument("--allow-dirty", action="store_true",
                     help="run with uncommitted changes in the tree")
     args = ap.parse_args(argv)
@@ -415,8 +426,10 @@ def main(argv=None) -> int:
             print("    python " + " ".join(command))
         return 0
 
+    commands = [c for c in GENERATORS
+                if not (args.offline and c in NETWORK_GENERATORS)]
     print(flush=True)
-    for command in GENERATORS:
+    for command in commands:
         # Flushed, or the generator's output -- written straight to the
         # terminal -- lands above the lines that introduced it.
         print("  $ python " + " ".join(command), flush=True)

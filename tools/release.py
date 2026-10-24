@@ -16,7 +16,8 @@ Two variants, each in three serialisations, with checksums:
 
   .ttl  Turtle      .owl  RDF/XML      .jsonld  JSON-LD
 
-plus NOTICE.md (the vendored attribution), LICENSE, and SHA256SUMS.
+plus NOTICE.md (the vendored attribution), LICENSE, CHANGES.md when given
+(--changes: the term diff from the previous release), and SHA256SUMS.
 
 The header of each: ontology IRI <iri_base>/<id>-base (or -full), version
 IRI <iri_base>/<version>/<id>-base, owl:versionInfo the version; title,
@@ -318,7 +319,8 @@ def same_graph(data: bytes, rdflib_format: str, graph) -> bool:
 
 
 def build(version: str, out: Path, modules: list[Path] | None = None,
-          vendored: list[Path] | None = None) -> list[str]:
+          vendored: list[Path] | None = None,
+          changes: Path | None = None) -> list[str]:
     if not VERSION.match(version):
         raise Refused("version %r is not MAJOR.MINOR.PATCH (a tag v1.2.0 is "
                       "released as 1.2.0)" % version)
@@ -348,6 +350,11 @@ def build(version: str, out: Path, modules: list[Path] | None = None,
     shutil.copyfile(notice_path, target / "NOTICE.md")
     shutil.copyfile(root / "LICENSE", target / "LICENSE")
     written += ["NOTICE.md", "LICENSE"]
+    if changes is not None:
+        # Before the checksums, so CHANGES.md is one of the files they
+        # cover rather than an unchecked attachment beside them.
+        shutil.copyfile(changes, target / "CHANGES.md")
+        written.append("CHANGES.md")
     sums = "".join("%s  %s\n" % (hashlib.sha256(
         (target / name).read_bytes()).hexdigest(), name)
         for name in sorted(written))
@@ -359,10 +366,13 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--version", required=True)
     ap.add_argument("--out", default=None)
+    ap.add_argument("--changes", default=None,
+                    help="a CHANGES.md to ship, from tools/ontology/term_diff.py")
     args = ap.parse_args(argv)
     root = layout.repository_root()
     out = Path(args.out) if args.out else root / "dist"
-    written = build(args.version, out)
+    written = build(args.version, out,
+                    changes=Path(args.changes) if args.changes else None)
     target = out / ("%s-%s" % (project.project_id(), args.version))
     for name in written:
         print("  %s/%s" % (target.as_posix(), name))

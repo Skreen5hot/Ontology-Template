@@ -13,4 +13,5 @@
     owl:imports <https://fandaws.com/ontology/example> ;
     owl:imports <https://fandaws.com/ontology/example/vendor/bfo-core-extract> ;
     owl:imports <https://fandaws.com/ontology/example/vendor/bfo-disjointness> ;
-    owl:imports <https://fandaws.com/ontology/example/vendor/cco-extract> .
+    owl:imports <https://fandaws.com/ontology/example/vendor/cco-extract> ;
+    owl:imports <https://fandaws.com/ontology/example/vocabulary> .
