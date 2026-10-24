@@ -156,3 +156,37 @@ def test_against_names_what_both_sides_changed(status, monkeypatch,
     report = status.against(tmp_path)
     assert report["both"] == [both], report
     assert theirs_only in report["template_changed"]["changed"]
+
+
+def test_the_dependabot_workflow_rerecords_the_manifest_and_nothing_else(repo):
+    """The guards that make it safe to give a Dependabot-triggered job
+    write permission, read from the workflow itself: it runs only when
+    both the author and the actor are Dependabot, only in the template,
+    refuses to push anything but the manifest, and re-runs the real
+    checks on the new commit rather than declaring it green."""
+    import yaml
+
+    workflow = yaml.safe_load((repo / ".github/workflows/"
+                               "dependabot-manifest.yml").read_text(
+        encoding="utf-8"))
+    job = workflow["jobs"]["rerecord"]
+    condition = " ".join(job["if"].split())
+    assert "github.event.pull_request.user.login == 'dependabot[bot]'" \
+        in condition
+    assert "github.actor == 'dependabot[bot]'" in condition
+    assert workflow["permissions"] == {"contents": "read"}
+    assert job["permissions"] == {"contents": "write", "actions": "write"}
+
+    steps = {step["name"]: step for step in job["steps"]}
+    record = steps["Re-record, and refuse anything but the manifest"]
+    assert "steps.state.outputs.template == 'true'" in record["if"]
+    assert '!= "config/template-manifest.json"' in record["run"]
+    push = steps["Push the one-file commit"]["run"]
+    assert "git add config/template-manifest.json" in push
+    assert "git add -A" not in push and "git add ." not in push
+    rerun = steps["Run Checks and Reasoning on the new commit"]["run"]
+    assert "checks.yml" in rerun and "reasoning.yml" in rerun
+    text = (repo / ".github/workflows/dependabot-manifest.yml").read_text(
+        encoding="utf-8")
+    for forbidden in ("gh pr merge", "gh pr review", "--admin"):
+        assert forbidden not in text, forbidden

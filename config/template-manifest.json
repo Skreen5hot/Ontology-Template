@@ -1,5 +1,5 @@
 {
-  "digest": "b8f7605845327ee88d0a86492e6461bb41d334e873cbde2b493da7e83df8636c",
+  "digest": "ccdbfc8d728b51b352c72e9cd2ffdfcd0d2757dda9648345b108df60b6325603",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".githooks/pre-commit": "e39d41b2b6c3a892468a61de9fd62c8fc0c1c69cb5cfba4bcfd5e141bdddd679",
@@ -9,10 +9,11 @@
     ".github/dependabot.yml": "63385b00ceb12bcde8309e8d4e6823aadd32b2d8cb92e5abb801afbd7b58f8de",
     ".github/pull_request_template.md": "8ef17ba107d2ec008b0f05953ca1108c97b5ff042c644418c22cb186d10084be",
     ".github/workflows/checks.yml": "2be99bfb06ded9dc6fbb56346a6398231edfdd7d1e91cf89d997ccd579dfa18f",
+    ".github/workflows/dependabot-manifest.yml": "78881307a539693bd2bddb7ce08cad1e29d4f2be0e714318f42ca1f559b22ef6",
     ".github/workflows/reasoning.yml": "8ce864f86ab20bf7d755a61300f9ebc0125ebbb612d3684db71bfa18006141b6",
     ".github/workflows/release.yml": "611dd4b2e9ffc964b880e103178eb6802dd86ba5fe8dd2ae7e6b59e91ea2feeb",
     ".github/workflows/term-diff.yml": "1c79a2806d8e98fb7cb32fab01fef430cf8ec8c6f1bc144a5e027a87cff67595",
-    "docs/DEVELOPMENT.md": "b031ed89dd2c2c84d90b654d136750da6c3782f65ec842a4ea77b14fec5d291e",
+    "docs/DEVELOPMENT.md": "ec573afc457681130ecc3fd596e2a640c842b3b684ad3f59a0555d5185a71457",
     "docs/process/PROCESS.md": "7d05fe31365cbecfc27faa028671b0f95b12a196b91ff53bac4ccc01d4eea446",
     "requirements-dev.txt": "c9a55233d63e08bc8b5facf18f8401e33da84d2d2aef15f41507fc93963dedd3",
     "tests/conftest.py": "0e9fcd66d3f5bf7dc819f1e07543dbe55398525c71a3d3b5f228cf17040a4a3a",
@@ -52,7 +53,7 @@
     "tests/test_reasoning.py": "20bb50f7a02dc110103f90c4911ce4f74eaddeaff91453f448729d4ca584d22f",
     "tests/test_release.py": "487a483bde50de0535fe04bfa407f9f6ba9fb5d2a996e7aac5e61a40a9e5e545",
     "tests/test_repository_layout.py": "d225aeb6ba3cdaa4a6eddcb799af888c15433a273fcc535e5463ae85fcd07696",
-    "tests/test_template.py": "7851eff7aa8a39d452c0c7264a502f5e5fe0155ae81e744ac90d2f3ce6ecee78",
+    "tests/test_template.py": "7bef2b56451e29a2789340004f7b0444ead848f285bc786955e8a95986dc886e",
     "tests/test_upstream_vendoring.py": "69080894500f8002532da1793ea5a45bc761eeff58cf6a77fd3b3ad7ace97593",
     "tests/test_vocabulary.py": "75e9d91611942df4792b8d8c82f8c0c75951cbe7e4b5fc1c73c0a2b87724a104",
     "tools/communications.py": "eb3cc330fb481d008fac6ea593a2540cc01b1979cc338ae9f6faa248600b0938",

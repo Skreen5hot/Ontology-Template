@@ -440,7 +440,11 @@ Release workflow ships it as `CHANGES.md`, inside the checksums.
   change of each kind needs.
 - **Dependabot** proposes updates to the SHA-pinned actions and the exact Python pins as
   pull requests; each runs the checks and is merged by a person. It does not touch the
-  ontology or ROBOT pins, which move by decision.
+  ontology or ROBOT pins, which move by decision. In the template, where those files are
+  template-owned, `.github/workflows/dependabot-manifest.yml` re-records
+  `config/template-manifest.json` on a Dependabot pull request -- that file and nothing
+  else -- and re-runs Checks and Reasoning on the result, so the pull request is judged on
+  what the update does. It approves and merges nothing.
 - **`research/`** is the project's own notes. Sources go in `docs/Reference/`, never
   tracked; `disposition.py --check` refuses anything in `research/` that is not a note,
   table or bibliography, and any file that is a byte copy of reference material.
