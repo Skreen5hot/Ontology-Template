@@ -1,5 +1,5 @@
 {
-  "digest": "f1412848cc58f36e0eeede75c52b83b741f113be9dd129c3e58175e5b3424c63",
+  "digest": "bfa5941cd4a91f3aa7b4498befcf124d29f540d5ff169ace4c5aad7e2c40afc4",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".githooks/pre-commit": "e39d41b2b6c3a892468a61de9fd62c8fc0c1c69cb5cfba4bcfd5e141bdddd679",
@@ -10,7 +10,7 @@
     ".github/pull_request_template.md": "8ef17ba107d2ec008b0f05953ca1108c97b5ff042c644418c22cb186d10084be",
     ".github/workflows/checks.yml": "2be99bfb06ded9dc6fbb56346a6398231edfdd7d1e91cf89d997ccd579dfa18f",
     ".github/workflows/dependabot-manifest.yml": "803ca641f83f593431414b037b6e944f7a2415a32a436273389f2c3aaf5f2d8f",
-    ".github/workflows/pages.yml": "934223c703cf0d6038990fab033be21dada772de1b3bb011612da358d3f5f679",
+    ".github/workflows/pages.yml": "ab15ff5a2f623493819d1efd1836cf9195bcb5a593ba014ad248c9ea40a188cb",
     ".github/workflows/reasoning.yml": "8ce864f86ab20bf7d755a61300f9ebc0125ebbb612d3684db71bfa18006141b6",
     ".github/workflows/release.yml": "611dd4b2e9ffc964b880e103178eb6802dd86ba5fe8dd2ae7e6b59e91ea2feeb",
     ".github/workflows/term-diff.yml": "1c79a2806d8e98fb7cb32fab01fef430cf8ec8c6f1bc144a5e027a87cff67595",
