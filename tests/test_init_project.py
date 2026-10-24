@@ -153,8 +153,15 @@ def test_the_module_is_renamed_and_rewritten(initialized):
 def test_the_template_namespace_survives_nowhere_but_generated_files(
         initialized):
     """The generated files still carry it -- --no-regenerate -- and are
-    the only ones that may."""
-    generated = ("vendor/", "config/upstream-extracts.json")
+    the only ones that may: whatever a component with a generator holds,
+    read from the copy's own contract."""
+    import yaml
+
+    contract = yaml.safe_load(read(initialized,
+                                   "config/repository-layout.yaml"))
+    generated = tuple(c["path"] for c in contract["components"]
+                      if c.get("generator"))
+    assert "protege" in generated and "vendor/bfo/bfo-core-extract.ttl" in         generated, generated
     stray = []
     for path in initialized.rglob("*"):
         relative = path.relative_to(initialized).as_posix()
@@ -177,6 +184,11 @@ def test_the_template_only_parts_are_gone(initialized):
     assert "{{" not in readme
     assert "Widget Works Ontology" in read(initialized, "CLAUDE.md")
     assert "Widget Works Ontology" in read(initialized, "docs/HANDOFF.md")
+    import yaml
+
+    cff = yaml.safe_load(read(initialized, "CITATION.cff"))
+    assert cff["title"] == "Widget Works Ontology"
+    assert cff["repository-code"] == "https://github.com/owner/Widget-Works"
 
 
 def test_the_owned_files_are_untouched(repo, initialized):

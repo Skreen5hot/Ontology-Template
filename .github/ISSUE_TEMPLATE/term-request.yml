@@ -1,0 +1,50 @@
+name: Term request
+description: Propose a new term, or a change to an existing one.
+title: "Term request: "
+labels: [term-request]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        A term is accepted when a reviewer can place it: under one parent, with a
+        definition that names that parent ("A(n) <parent> that ..."), from a source.
+        If you do not know the parent's IRI, give its name; the reviewer will find
+        it in the vendored register. You can also propose terms as rows in
+        vocabulary/terms.tsv, in a pull request.
+  - type: input
+    id: label
+    attributes:
+      label: Preferred label
+      description: The name, as it will be shown.
+    validations:
+      required: true
+  - type: textarea
+    id: definition
+    attributes:
+      label: Definition
+      description: A(n) <parent> that ...
+    validations:
+      required: true
+  - type: input
+    id: parent
+    attributes:
+      label: Parent
+      description: The class this is a kind of -- an existing term of this ontology, or a BFO or CCO class.
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: Definition source
+      description: Where the definition comes from -- a standard, a document, a domain expert.
+  - type: textarea
+    id: synonyms
+    attributes:
+      label: Synonyms and other names
+  - type: textarea
+    id: why
+    attributes:
+      label: Why it is needed
+      description: The competency question, use case or mapping it serves.
+    validations:
+      required: true

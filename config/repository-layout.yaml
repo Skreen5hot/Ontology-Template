@@ -57,6 +57,14 @@ components:
       Linted with the modules; never in the corpus digest or the SHACL
       ladder.
 
+  - id: research
+    path: research
+    role: research
+    description: >-
+      The project's own notes: summaries of sources, comparisons, the
+      reasoning before a decision. Notes, tables and bibliographies only;
+      the sources themselves go in docs/Reference, never tracked.
+
   - id: competency-questions
     path: competency-questions
     role: competency-question
@@ -163,6 +171,13 @@ components:
       The decision record: the architect's acts and choices, recorded
       verbatim and dated, each citing the digest or commit of what it
       decided about.
+
+  - id: docs.citation
+    path: CITATION.cff
+    role: documentation
+    description: >-
+      How to cite this repository (Citation File Format). init renders the
+      project's from a skeleton.
 
   - id: licence.project
     path: LICENSE
@@ -366,6 +381,14 @@ components:
       The Python dependencies, pinned exactly, and only what the tools and
       tests import.
 
+  - id: github.meta
+    path: .github
+    role: configuration
+    template: owned
+    description: >-
+      Dependabot (the SHA-pinned actions and the exact Python pins), the
+      term-request and defect issue forms, and the pull-request checklist.
+
   - id: ci.workflows
     path: .github/workflows
     role: configuration
@@ -511,6 +534,30 @@ components:
     description: >-
       Builds <id>-base and <id>-full as Turtle, RDF/XML and JSON-LD with
       NOTICE, LICENSE and SHA256SUMS, byte-identical across builds.
+
+  - id: tool.protege
+    path: tools/ontology/protege.py
+    role: tool
+    template: owned
+    description: >-
+      Generates protege/edit.ttl, which imports every module and vendored
+      file, and the XML catalog that maps each import to its local file.
+
+  - id: tool.normalize
+    path: tools/ontology/normalize.py
+    role: tool
+    template: owned
+    description: >-
+      Keeps the modules that declare format: canonical in canonical Turtle,
+      for modules edited in Protégé.
+
+  - id: protege
+    path: protege
+    role: generated-artifact
+    generator: tool.protege
+    description: >-
+      The Protégé entry point: open edit.ttl, and catalog-v001.xml beside it
+      resolves every import to a file here, offline. Declares no term.
 
   - id: tool.corpus-digest
     path: tools/ontology/corpus_digest.py

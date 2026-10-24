@@ -1,0 +1,26 @@
+# Dependabot: proposes updates to the pins, as pull requests.
+#
+# GitHub Actions are pinned to commit SHAs, with the version in a trailing
+# comment; Dependabot updates both. requirements-dev.txt pins exactly, and
+# Dependabot proposes the next exact pin. Each proposal runs the Checks and
+# Reasoning workflows like any pull request, and is merged by a person:
+# nothing here updates itself.
+#
+# Not covered here, because Dependabot does not know them: the upstream
+# ontology pins (config/upstream-sources.yaml) and the ROBOT pin
+# (config/reasoning.yaml). Those move by a decision, with --rebuild.
+
+version: 2
+
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5

@@ -69,6 +69,7 @@ RENDERED = {
     "README.md": "README.md",
     "CLAUDE.md": "CLAUDE.md",
     "HANDOFF.md": "docs/HANDOFF.md",
+    "CITATION.cff": "CITATION.cff",
 }
 
 #: Roles whose Turtle carries the namespace or the prefix.
@@ -81,6 +82,7 @@ MARK_END = "  # <<< template-only"
 GENERATORS = (
     ("tools/ontology/vendor_upstream.py", "--rebuild"),
     ("tools/ontology/profile_shapes.py",),
+    ("tools/ontology/protege.py",),
     ("tools/ontology/corpus_digest.py", "-o", "config/corpus-digest.json"),
     ("tools/ontology/validate.py", "--record"),
 )
@@ -213,6 +215,7 @@ def render(text: str, new: dict, module: str, template: str) -> str:
         "repository": new["repository"], "module": module,
         "date": dt.date.today().isoformat(),
         "template_url": "https://github.com/" + template,
+        "licence_holder": new["licence_holder"],
     }
     for key, value in values.items():
         text = text.replace("{{%s}}" % key, value)
@@ -308,23 +311,34 @@ def plan(root: Path, old: dict, new: dict) -> tuple[dict, list, list]:
     return writes, renames, removals
 
 
+def generated_paths() -> set:
+    """Every file a component with a generator holds. The generators
+    rewrite them after this check, so the template's IRI base in them is
+    expected here and gone afterwards."""
+    out = set()
+    for entry in layout.components():
+        if entry.generator and entry.exists():
+            out |= {p.resolve() for p in entry.members("*")}
+    return out
+
+
 def leftovers(root: Path, old: dict) -> list[str]:
     """Turtle in which the template's namespace survives.
 
-    Every .ttl in the tree except the vendored extracts, which the
-    generators rewrite -- deliberately not the TURTLE_ROLES the rewrite
-    walked. Asking the same list twice would make this check blind
+    Every .ttl in the tree except what a generator rewrites next (the
+    extracts, the Protégé edit file, the profile shapes) -- deliberately
+    not the TURTLE_ROLES the rewrite walked. Asking the same list twice would make this check blind
     exactly where the rewrite was: with the shapes' role dropped from
     that list, both skipped the shapes, init reported success, and the
     shapes went on filtering on a namespace nothing used.
     """
-    vendored = {p.resolve() for p in layout.vendored_files()}
+    regenerated = generated_paths()
     found = []
     for path in sorted(root.rglob("*.ttl")):
         relative = path.relative_to(root).as_posix()
         if relative.startswith((".git/", ".venv/", ".upstream-cache/")):
             continue
-        if path.resolve() in vendored:
+        if path.resolve() in regenerated:
             continue
         if old["iri_base"] in path.read_bytes().decode("utf-8"):
             found.append(relative)

@@ -20,13 +20,15 @@ project on its first commit:
 | A corpus digest that survives blank-node renaming | `tools/ontology/corpus_digest.py` |
 | An IRI linter: every upstream IRI a term of its pinned release, every authored one declared, the opaque id suggested for a readable name -- in CI, a git hook, and a Claude Code hook | `tools/ontology/iri_lint.py` |
 | A communications record for other teams, and a decision record for the architect | `communications/`, `docs/decisions/` |
+| Protégé: an edit file importing every module and vendored file, with a catalog resolving each offline; canonical Turtle for modules edited there | `protege/`, `tools/ontology/normalize.py` |
+| Term-request and defect forms, a pull-request checklist, Dependabot for the pinned actions and Python, a citation file, a research record | `.github/`, `CITATION.cff`, `research/` |
 | Reasoning: ROBOT and ELK over the modules plus the full pinned BFO and CCO -- consistency, unsatisfiable classes, examples -- in a CI job of its own | `tools/ontology/reason.py`, `.github/workflows/reasoning.yml` |
 | Releases on a version tag: base and full, as Turtle, RDF/XML and JSON-LD, byte-identical across builds, with checksums | `tools/release.py`, `.github/workflows/release.yml` |
 | CI with actions pinned to commit SHAs | `.github/workflows/checks.yml` |
 | The method, and the defects each rule exists because of | `docs/process/PROCESS.md` |
 
 What it does not have yet (vocabulary intake, concept schemes, governance and crosswalks;
-Protégé catalog and other authoring aids; a research record; a public site) is in [`docs/template/ROADMAP.md`](docs/template/ROADMAP.md).
+a public site) is in [`docs/template/ROADMAP.md`](docs/template/ROADMAP.md).
 
 ## Starting a project
 

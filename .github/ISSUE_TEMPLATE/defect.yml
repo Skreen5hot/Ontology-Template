@@ -1,0 +1,22 @@
+name: Defect
+description: Something in the ontology or its tooling is wrong.
+labels: [defect]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What is wrong
+      description: The term, file or check, and what it says or does.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What it should be, and why
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: The command and its output, the axiom, the source that says otherwise.

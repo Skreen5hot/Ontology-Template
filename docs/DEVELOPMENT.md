@@ -60,6 +60,8 @@ python tools/ontology/iri_lint.py             # every IRI is a real term or a de
 python tools/ontology/competency.py           # every answerable competency question gives its answer
 python tools/ontology/profile_shapes.py --check   # the profile shapes are what the profile generates
 python tools/ontology/reason.py               # needs Java: consistent, nothing unsatisfiable
+python tools/ontology/protege.py --check      # the Protégé edit file and catalog are current
+python tools/ontology/normalize.py --check    # modules declared canonical are canonical
 python tools/communications.py                # the communications record follows its protocol
 python tools/template_status.py               # where this has diverged from the template
 python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsifications
@@ -78,6 +80,8 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `competency.py` | an answerable question whose query gives a different answer, or none where rows were expected; an expectation nothing can fail (`rows: []`, `count: 0`, `ask: false`); a question depending on a term nobody defines; an example file that does not exist or lies outside `examples/` |
 | `profile_shapes.py --check` | `shapes/annotation_profile_shapes.ttl` differing from what `config/annotation-profile.yaml` generates; a profile property no pinned upstream or W3C vocabulary defines |
 | `reason.py` | an unsatisfiable authored class; an ontology with no model; example individuals inconsistent with it; and, as exit 2, no Java, a ROBOT jar that is not the pinned one, or an answer from ROBOT it cannot read |
+| `protege.py --check` | `protege/edit.ttl` or its catalog differing from what the modules and the vendored files generate; a module with no ontology header, or two |
+| `normalize.py --check` | a module declared `format: canonical` that is not in canonical Turtle |
 | `release.py` | a version that is not MAJOR.MINOR.PATCH; a file that does not parse back to the graph it was written from |
 | `template_status.py --check` | in the template only: a manifest that does not describe the owned files. A project's divergence is reported, never refused |
 
@@ -182,6 +186,7 @@ the licensing tool so the two cannot drift:
 | `site-source` | a public site's pages, copy and assets |
 | `example-data` | instance data the competency questions are answered against; linted, never in the digest or the ladder |
 | `competency-question` | one YAML file per question, run by `tools/ontology/competency.py` |
+| `research` | the project's own notes, tables and bibliographies; never a source itself |
 | `communication` | the communications record |
 | `documentation`, `configuration`, `tool`, `project-licence` | as they sound |
 
@@ -356,6 +361,41 @@ made from.
 python tools/template_status.py                                 # what this project changed
 python tools/template_status.py --against ../Ontology-Template  # what the template changed since
 ```
+
+---
+
+## Editing in Protégé
+
+Open `protege/edit.ttl`. It imports every module and every vendored file, and
+`protege/catalog-v001.xml` beside it maps each import to the local file, so Protégé loads
+BFO and CCO beneath your classes without fetching anything, and saves an edit into the
+module the axiom belongs to. Both files are generated; after adding a module or
+re-vendoring, regenerate them:
+
+```bash
+python tools/ontology/protege.py
+```
+
+Protégé rewrites a module in its own Turtle on save, and drops its comments. For a module
+you edit only in Protégé, declare `format: canonical` on it in the layout contract and run
+`python tools/ontology/normalize.py` after saving: the module is then always in one form,
+and a diff shows the axioms that changed rather than every line Protégé reordered. A module
+written by hand, with its reasoning in comments, should not be canonical.
+
+## Requests, reviews and records
+
+- **Term requests** come in through the issue form (`.github/ISSUE_TEMPLATE/term-request.yml`),
+  which asks for what placing a term needs: a label, a definition naming its parent, the
+  parent, a source, and why.
+- **Pull requests** carry a checklist (`.github/pull_request_template.md`) of the checks a
+  change of each kind needs.
+- **Dependabot** proposes updates to the SHA-pinned actions and the exact Python pins as
+  pull requests; each runs the checks and is merged by a person. It does not touch the
+  ontology or ROBOT pins, which move by decision.
+- **`research/`** is the project's own notes. Sources go in `docs/Reference/`, never
+  tracked; `disposition.py --check` refuses anything in `research/` that is not a note,
+  table or bibliography, and any file that is a byte copy of reference material.
+- **`CITATION.cff`** says how to cite the ontology; init writes the project's.
 
 ---
 

@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: If you use this ontology, please cite it as below.
+title: "{{title}}"
+abstract: >-
+  {{description}}
+authors:
+  - name: "{{licence_holder}}"
+repository-code: https://github.com/{{repository}}
+license: MIT
+type: dataset
+identifiers:
+  - type: uri
+    value: {{iri_base}}

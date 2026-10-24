@@ -172,7 +172,7 @@ CONTENT_ROLES = {"ontology-module", "ontology-module-set",
                  "ontology-validation", "test-fixture", "documentation",
                  "generated-artifact", "specification", "historical-draft",
                  "site-source", "communication", "example-data",
-                 "competency-question"}
+                 "competency-question", "research"}
 
 #: Roles that are software rather than published content.
 SOFTWARE_ROLES = {"tool", "configuration"}
@@ -385,9 +385,53 @@ def attribution_findings(rows) -> list:
     return out
 
 
+#: What research/ may hold: the project's own notes, tables and
+#: bibliographies. Anything else is likely a source, which belongs in the
+#: never-tracked reference component.
+RESEARCH_SUFFIXES = (".md", ".txt", ".tsv", ".csv", ".bib", ".yaml", ".yml")
+
+
+def research_findings(rows) -> list:
+    """A source copied into research/ is redistributed like any other
+    tracked file. Refused by suffix, and by content: a file whose bytes are
+    those of a file in the reference component is a copy whatever its
+    name. The content half can only look at reference files present on
+    this machine; in CI there are none, and the suffix half stands alone.
+    """
+    import hashlib
+
+    research = [c for c in layout.components() if c.role == "research"]
+    if not research:
+        return []
+    prefixes = tuple(c.path + "/" for c in research)
+    tracked = [r.path for r in rows if r.path.startswith(prefixes)]
+    root = layout.repository_root()
+    out = []
+    odd = [p for p in tracked if Path(p).suffix.lower() not in RESEARCH_SUFFIXES]
+    if odd:
+        out.append("%d file(s) in research/ are not notes, tables or "
+                   "bibliographies, and are likely sources, which belong in "
+                   "the never-tracked reference component: %s" % (len(odd),
+                                                                  odd[:6]))
+    reference = {}
+    for entry in layout.components():
+        if entry.role in CITED_ROLES and entry.exists():
+            for path in entry.members("*"):
+                if path.is_file():
+                    digest = hashlib.sha256(path.read_bytes()).hexdigest()
+                    reference[digest] = path.name
+    copies = [p for p in tracked
+              if hashlib.sha256((root / p).read_bytes()).hexdigest()
+              in reference]
+    if copies:
+        out.append("%d file(s) in research/ are byte-for-byte copies of "
+                   "reference material: %s" % (len(copies), copies[:6]))
+    return out
+
+
 def findings(rows: list[Disposition]) -> list[str]:
     """What is wrong, as opposed to what is unusual."""
-    out = attribution_findings(rows)
+    out = attribution_findings(rows) + research_findings(rows)
     not_publishable = [r for r in rows if not r.redistributable]
     if not_publishable:
         out.append(

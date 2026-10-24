@@ -50,7 +50,8 @@ class Component:
     """One declaration, with the questions worth asking of it."""
 
     __slots__ = ("id", "path", "role", "description", "redistributable",
-                 "tracked", "generator", "orphaned", "template", "_root")
+                 "tracked", "generator", "orphaned", "template", "format",
+                 "_root")
 
     def __init__(self, raw: dict, root: Path):
         for required in ("id", "path", "role"):
@@ -93,6 +94,14 @@ class Component:
             raise LayoutError(
                 "%s declares template %r; the values are 'owned' and "
                 "'only'" % (self.id, self.template))
+        #: `canonical`: the module is kept in canonical Turtle by
+        #: tools/ontology/normalize.py -- for a module edited in Protégé,
+        #: which rewrites it on save. Absent: written by hand, comments
+        #: and all.
+        self.format = raw.get("format")
+        if self.format not in (None, "canonical"):
+            raise LayoutError("%s declares format %r; the value is "
+                              "'canonical'" % (self.id, self.format))
         self._root = root
 
     def resolve(self) -> Path:
