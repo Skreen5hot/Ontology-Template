@@ -11,9 +11,10 @@
 # keyed on the files that pin them, so a cache hit is the same bytes the
 # digests require.
 #
-# Actions are pinned to commit SHAs, resolved 2026-10-23 from the GitHub
-# API: setup-java v6.0.1, cache v6.1.0, and the checkout and setup-python
-# the Checks workflow uses.
+# Actions are pinned to commit SHAs, resolved from the GitHub API: cache
+# v6.1.0 (2026-10-23), setup-java v6.1.0 (Dependabot's #3, checked and
+# merged 2026-10-24), and the checkout and setup-python the Checks
+# workflow uses.
 
 name: Reasoning
 
