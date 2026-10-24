@@ -1,5 +1,5 @@
 {
-  "digest": "f1412848cc58f36e0eeede75c52b83b741f113be9dd129c3e58175e5b3424c63",
+  "digest": "7ca99a20911884ff6bbad185074a5622d76702f00d75688d5be227af1dafde37",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".githooks/pre-commit": "e39d41b2b6c3a892468a61de9fd62c8fc0c1c69cb5cfba4bcfd5e141bdddd679",
@@ -16,7 +16,7 @@
     ".github/workflows/term-diff.yml": "1c79a2806d8e98fb7cb32fab01fef430cf8ec8c6f1bc144a5e027a87cff67595",
     "docs/DEVELOPMENT.md": "be78c99877531381b500658d58c54a21f612269c08ac6360e6f714c0a465b71c",
     "docs/process/PROCESS.md": "7d05fe31365cbecfc27faa028671b0f95b12a196b91ff53bac4ccc01d4eea446",
-    "requirements-dev.txt": "b2fb0f761a0c8f38c3b8c3ea2e603f67187a9b1d78c2ea2ceb14b5299c947ac0",
+    "requirements-dev.txt": "9c74d0f41fb0c1a47fea53e031a252ecb45574f02fecb8d501a6d62afc8e0591",
     "site/pages/competency.html": "aca4de31a9d3db5873f48f82c4d6545ee63e8118379c66a3edf12efe64140fe1",
     "site/pages/crosswalks.html": "ecb37fa38cf308e54840bbf6b8b370b19c7ca1c33c7fea45e55dd1e417b14b2b",
     "site/pages/downloads.html": "3254b2e5462dc2f41f419f72fa7f6c83eee78bb73c39122b2ed35cd64d0343ae",
