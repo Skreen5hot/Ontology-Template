@@ -88,3 +88,14 @@ the build is told the repository's visibility and, for a private one, writes no 
 it (source files, commit, issues, releases); the checker refuses one, and an optional
 `contact` in `site.json` is the route for findings instead. A project that will not publish
 sets `"publish": false`.
+
+**11. "Approved"** (2026-10-26)
+
+In answer to the proposed response to the BPO evaluation,
+`docs/template/evaluations/2026-10-26-bpo-evaluation-response.md` (SHA-256 of the proposed
+text `5503fbd9a322eaea25eca15623011d9879ba8522b90b97d1d4c3527088b16597`; the approved file differs only in its status line). Effect: the six work
+packages are the template's next phases, in order, replacing roadmap phase 8 as written; the
+dispositions stand as written, the five changed remedies included; and the three policies
+take effect as proposed -- the time budgets (ladder and release build 15 min, the suite on
+the BPO port 30 min, the template's own suite 10 min, on GitHub's standard runner), a new
+warning fails the gate unless recorded, and an expired review date is reported, not failed.

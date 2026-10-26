@@ -25,7 +25,13 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 5 | Reasoning and release (ROBOT, own CI job) | **done** |
 | 6 | Authoring ergonomics, the vocabulary and governance layer, crosswalks, the research record | **done** |
 | 7 | Public site and its Pages workflow, generalized | **done** |
-| 8 | Prove the template works end to end | not started |
+| 8 | Prove it: the BPO port | **port done** (2026-10-26); success criterion not met |
+| 9 | WP1 Scale: validation, release build, a size benchmark | in progress |
+| 10 | WP2 One findings register, every Checks step run | not started |
+| 11 | WP3 One term contract for validation and the site | not started |
+| 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | not started |
+| 13 | WP5 Project ergonomics and documentation (alongside) | not started |
+| 14 | WP6 The final BPO evaluation | not started |
 
 ## 1. Extract and generalize the core
 
@@ -291,9 +297,29 @@ Built 2026-10-24. What changed from the plan:
 
 ## 8. Prove it
 
-A CI job in the template initializes a copy with sample values, adds one term under a CCO
-class, rebuilds the extracts, and runs the whole gate — showing the suite is not vacuous.
-Then a real "Use this template" run, to green CI, in one sitting.
+Done as a port rather than a synthetic run, which the architect chose for time: the BPO Testing Team ported the Business Process Ontology, 5,051 terms,
+losslessly, in `Skreen5hot/BPO-Template-Port`, and evaluated the template against five
+questions. The port succeeded; the template did not meet its success criterion. Validation
+needed a patched template file, a release could not be built, accepted findings could not be
+recorded by identity, and one accepted finding stopped most of CI.
+
+The response, approved as decision 11, is
+[`evaluations/2026-10-26-bpo-evaluation-response.md`](evaluations/2026-10-26-bpo-evaluation-response.md):
+every finding's disposition, and phases 9 to 14 below as its work packages, each with
+acceptance criteria and a planted fixture that is not BPO's. Those criteria are the gates;
+they are not repeated here. The synthetic CI run this phase first named is folded into WP1's
+benchmark and WP6.
+
+## 9 to 14. The work packages
+
+| Phase | Package | Gate |
+|---|---|---|
+| 9 | WP1 Scale (T1, T2, T3) | response §5, WP1 |
+| 10 | WP2 Findings register and complete CI (T4, T5, T20, T22, T24) | response §5, WP2 |
+| 11 | WP3 Term contract (T6, T7) | response §5, WP3 |
+| 12 | WP4 Detection gaps (T8 to T12, T23) | response §5, WP4 |
+| 13 | WP5 Ergonomics and documentation (T13 to T19, T21) | response §5, WP5 |
+| 14 | WP6 Final evaluation with the BPO Testing Team | response §7 |
 
 ## Capabilities compared with ODK
 
