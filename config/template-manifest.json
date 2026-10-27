@@ -1,5 +1,5 @@
 {
-  "digest": "f04225195063d3a1f29c51d8d20eae8d08322b6924d769a3612ccf0d4996ce98",
+  "digest": "8dbf657c942276fe0f5faceb9fd2412e3108daf64334107e0c449b429dddad27",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".githooks/pre-commit": "e39d41b2b6c3a892468a61de9fd62c8fc0c1c69cb5cfba4bcfd5e141bdddd679",
@@ -70,7 +70,7 @@
     "tests/test_release.py": "f82456810f19dc30c6c5bbaca1ca361efd1180612dc6fac33f19b3ba3a510016",
     "tests/test_repository_layout.py": "d225aeb6ba3cdaa4a6eddcb799af888c15433a273fcc535e5463ae85fcd07696",
     "tests/test_scale.py": "0f70716251c9078aa3b7b1a6bbccef808cd0e385072dd5ea85d792a86a5fad50",
-    "tests/test_site.py": "f6dcc1300dc82be556fcf89a1d1df96e590dce71a7b7d15dc260aaebf41a2175",
+    "tests/test_site.py": "2bf9c9464cc418c83c644fe8edd3a2c422db1999d8dfd7544c9f5d21267e3296",
     "tests/test_template.py": "3133a358ae805be904e56e65f7d41bfd4eeb82786e0ead3980cbdb5488201aa4",
     "tests/test_upstream_vendoring.py": "69080894500f8002532da1793ea5a45bc761eeff58cf6a77fd3b3ad7ace97593",
     "tests/test_vocabulary.py": "a0b53c5d5a70a1b9f9d4d28194c93e215394c4f38714289fd3040f752e841ad7",

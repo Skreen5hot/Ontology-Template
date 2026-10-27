@@ -28,6 +28,19 @@ import pytest
 from conftest import load_tool
 
 
+@pytest.fixture(scope="module", autouse=True)
+def private_by_default():
+    """The tests describe the default build, for a private repository.
+    The Pages workflow sets SITE_REPOSITORY_PRIVATE from the repository's
+    real visibility, so in a public repository's Pages job the default
+    tests inherited "false" and failed. A test of the public build sets
+    it itself."""
+    mp = pytest.MonkeyPatch()
+    mp.setenv("SITE_REPOSITORY_PRIVATE", "true")
+    yield
+    mp.undo()
+
+
 @pytest.fixture(scope="module")
 def builder():
     return load_tool("t_build_site", "tools/site/build_site.py")
