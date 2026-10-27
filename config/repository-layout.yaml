@@ -685,6 +685,33 @@ components:
       Keeps the modules that declare format: canonical in canonical Turtle,
       for modules edited in Protégé.
 
+  - id: tool.benchmark
+    path: tools/ontology/benchmark.py
+    role: tool
+    template: owned
+    description: >-
+      Generates a corpus a little larger than the Business Process
+      Ontology, with one planted defect per kind of check, so the
+      template's time budgets are measured on a real size.
+
+  - id: tool.sparql-constraints
+    path: tools/ontology/sparql_constraints.py
+    role: tool
+    template: owned
+    description: >-
+      Evaluates the shapes' SPARQL constraints set-based in Oxigraph,
+      held record for record to pyshacl's results; refuses any SHACL
+      feature it does not evaluate.
+
+  - id: tool.canon
+    path: tools/ontology/canon.py
+    role: tool
+    template: owned
+    description: >-
+      Canonical blank-node labels by structure, linear for tree-shaped
+      blank nodes, rdflib's canonicalization otherwise; used by the
+      release build and the canonical-form check.
+
   - id: protege
     path: protege
     role: generated-artifact

@@ -120,7 +120,7 @@ jobs:
       # Reasoning workflow runs. Deselected by marker, named here, rather
       # than skipped where they stand: a skip reads as a pass.
       - name: Tests
-        run: python -m pytest tests/ -q -p no:randomly -m "not reasoning"
+        run: python -m pytest tests/ -q -p no:randomly -m "not reasoning and not scale and not corpus"
 
   vendored:
     # The check the offline one cannot make: that the committed extracts

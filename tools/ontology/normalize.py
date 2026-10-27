@@ -28,6 +28,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import layout  # noqa: E402
 import project  # noqa: E402
@@ -60,19 +61,21 @@ def prefixes() -> dict[str, str]:
 def canonical_text(text: str) -> bytes:
     """The canonical Turtle of a module's text."""
     import rdflib
-    from rdflib.compare import isomorphic, to_canonical_graph
+
+    import canon
 
     source = rdflib.Graph()
     source.parse(data=text, format="turtle")
-    graph = rdflib.Graph()
-    for triple in to_canonical_graph(source):
-        graph.add(triple)
+    # canon.py rather than rdflib's to_canonical_graph, which does not
+    # finish on thousands of alike restrictions; the same labels
+    # tools/release.py writes.
+    graph = canon.canonical(source)
     for prefix, namespace in sorted(prefixes().items()):
         graph.bind(prefix, namespace, override=True, replace=True)
     data = graph.serialize(format="turtle", encoding="utf-8")
     back = rdflib.Graph()
     back.parse(data=data.decode("utf-8"), format="turtle")
-    if not isomorphic(back, source):
+    if not canon.same_graph(back, source):
         raise Refused("the canonical form does not parse back to the same "
                       "graph; refusing to rewrite")
     return data

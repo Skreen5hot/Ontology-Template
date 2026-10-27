@@ -34,6 +34,14 @@ def pytest_configure(config):
         "markers",
         "reasoning: needs Java and the pinned ROBOT jar; the Reasoning "
         "workflow runs these, the Checks workflow deselects them")
+    config.addinivalue_line(
+        "markers",
+        "scale: time budgets on the generated benchmark corpus; the Scale "
+        "workflow runs these, the Checks workflow deselects them")
+    config.addinivalue_line(
+        "markers",
+        "corpus: work that grows with the live ontology (minutes at 3,000 "
+        "classes); the Scale workflow runs these, Checks deselects them")
 
 
 @pytest.fixture(scope="session")

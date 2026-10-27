@@ -321,6 +321,44 @@ benchmark and WP6.
 | 13 | WP5 Ergonomics and documentation (T13 to T19, T21) | response §5, WP5 |
 | 14 | WP6 Final evaluation with the BPO Testing Team | response §7 |
 
+### Phase 9, WP1, as built (2026-10-26)
+
+What changed from the response's remedies, and why:
+
+- **T1 is fixed by a different engine, not by BPO's patch.** Measured on the benchmark: the
+  patch (inlining `$this`) removes the one quadratic constraint, the realist domain check
+  (6.6 s per focus node pre-bound, 0.06 s inlined), but every query is still parsed and run
+  once per focus node, 30-100 ms each -- the 35 minutes BPO measured with it. Run once,
+  unbound, in rdflib, the same domain check passed nine minutes. So the SPARQL constraints
+  run set-based in Oxigraph (`tools/ontology/sparql_constraints.py`, pyoxigraph pinned),
+  and pyshacl keeps the core constraints. The response's guard on pyshacl internals no
+  longer applies; the equivalence test (`tests/test_scale.py`) holds the two engines to
+  the same records instead. Found on the way: Oxigraph's `bulk_load` splits a blank node
+  across its parsing chunks, and the realist domain and range checks then found nothing --
+  caught by the equivalence test, fixed by `load`, and held by its own test.
+- **T2 as planned**: `tools/ontology/canon.py` labels tree-shaped blank nodes by structure
+  and where they hang, and falls back to rdflib otherwise; the release and the canonical-form
+  check both use it.
+- **T3 needed a second pass.** The first measurement of BPO's Checks suite with T1 and T2
+  in place ran about 21 h: the equivalence test ran pyshacl, the quadratic reference, on
+  the live corpus, and two tests built releases of it. The equivalence test now compares
+  on the fixtures and the benchmark only; the corpus-sized builds are marked `corpus` and
+  run in the Scale workflow; the vocabulary's release-diff test builds a stand-in module.
+  The second measurement ran 4 h 8 min, 3 h 48 min of it in one test: the release test of
+  the three serialisations still called rdflib's `isomorphic`. It now uses
+  `canon.same_graph` and requires the fast path.
+
+Measured:
+
+| | Before | After |
+|---|---|---|
+| Ladder, benchmark (3,200 classes) | realist set: 131 s at 60 classes, quadratic | 14 s, every planted defect found |
+| Ladder, BPO port (63,731 triples) | 44 min with BPO's patch; unpatched, did not finish | 22 s; all 3,716 records identical to the patched ladder's |
+| Release build, BPO port | > 5 h 22 min, unfinished | 354 s for two builds, byte-identical across hash seeds |
+| Release build, benchmark | -- | 179 s for two builds, byte-identical |
+| Checks suite, BPO port (T3, budget 30 min) | did not finish | 18 min 34 s; 333 passed, 3 failed: BPO's accepted P10530 lint finding (T5), not the template |
+| Checks suite, template, with the scale tests (budget 10 min) | -- | 7 min 19 s, 326 passed |
+
 ## Capabilities compared with ODK
 
 | ODK | Here |

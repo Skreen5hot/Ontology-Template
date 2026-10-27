@@ -17,7 +17,9 @@
 #   PyYAML      tools/layout.py reads the layout contract; the licensing
 #               and vendoring tools read the pins and adjudications
 #   rdflib      reading the ontology without a reasoner
-#   pyshacl     the SHACL validation ladder
+#   pyshacl     the SHACL validation ladder: the core constraints
+#   pyoxigraph  the ladder's SPARQL constraints, set-based; pyshacl's
+#               per-focus evaluation does not finish at 3,000 classes
 #   Markdown    the site build renders a specification and reviews
 #
 # jsonschema and owlrl are not pinned:
@@ -28,4 +30,5 @@ pytest==9.1.1
 PyYAML==6.0.3
 rdflib==7.6.0
 pyshacl==0.40.1
+pyoxigraph==0.5.13
 Markdown==3.11

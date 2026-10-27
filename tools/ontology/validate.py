@@ -61,6 +61,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import layout  # noqa: E402
 import project  # noqa: E402
@@ -108,11 +109,37 @@ def stable_shape(source, message) -> str:
     return "_:constraint-" + digest[:12]
 
 
-def run(data, shapes) -> dict:
+def run(data, shapes, engine: str = "oxigraph") -> dict:
+    """Every shape in `shapes` over `data`, as one record.
+
+    engine "oxigraph": the SPARQL constraints run set-based in Oxigraph
+    (tools/ontology/sparql_constraints.py, which says why), the core
+    constraints in pyshacl. engine "pyshacl": everything in pyshacl, per
+    focus node -- the reference the first is held to, record for record,
+    in tests/test_ontology_checks.py, and quadratic at a real ontology's
+    size.
+    """
     from pyshacl import validate as shacl
 
+    sparql_records = []
+    core = shapes
+    if engine == "oxigraph":
+        import sparql_constraints
+
+        core, sparql_shapes = sparql_constraints.split(shapes)
+        if sparql_shapes:
+            for record in sparql_constraints.run(data, shapes,
+                                                 sparql_shapes):
+                source = record.pop("source")
+                record["shape"] = stable_shape(source, record["message"])
+                record["message"] = (record["message"][:600]
+                                     if record["message"] else None)
+                sparql_records.append(record)
+    elif engine != "pyshacl":
+        raise ValueError("unknown engine %r" % engine)
+
     conforms, results_graph, results_text = shacl(
-        data_graph=data, shacl_graph=shapes, inference="none",
+        data_graph=data, shacl_graph=core, inference="none",
         abort_on_first=False, meta_shacl=False, advanced=True,
         allow_warnings=True, debug=False)
 
@@ -140,7 +167,11 @@ def run(data, shapes) -> dict:
             # the range check in its own report.
             "message": (str(message)[:600] if message else None),
         })
-    violations.sort(key=lambda v: (v["shape"] or "", v["focus"] or ""))
+    violations.extend(sparql_records)
+    if any(r["severity"] == "Violation" for r in sparql_records):
+        conforms = False
+    violations.sort(key=lambda v: (v["shape"] or "", v["focus"] or "",
+                                   v["message"] or ""))
     return {"conforms": bool(conforms), "violations": violations,
             "text": results_text[:4000]}
 

@@ -49,6 +49,7 @@ from pathlib import Path
 from xml.sax.saxutils import escape, quoteattr
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
+sys.path.insert(0, str(Path(__file__).resolve().parent / "ontology"))
 
 import layout  # noqa: E402
 import project  # noqa: E402
@@ -169,15 +170,16 @@ def attribution() -> str:
 
 
 def canonical(graph):
-    """A plain graph with canonical blank-node labels. to_canonical_graph
-    returns a read-only aggregate, which cannot have prefixes bound."""
-    import rdflib
-    from rdflib.compare import to_canonical_graph
+    """A plain graph with canonical blank-node labels.
 
-    out = rdflib.Graph()
-    for triple in to_canonical_graph(graph):
-        out.add(triple)
-    return out
+    tools/ontology/canon.py, not rdflib's to_canonical_graph: on the
+    Business Process Ontology's 4,381 alike restrictions one build with
+    rdflib's had not finished after 5 h 22 min. canon.py says why a tree of
+    blank nodes is linear to label, and falls back to rdflib for one that
+    is not a tree."""
+    import canon
+
+    return canon.canonical(graph)
 
 
 def known_prefixes() -> dict[str, str]:
@@ -308,11 +310,12 @@ FORMATS = (("ttl", "turtle", turtle), ("owl", "xml", rdfxml),
 
 def same_graph(data: bytes, rdflib_format: str, graph) -> bool:
     import rdflib
-    from rdflib.compare import isomorphic
+
+    import canon
 
     back = rdflib.Graph()
     back.parse(data=data.decode("utf-8"), format=rdflib_format)
-    return isomorphic(back, graph)
+    return canon.same_graph(back, graph)
 
 
 # -------------------------------------------------------------- build

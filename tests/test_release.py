@@ -88,15 +88,21 @@ def test_every_artefact_is_built_and_summed(built, project):
 
 
 def test_the_three_serialisations_are_one_graph(built, project):
-    from rdflib.compare import isomorphic
-
+    """By canon.same_graph, not rdflib's isomorphic: on a 3,000-class
+    project with thousands of alike restrictions, rdflib's search took
+    3 h 48 min for this one test. The fast path is required, so a release
+    whose blank nodes stop being trees is noticed here, not as a slow
+    suite."""
+    canon = load_tool("t_release_canon", "tools/ontology/canon.py")
     target, _ = built
     for variant in ("base", "full"):
         stem = target / ("%s-%s" % (project.project_id(), variant))
         ttl = graph_of(stem.with_suffix(".ttl"), "turtle")
-        assert isomorphic(ttl, graph_of(stem.with_suffix(".owl"), "xml"))
-        assert isomorphic(ttl, graph_of(stem.with_suffix(".jsonld"),
-                                        "json-ld"))
+        assert canon.is_forest(ttl), variant
+        assert canon.same_graph(ttl, graph_of(stem.with_suffix(".owl"),
+                                              "xml"))
+        assert canon.same_graph(ttl, graph_of(stem.with_suffix(".jsonld"),
+                                              "json-ld"))
 
 
 def test_the_header_carries_the_version(built, project):
@@ -149,7 +155,12 @@ def test_the_full_release_carries_the_extracts_and_says_they_are_partial(
     assert len(heads) == 1, "an extract's own header survived: %s" % heads
 
 
+@pytest.mark.corpus
 def test_two_builds_are_byte_identical_across_hash_seeds(repo, tmp_path):
+    """Two builds of the live corpus: minutes on a real ontology, so
+    marked `corpus` and run by the Scale workflow (and at every tag by the
+    Release workflow, which builds twice). The fixture-based test below
+    keeps determinism in every Checks run."""
     build_in_subprocess(repo, tmp_path / "a", 1)
     build_in_subprocess(repo, tmp_path / "b", 2)
     first, second = tree(tmp_path / "a"), tree(tmp_path / "b")

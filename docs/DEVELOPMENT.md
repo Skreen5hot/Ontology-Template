@@ -23,8 +23,12 @@ python -m pytest tests/ -q -p no:randomly
 ```
 
 The tests marked `reasoning` need Java 11 or later (they run the pinned ROBOT jar); without
-Java they fail, by design, rather than skip. To run everything else, as the Checks workflow
-does: `python -m pytest tests/ -q -p no:randomly -m "not reasoning"`.
+Java they fail, by design, rather than skip. The tests marked `scale` take a few minutes
+(two release builds of a 3,200-class benchmark). To run everything else, as the Checks
+workflow does: `python -m pytest tests/ -q -p no:randomly -m "not reasoning and not scale and not corpus"`.
+Tests marked `corpus` do work that grows with the live ontology -- two release builds of it
+-- and run in the Scale workflow; a project's own test that does the same should carry the
+mark.
 
 `tools/` is deliberately not an installed package. It is a directory of scripts that the
 tests import by path, so there is no build step between writing a tool and testing the
@@ -239,10 +243,29 @@ result the severity of the node shape that holds it, so a warning needs a node s
 own (see `rs:AuthoredClassReviewShape`). The gate counts `sh:Violation` results; warnings
 are reported beside them and never block.
 
-**Write SPARQL so each property path is in the block that binds its subject.** rdflib
-evaluates a group split by a `FILTER` or a `UNION` on its own; a `?x rdfs:subClassOf* ?y`
-there runs with `?x` unbound over every node in the graph. Use path alternatives (`|`, `^`)
-instead of `UNION`, and put filters last.
+**SPARQL constraints run in Oxigraph, not pyshacl.** pyshacl evaluates a SPARQL constraint
+once per focus node through rdflib, which is quadratic: on the Business Process Ontology's
+3,119 classes the ladder did not finish in two hours. `tools/ontology/sparql_constraints.py`
+runs each constraint once, its focus nodes in a `VALUES` block, and the ladder on BPO takes
+about 22 seconds; pyshacl still runs the core constraints. It supports what the template's
+shapes use -- SPARQL targets, `sh:select` constraints projecting `$this` with one
+`sh:message`, `sh:prefixes`, `sh:deactivated`, severity on the node shape -- and **refuses**
+anything else (`sh:ask`, a subquery, `$value`, another kind of target) rather than skipping
+it. A new shape that needs one of those is a change to the runner, with a case in
+`tests/test_scale.py`. `tests/test_scale.py` holds the two engines to the same records on
+every fixture; `validate.run(..., engine="pyshacl")` is the reference.
+
+**Write SPARQL so each property path is in the block that binds its subject.** Written for
+rdflib, and still good practice: rdflib evaluates a group split by a `FILTER` or a `UNION`
+on its own, and a `?x rdfs:subClassOf* ?y` there runs with `?x` unbound over every node in
+the graph. Use path alternatives (`|`, `^`) instead of `UNION`, and put filters last.
+
+**Size.** `python tools/ontology/benchmark.py` generates a corpus a little larger than BPO
+(3,200 classes, 4,500 alike restrictions) with one planted defect per check. The `scale`
+tests in `tests/test_scale.py` run the ladder and two release builds on it within 15
+minutes each (decision 11), in the Scale workflow, weekly and on any change to the tools,
+shapes or pins, together with the `corpus` tests. Locally:
+`python -m pytest tests/ -m "scale or corpus"`.
 
 ---
 
@@ -490,6 +513,9 @@ The header's ontology IRI is `<iri_base>/<id>-base` (or `-full`), the version IR
 come from the main module's header. To build locally: `python tools/release.py --version
 1.2.0` (into `dist/`, gitignored). RDF/XML and JSON-LD are written by the tool, flat and
 sorted, because rdflib's writers for both are not deterministic across processes.
+Blank nodes are labelled by structure (`tools/ontology/canon.py`): linear for the tree-shaped
+blank nodes OWL in Turtle produces, where rdflib's canonicalization did not finish one BPO
+build in five hours. A blank node with two parents, or on a cycle, falls back to rdflib.
 
 ---
 

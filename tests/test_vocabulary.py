@@ -199,11 +199,17 @@ def test_a_ref_that_is_not_a_commit_is_refused(term_diff, history):
     assert "is not a commit" in str(error.value)
 
 
-def test_a_release_ships_the_diff_inside_its_checksums(tmp_path, project):
+def test_a_release_ships_the_diff_inside_its_checksums(tmp_path, project,
+                                                      layout):
+    """Built from a stand-in module, not the live corpus: where CHANGES.md
+    goes does not depend on the ontology's size, and on a 3,000-class
+    project a release build of the corpus is minutes."""
     release = load_tool("t_release_changes", "tools/release.py")
     changes = tmp_path / "CHANGES.md"
     changes.write_text("## Terms: 0 added\n", encoding="utf-8")
-    names = release.build("1.0.0", tmp_path / "out", changes=changes)
+    names = release.build(
+        "1.0.0", tmp_path / "out", changes=changes,
+        modules=[layout.path("fixture.realist-bad-examples")])
     assert "CHANGES.md" in names
     sums = (tmp_path / "out" / ("%s-1.0.0" % project.project_id())
             / "SHA256SUMS").read_text(encoding="utf-8")

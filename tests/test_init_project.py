@@ -229,8 +229,8 @@ def test_the_copy_passes_its_own_suite(initialized):
                     "tests/test_competency.py",
                     "tests/test_release.py", "tests/test_vocabulary.py",
                     "tests/test_authoring.py", "tests/test_mappings.py",
-                    "tests/test_site.py",
-                    "-m", "not reasoning",
+                    "tests/test_site.py", "tests/test_scale.py",
+                    "-m", "not reasoning and not scale and not corpus",
                     env_extra=env)
     assert code == 0, out[-3000:]
     code, out = run(initialized, "tools/site/build_site.py",
