@@ -375,6 +375,13 @@ Measured:
   Checks step continues on error, and a final step fails the job and names each check that
   did not pass.
 - **T20.** The validator reports each shape set on stderr, and its JSON holds every finding.
+- **The CI rehearsal** (a scratch branch, deleted afterwards). First, an undeclared file at
+  the root: every check passed, because the every-file-declared test exempted the root and
+  four directories (fixed in 9d834a9; `.gitattributes` and `.gitignore` were undeclared).
+  Then, with that fixed and a component pointing nowhere added, Checks run
+  [40649375161](https://github.com/Skreen5hot/Ontology-Template/actions/runs/40649375161):
+  `layout` failed, the 13 checks after it ran, `tests` failed on the planted file, and the
+  verdict step named both.
 - **T24.** An entry may carry `upstream: <SOURCE> <IRI>`, and must when its focus is an
   upstream term. The status page lists those entries apart.
 - **Found on the way:** PyYAML's pure-Python loader took 9.4 s to read BPO's 3,717-entry
