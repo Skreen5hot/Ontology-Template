@@ -152,6 +152,18 @@ jobs:
         continue-on-error: true
         run: python tools/template_status.py --check
 
+      # The site the Pages job would deploy, built and checked here, so
+      # that what the build refuses -- a fragment no page names, an asset
+      # with no rule, a CRLF source -- fails a pull request rather than a
+      # deploy. It refuses nothing about the ontology's content, which
+      # the ladder gates (tools/site/build_site.py says why).
+      - name: The site builds and passes its own check
+        id: site
+        continue-on-error: true
+        run: |
+          python tools/site/build_site.py -o "$RUNNER_TEMP/site"
+          python tools/site/check_site.py "$RUNNER_TEMP/site"
+
       # Everything but the tests that need Java and ROBOT, which the
       # Reasoning workflow runs. Deselected by marker, named here, rather
       # than skipped where they stand: a skip reads as a pass.

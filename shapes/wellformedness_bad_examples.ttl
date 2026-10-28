@@ -67,6 +67,46 @@ example:FixtureWellFormed a owl:Class ;
     rdfs:label "Well formed" ;
     skos:definition "One label, one definition, nothing to report." .
 
+# -- W6: a label that is an IRI -------------------------------------
+
+example:FixtureIriLabel a owl:Class ;
+    rdfs:label example:FixtureWellFormed ;
+    skos:definition "Labelled with a reference, not with text." .
+
+# -- W7: a definition that is an IRI ----------------------------------
+
+example:FixtureIriDefinition a owl:Class ;
+    rdfs:label "IRI definition" ;
+    skos:definition example:FixtureWellFormed .
+
+# -- P1 to P5: properties, held to the class contract -----------------
+#
+# The BPO port's properties had no definitions, and the shapes, written
+# for classes, passed them; the site refused them at deploy.
+
+example:fixtureUndefinedProperty a owl:ObjectProperty ;
+    rdfs:label "undefined property" .
+
+example:fixtureUnlabelledProperty a owl:DatatypeProperty ;
+    skos:definition "A property with a definition and no label." .
+
+example:fixtureDriftedProperty a owl:AnnotationProperty ;
+    rdfs:label "first name"@en , "second name"@en ;
+    skos:definition "A property with two English labels."@en .
+
+example:fixtureIriLabelProperty a owl:ObjectProperty ;
+    rdfs:label example:FixtureWellFormed ;
+    skos:definition "A property labelled with a reference." .
+
+example:fixtureIriDefinitionProperty a owl:ObjectProperty ;
+    rdfs:label "IRI-defined property" ;
+    skos:definition example:FixtureWellFormed .
+
+# A well-formed property, multilingual: not reported.
+example:fixtureWellFormedProperty a owl:ObjectProperty ;
+    rdfs:label "well formed property"@en , "propriete bien formee"@fr ;
+    skos:definition "A property with one label and one definition per language."@en .
+
 # A term carrying the same value twice is not drift -- an RDF graph is a
 # set, so the duplicate collapses on parse and there is nothing to find.
 # Here so that the rule is known to be about disagreement rather than

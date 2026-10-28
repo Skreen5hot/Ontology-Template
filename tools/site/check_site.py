@@ -38,6 +38,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import html
 import io
 import json
 import sys
@@ -256,6 +257,41 @@ def check_data(site: Path) -> list[str]:
     if counted != terms["counts"]:
         problems.append("the term index counts %s and holds %s"
                         % (terms["counts"], counted))
+    problems.extend(check_nothing_concealed(site, records))
+    return problems
+
+
+def check_nothing_concealed(site: Path, records: list) -> list[str]:
+    """A term whose text differs within a language is published with
+    every variant and a note, never as one of them; and every noted term
+    is on the status page, so the explorer is not the only place it is
+    said (BPO evaluation, T7)."""
+    problems = []
+    status = (site / "status/index.html").read_text(encoding="utf-8") \
+        if (site / "status/index.html").is_file() else ""
+    for record in records:
+        for field, what in (("label", "rdfs:label"),
+                            ("definition", "skos:definition")):
+            variants = [v for v in record["variants"][field] if v["literal"]]
+            shown_lang = "en" if [v for v in variants
+                                  if v["lang"] == "en"] else ""
+            for lang in sorted({v["lang"] for v in variants}):
+                same = [v["value"] for v in variants if v["lang"] == lang]
+                if len(same) < 2:
+                    continue
+                if not [n for n in record["notes"] if n["kind"] == "conflict"
+                        and n["about"] == what and n["lang"] == lang]:
+                    problems.append("%s has %d %s values in one language "
+                                    "and no note says so"
+                                    % (record["id"], len(same), what))
+                shown = record[field]
+                if lang == shown_lang and not all(v in shown for v in same):
+                    problems.append("%s is published with one of its %d "
+                                    "%s values, not all of them"
+                                    % (record["id"], len(same), what))
+        if record["notes"] and html.escape(record["id"]) not in status:
+            problems.append("%s is published with findings the status "
+                            "page does not list" % record["id"])
     return problems
 
 

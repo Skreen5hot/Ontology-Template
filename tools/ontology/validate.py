@@ -57,6 +57,14 @@ accepted by an entry naming it, or it is new, and a new violation or
 warning fails. This replaced a count per shape set, under which fixing
 one finding and introducing another passed, and a warning was never
 gated at all.
+
+MODULES
+
+The shapes see one merged graph, and some of what the site publishes is
+per module: the header it shows a module under, and which module a term
+is declared in. Those are read module by module here (`module_findings`)
+and gated through the same register, under `where: modules`, so that
+nothing the site depends on goes unchecked until a deploy.
 """
 
 from __future__ import annotations
@@ -86,6 +94,24 @@ def load(paths) -> "rdflib.Graph":
     for path in paths:
         graph.parse(path, format="turtle")
     return graph
+
+
+OWL = "http://www.w3.org/2002/07/owl#"
+RDF_TYPE = "http://www.w3.org/1999/02/22-rdf-syntax-ns#type"
+
+#: The header annotations the site shows for a module, which must each be
+#: one literal per language for the site to show one.
+HEADER_TEXT = (("http://purl.org/dc/terms/title", "dcterms:title"),
+               (OWL + "versionInfo", "owl:versionInfo"),
+               ("http://www.w3.org/2000/01/rdf-schema#comment",
+                "rdfs:comment"))
+
+#: The declarations that make a subject a term, for the site and here.
+TERM_TYPES = (OWL + "Class", OWL + "ObjectProperty", OWL + "DatatypeProperty",
+              OWL + "AnnotationProperty")
+
+#: `where` for the module findings in the register.
+MODULES = "modules"
 
 
 def shape_sets() -> dict[str, Path]:
@@ -350,7 +376,13 @@ def measure() -> dict:
 
     progress("loading %d data file(s), %d extract(s), %d fixture(s)"
              % (len(scope), len(vendored), len(fixture_paths)))
-    data = load(list(scope) + list(vendored))
+    # Each module parsed once, alone, for the module findings, and the
+    # same graphs merged for the shapes.
+    modules = [(path, load([path])) for path in scope]
+    data = load(list(vendored))
+    for _path, graph in modules:
+        for triple in graph:
+            data.add(triple)
     bad = load(list(fixture_paths) + list(vendored))
     vocabularies = unresolved_vocabularies(data)
     missing = sorted(name for name, info in vocabularies.items()
@@ -406,6 +438,7 @@ def measure() -> dict:
                 len(against_fixture["violations"]) > 0,
         }
 
+    module_results = module_findings(modules, root)
     return {
         "format_version": FORMAT_VERSION,
         "generated_by": GENERATOR,
@@ -421,6 +454,7 @@ def measure() -> dict:
         "upstream_vocabularies": vocabularies,
         "unresolved": missing,
         "rungs": rungs,
+        "modules": {"files": len(modules), "detail": module_results},
         "note": (
             "A shape set reporting no violations is ambiguous by itself: "
             "clean data and a constraint selecting nothing look the same. "
@@ -434,8 +468,71 @@ def measure() -> dict:
                                   if r["evaluable"]),
         "blocked_rungs": sorted(n for n, r in rungs.items()
                                 if not r["evaluable"]),
-        "passed": passed_of(rungs),
+        "passed": passed_of(rungs) and not any(
+            r["severity"] == "Violation" for r in module_results),
     }
+
+
+# ------------------------------------------------------------ modules
+
+
+def module_findings(modules, root=None) -> list[dict]:
+    """What only a module-by-module reading can find, for (path, graph)
+    pairs: a module without exactly one ontology header, header text that
+    is not one literal per language, and an authored term declared in
+    more than one module. Records in the shape of a shape result, with
+    `shape` naming the rule."""
+    import rdflib
+
+    root = root or layout.repository_root()
+    out, declared = [], {}
+
+    def found(focus, rule, severity, message):
+        out.append({"focus": focus, "shape": "module:" + rule,
+                    "severity": severity, "message": message})
+
+    for path, graph in modules:
+        path = Path(path).resolve()
+        where = (path.relative_to(root).as_posix()
+                 if path.is_relative_to(root) else path.as_posix())
+        headers = sorted(str(s) for s in graph.subjects(
+            rdflib.URIRef(RDF_TYPE), rdflib.URIRef(OWL + "Ontology")))
+        if len(headers) != 1:
+            found(where, "one-header", "Violation",
+                  "Module %s has %d ontology headers%s. A module is "
+                  "published under its one header: with none it has no "
+                  "title, version or licence, and with two the site would "
+                  "have to choose." % (where, len(headers), (
+                      ": " + ", ".join(headers)) if headers else ""))
+        for header in headers:
+            for iri, name in HEADER_TEXT:
+                values = list(graph.objects(rdflib.URIRef(header),
+                                            rdflib.URIRef(iri)))
+                if [v for v in values if not isinstance(v, rdflib.Literal)]:
+                    found(header, "header-literal", "Violation",
+                          "Ontology header %s has a %s that is not a "
+                          "literal." % (header, name))
+                langs = [v.language or "" for v in values
+                         if isinstance(v, rdflib.Literal)]
+                if any(langs.count(lang) > 1 for lang in set(langs)):
+                    found(header, "header-drift", "Violation",
+                          "Ontology header %s carries two different %s "
+                          "values in the same language." % (header, name))
+        for type_iri in TERM_TYPES:
+            for subject in graph.subjects(rdflib.URIRef(RDF_TYPE),
+                                          rdflib.URIRef(type_iri)):
+                if isinstance(subject, rdflib.URIRef) and str(
+                        subject).startswith(AUTHORED_NAMESPACE):
+                    declared.setdefault(str(subject), set()).add(where)
+    for iri, wheres in sorted(declared.items()):
+        if len(wheres) > 1:
+            found(iri, "declared-once", "Warning",
+                  "Term %s is declared in %d modules: %s. A term declared "
+                  "in two modules is an inlined copy, and inlined copies "
+                  "drift; declare it once and let the others use it."
+                  % (iri, len(wheres), ", ".join(sorted(wheres))))
+    out.sort(key=lambda r: (r["shape"], r["focus"], r["message"]))
+    return out
 
 
 # ---------------------------------------------------------- the gate
@@ -455,6 +552,10 @@ def register_findings(record: dict) -> list[dict]:
             out.append(findings.finding(
                 CHECK, name, result["focus"], result["shape"],
                 result["message"], result["severity"]))
+    for result in (record.get("modules") or {}).get("detail", []):
+        out.append(findings.finding(
+            CHECK, MODULES, result["focus"], result["shape"],
+            result["message"], result["severity"]))
     return out
 
 
@@ -550,6 +651,11 @@ def main(argv=None) -> int:
                  "" if rung["can_still_fail"]
                  else "<- the shapes did not fire on data built to break "
                       "them"))
+    module_results = record["modules"]["detail"]
+    print("  %s" % MODULES)
+    print("    corpus  %-9s %d result(s) across %d module(s)"
+          % ("conforms" if not module_results else "FINDINGS",
+             len(module_results), record["modules"]["files"]))
     print()
     if args.gate:
         pass

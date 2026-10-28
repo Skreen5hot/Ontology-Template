@@ -66,7 +66,19 @@
 # failure available. Identical copies collapse -- an RDF graph is a set
 # -- so a second value is always a disagreement and never a duplicate.
 #
-# The count lives in config/validation-baseline.json rather than here.
+# Findings accepted rather than fixed are entries in
+# config/findings-register.yaml, one per finding, not counts here.
+#
+# THE SITE'S TERM CONTRACT IS THIS FILE
+#
+# The public site publishes every authored term, class or property, with
+# its label and definition. Before WP3 it also refused a term the shapes
+# passed -- a property with no definition, a label that was an IRI -- so
+# an ontology could pass every check and fail at deploy. Every rule about
+# a term's text is now here, for properties as for classes, and the site
+# refuses none of them: it publishes what it finds, marked, and these
+# shapes are what fails. tests/test_term_contract.py holds the two to
+# the same inputs.
 
 wf:prefixes
     a owl:Ontology ;
@@ -105,6 +117,20 @@ wf:AuthoredClassShape
         sh:severity sh:Violation ;
         sh:message "Class has no skos:definition." ] ;
 
+    # Text, not a reference. An IRI as a label reads as nothing to a
+    # person, and the drift rule below compares literals only.
+    sh:property [
+        sh:path rdfs:label ;
+        sh:nodeKind sh:Literal ;
+        sh:severity sh:Violation ;
+        sh:message "Class has an rdfs:label that is not a literal." ] ;
+
+    sh:property [
+        sh:path skos:definition ;
+        sh:nodeKind sh:Literal ;
+        sh:severity sh:Violation ;
+        sh:message "Class has a skos:definition that is not a literal." ] ;
+
     sh:sparql [
         a sh:SPARQLConstraint ;
         sh:severity sh:Violation ;
@@ -113,6 +139,65 @@ wf:AuthoredClassShape
         sh:select """SELECT $this ?p WHERE {
           $this ?p ?a, ?b .
           FILTER(?p IN (rdfs:label, skos:definition))
+          FILTER(isLiteral(?a) && isLiteral(?b))
+          FILTER(STR(?a) < STR(?b))
+          FILTER(LANG(?a) = LANG(?b)) }""" ] .
+
+
+# ---------------------------------------------------------------------
+# Authored properties
+# ---------------------------------------------------------------------
+#
+# The same contract as a class. The Business Process Ontology port had
+# properties with no definition: the shapes, written for classes, passed
+# them, and the site refused them at deploy (BPO evaluation, T6).
+
+wf:AuthoredPropertyShape
+    a sh:NodeShape ;
+
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes wf:prefixes ;
+        sh:select """SELECT ?this WHERE {
+          ?this a ?type .
+          FILTER(?type IN (owl:ObjectProperty, owl:DatatypeProperty,
+                           owl:AnnotationProperty))
+          FILTER(STRSTARTS(STR(?this), "https://fandaws.com/ontology/example#"))
+        }""" ] ;
+
+    sh:property [
+        sh:path rdfs:label ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "Property has no rdfs:label." ] ;
+
+    sh:property [
+        sh:path skos:definition ;
+        sh:minCount 1 ;
+        sh:severity sh:Violation ;
+        sh:message "Property has no skos:definition." ] ;
+
+    sh:property [
+        sh:path rdfs:label ;
+        sh:nodeKind sh:Literal ;
+        sh:severity sh:Violation ;
+        sh:message "Property has an rdfs:label that is not a literal." ] ;
+
+    sh:property [
+        sh:path skos:definition ;
+        sh:nodeKind sh:Literal ;
+        sh:severity sh:Violation ;
+        sh:message "Property has a skos:definition that is not a literal." ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:severity sh:Violation ;
+        sh:message "Property {$this} carries two different {?p} values in the same language. Inlined copies of a shared term have drifted, so the same IRI now reads differently depending on which module is loaded." ;
+        sh:prefixes wf:prefixes ;
+        sh:select """SELECT $this ?p WHERE {
+          $this ?p ?a, ?b .
+          FILTER(?p IN (rdfs:label, skos:definition))
+          FILTER(isLiteral(?a) && isLiteral(?b))
           FILTER(STR(?a) < STR(?b))
           FILTER(LANG(?a) = LANG(?b)) }""" ] .
 

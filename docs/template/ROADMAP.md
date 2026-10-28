@@ -27,8 +27,8 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 7 | Public site and its Pages workflow, generalized | **done** |
 | 8 | Prove it: the BPO port | **port done** (2026-10-26); success criterion not met |
 | 9 | WP1 Scale: validation, release build, a size benchmark | **done** (2026-10-27) |
-| 10 | WP2 One findings register, every Checks step run | in progress |
-| 11 | WP3 One term contract for validation and the site | not started |
+| 10 | WP2 One findings register, every Checks step run | **done** (accepted 2026-10-28, decision 13) |
+| 11 | WP3 One term contract for validation and the site | **built** (2026-10-28), for the architect's acceptance |
 | 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | not started |
 | 13 | WP5 Project ergonomics and documentation (alongside) | not started |
 | 14 | WP6 The final BPO evaluation | not started |
@@ -395,11 +395,62 @@ Measured, on the BPO port (in a scratch copy, never pushed):
 | Findings identified | a count: 57, warnings not gated | 3,716 by identity: 57 violations, 3,659 warnings; all distinct |
 | Fix one drift, add an unrelated label (still 57) | passed | fails, naming the new finding and the stale entry |
 | P10530 lint finding, accepted | Checks red, 7 steps never run | lint exits 0; `test_iri_lint` passes; the BPO suite has 356 passed, 0 failed |
-| Checks suite, BPO port (budget 30 min) | 18 min 34 s (WP1) | not measured cleanly: 36 min with the machine at 70-96% load from other work. WP2's own tests add about 1 min. A runner measurement is open |
+| Checks suite, BPO port (budget 30 min) | 18 min 34 s (WP1) | **not measured**: 36 min locally with the machine at 70-96% load from other work, which is not a measurement of the suite. Carried to WP6 (decision 13) |
 | Template suite (budget 10 min) | 7 min 19 s | 6 min 36 s, 346 passed |
 
 The BPO entries were written with a reason marked as trial evidence. Accepting BPO's
 findings is BPO's decision, not the template's.
+
+### Phase 11, WP3, as built (2026-10-28)
+
+- **T6: the rules are in the ladder, and the site refuses none of them.** The
+  wellformedness shapes hold properties to the class contract (a literal label and
+  definition, at most one per language) and require literals for classes too.
+  `validate.py` reads each module alone for what the merged graph cannot show: a module
+  without exactly one header, header text that is not one literal per language, and a term
+  declared in two modules (a warning). These are gated through the register under
+  `where: modules`.
+- **Why the site no longer refuses content.** The response asked that the ladder fail on
+  every input the site refuses. With WP2's register that was not enough: a finding the
+  register accepts would still have been refused at deploy, which decision 13 rules out. So
+  the site publishes each term as it is, with a note for each finding. It still refuses
+  its own inputs (placeholders, fragments, assets, CRLF, unpinned vendored files), and a
+  new Checks step builds and checks the site, so those fail a pull request.
+- **T7 as approved.** A term's label and definition are read from every authored module,
+  not only the one declaring it, and published with every variant and the modules each
+  comes from. Each conflict is noted on the term and listed on the status page, and nothing
+  is chosen between the variants. Each term also shows the register's accepted findings
+  about it, with reason, owner and review date. The site checker fails a conflict published
+  without a note, as one of its variants, or missing from the status page.
+- **Found on the way:** the vocabulary page still used the removed refusal for a concept's
+  preferred labels. The template has no concept scheme, so its suite never reached that
+  code; the BPO port's build failed on it. It is fixed the same way, and the planted
+  corpus now has a scheme.
+
+Measured:
+
+| | Before | After |
+|---|---|---|
+| A property without a definition, a class with two English labels (planted) | ladder passed; site refused at deploy | ladder fails on both; site publishes both, noted |
+| BPO's drifted classes on the site | 51 published with one module's text, conflict hidden | 51 published with every variant (51 definitions, 6 labels), each on the status page: the ladder's 57 drift findings |
+| BPO ladder with the extended contract | 3,716 findings | 3,716: no BPO property or module breaks the new rules; gate passes |
+| BPO `data/terms.json` | 2.0 MB | 4.9 MB, of which 2.3 MB is the 3,717 accepted findings shown on their terms |
+| Template suite (budget 10 min) | 6 min 36 s | 7 min 46 s, 365 passed |
+| Mutations of the new checks, each caught by its named test | -- | 23 of 23, after one test was strengthened: an emptied status-page section passed the first version |
+
+Not covered: the explorer's rendering is checked by reading the script, not in a browser.
+
+### Carried to WP6
+
+Open items the work packages cannot close themselves, kept here until WP6 closes them
+(decision 13):
+
+| Item | What closes it | From |
+|---|---|---|
+| BPO-scale time of the complete Checks job, against its 30-minute budget | A run in BPO's private repository on GitHub's standard runner, with the runner's conditions recorded. Not in this repository's public CI | WP1, WP2 |
+| BPO-scale time of the Reasoning job | The same run | WP1 |
+| BPO's 3,716 findings: which are real, which are fixed, which are accepted | The BPO team's own decisions, each entry with BPO's reason and owner. The trial entries are evidence that the register can hold them, nothing more. Entries about BFO/CCO terms carry `upstream` | WP2 |
+| Whether the template improves the ontology, not only whether its tests pass | Response §7's first verdict: S2 against S0 on confirmed real defects, each traced to a decision and to a check that fails if it returns | decision 13 |
 
 ## Capabilities compared with ODK
 

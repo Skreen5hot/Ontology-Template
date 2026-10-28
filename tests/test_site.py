@@ -388,6 +388,16 @@ def test_the_index_holds_every_upstream_term_and_marks_it(built, builder):
         [r for r in index["classes"] if r["origin"] == "authored"])
 
 
+def test_every_record_carries_the_term_contract(built):
+    """Every record in the built index has the fields the explorer reads
+    for variants, findings and accepted findings
+    (tests/test_term_contract.py), so it never meets one without them."""
+    out, _ = built
+    for record in terms(out)["classes"]:
+        for key in ("variants", "notes", "accepted", "declared_in"):
+            assert key in record, (record["id"], key)
+
+
 def test_category_comes_from_the_hierarchy(built, builder):
     """Read from the subClassOf chain of the vendored BFO, never from a
     name: fiat object part is shown as a material entity because BFO puts
@@ -420,12 +430,17 @@ def test_the_most_specific_category_wins(builder, project):
         "information content entity"
 
 
-def test_two_unrelated_categories_stop_the_build(builder, project):
+def test_two_unrelated_categories_are_both_shown_and_noted(builder,
+                                                          project):
+    """Not refused: the realist shapes report it, and an accepted finding
+    must still publish (tests/test_term_contract.py)."""
     graph = chain(":Both rdfs:subClassOf obo:BFO_0000015, obo:BFO_0000040 .",
                   project)
-    with pytest.raises(SystemExit) as error:
-        builder.category_of(project.namespace() + "Both", "class", graph)
-    assert "unrelated categories" in str(error.value)
+    notes = []
+    shown = builder.category_of(project.namespace() + "Both", "class", graph,
+                                notes)
+    assert shown == "material entity / process"
+    assert "unrelated categories" in notes[0]["text"]
 
 
 def authored_source(text, project):
@@ -441,30 +456,28 @@ def authored_source(text, project):
                    "origin": "authored"}
 
 
-def test_an_authored_term_without_a_definition_stops_the_build(builder,
-                                                               project):
-    """No fallback and no allowlist: an authored term with no definition
-    is a question for whoever wrote it, not something the site papers
-    over."""
+def test_an_authored_term_without_a_definition_is_noted(builder, project):
+    """No fallback text: the definition is shown as absent and noted, and
+    the validator fails on it unless the register accepts it."""
     graph, source = authored_source(':X a owl:Class ; rdfs:label "X" .',
                                     project)
-    with pytest.raises(SystemExit) as error:
-        builder.term_records([source], graph, builder.prefixes())
-    assert "no skos:definition" in str(error.value)
+    [record] = builder.term_records([source], graph, builder.prefixes())
+    assert record["definition"] == ""
+    assert [n["kind"] for n in record["notes"]] == ["missing"]
 
 
-def test_two_labels_in_one_language_stop_the_build(builder, project):
+def test_two_labels_in_one_language_are_both_shown(builder, project):
     graph, source = authored_source(
         ':X a owl:Class ; rdfs:label "A"@en, "B"@en ; skos:definition "d" .',
         project)
-    with pytest.raises(SystemExit) as error:
-        builder.term_records([source], graph, builder.prefixes())
-    assert "rdfs:label values tagged en" in str(error.value)
+    [record] = builder.term_records([source], graph, builder.prefixes())
+    assert record["label"] == "A / B"
+    assert [n["kind"] for n in record["notes"]] == ["conflict"]
 
 
 def test_a_well_formed_authored_term_is_indexed(builder, project):
-    """Guards the two refusals above: a builder that refused every
-    authored term would pass both."""
+    """Guards the two above: a builder that noted every authored term
+    would pass both."""
     graph, source = authored_source(
         ':X a owl:Class ; rdfs:label "X"@en ; skos:definition "d"@en ;\n'
         '  rdfs:subClassOf <http://purl.obolibrary.org/obo/BFO_0000015> .',
@@ -472,6 +485,7 @@ def test_a_well_formed_authored_term_is_indexed(builder, project):
     [record] = builder.term_records([source], graph, builder.prefixes())
     assert record["id"] == project.prefix() + ":X"
     assert record["origin"] == "authored" and record["category"] == "process"
+    assert record["notes"] == []
 
 
 # --------------------------------------------------- text is not markup
@@ -577,6 +591,33 @@ def test_the_checker_refuses_each_kind_of_damage(checker, copy, page, old,
     damage(copy / page, old, new)
     problems = checker.check(copy)
     assert any(expect in p for p in problems), problems
+
+
+def test_the_checker_refuses_a_concealed_conflict_in_the_index(checker,
+                                                               copy):
+    """Through check(), on a real artifact: a record given two English
+    definitions and no note is published concealing one of them (T7)."""
+    path = copy / "data/terms.json"
+    index = json.loads(path.read_text(encoding="utf-8"))
+    record = index["classes"][0]
+    record["variants"]["definition"] = [
+        {"value": "one", "lang": "en", "literal": True, "modules": ["a"]},
+        {"value": "two", "lang": "en", "literal": True, "modules": ["b"]}]
+    record["definition"] = "one"
+    path.write_bytes(json.dumps(index).encode("utf-8"))
+    problems = checker.check(copy)
+    assert [p for p in problems if "no note says so" in p], problems
+    assert [p for p in problems if "not all of them" in p], problems
+
+
+def test_the_status_page_has_the_published_findings(built):
+    out, _ = built
+    status = (out / "status/index.html").read_text(encoding="utf-8")
+    section = status.split("Terms and modules published with findings", 1)[1]
+    assert ("Every term has one label" in section
+            or "finding(s) the published pages show" in section), section[:300]
+    assert "Terms published with conflicting or missing text" in (
+        out / "index.html").read_text(encoding="utf-8")
 
 
 def test_the_checker_refuses_a_broken_fragment(checker, built_with_documents,

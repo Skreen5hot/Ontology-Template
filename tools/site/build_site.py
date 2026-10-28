@@ -37,12 +37,26 @@ Every value read from a Turtle file, a pin, a question or a mapping set
 reaches a page through html.escape here, or through textContent in the
 explorer. Markdown documents are rendered with raw HTML shown, not run.
 
-REFUSALS
+WHAT IS PUBLISHED, AND WHAT IS REFUSED
 
-An authored term with no label or definition, or two in one language,
-stops the build: which one is published would otherwise be decided by
-traversal order. So does a placeholder nothing fills, a page fragment no
-navigation entry names, and an asset with a suffix no rule covers.
+The site refuses nothing about the ontology's content. A term with no
+definition, two labels in one language, a label that is an IRI, two
+unrelated categories, a module with two headers: each is a finding the
+validator gates on (shapes/wellformedness_shapes.ttl, the realist shapes,
+and its module check), and a finding can be accepted in the register.
+A site that refused what the register accepts would fail at deploy on
+an ontology every check passed -- the BPO port's T6. So the term is
+published as it is, with every variant of its text and the module each
+comes from, marked, and listed on the status page with the register's
+accepted findings for it. Nothing is chosen between variants: which one
+would be shown would otherwise be decided by traversal order, and the
+reader would never see the other (T7).
+
+What it refuses is its own inputs: a placeholder nothing fills, a page
+fragment no navigation entry names, an asset with a suffix no rule
+covers, a source file with CRLF, a vendored file no pin produces. The
+Checks job builds and checks the site, so each of those fails there,
+before a deploy.
 
 A PRIVATE REPOSITORY, A PUBLIC SITE
 
@@ -139,11 +153,16 @@ CATEGORY_ROOTS = {
     OBO + "BFO_0000029": "site",
 }
 
+#: What a term's record carries of each register entry about it.
+ACCEPTED_FIELDS = ("check", "where", "rule", "severity", "text", "reason",
+                   "owner", "review", "upstream")
+
 esc = html.escape
 
 
 class Refused(SystemExit):
-    """A question for whoever wrote the input, not for this build."""
+    """A question for whoever wrote the site's inputs, not for this
+    build. Never raised for the ontology's content: see the docstring."""
 
 
 # ------------------------------------------------------------- inputs
@@ -228,29 +247,53 @@ def parse(path: Path):
 # --------------------------------------------------------- term index
 
 
-def literal(graph, subject, predicate: str, what: str, required: bool) -> str:
-    """At most one value per language, preferring English then untagged."""
+def text_variants(graphs, subject, predicate: str) -> list[dict]:
+    """Every value of `predicate` on `subject` across `graphs`, a list of
+    (module key, graph): the value, its language ("" for none), whether it
+    is a literal, and which modules assert it."""
     import rdflib
 
-    values = list(graph.objects(subject, rdflib.URIRef(predicate)))
-    wrong = [v for v in values if not isinstance(v, rdflib.Literal)]
-    if wrong:
-        raise Refused("%s has a %s that is not a literal: %r"
-                      % (subject, what, [str(w)[:60] for w in wrong]))
-    for lang in ("en", None):
-        chosen = sorted({str(v) for v in values if v.language == lang})
-        if len(chosen) > 1:
-            raise Refused(
-                "%s has %d %s values tagged %s: %s. Which is published "
-                "would depend on traversal order; this is a question for "
-                "the ontology." % (subject, len(chosen), what,
-                                   lang or "untagged",
-                                   [c[:40] for c in chosen]))
-        if chosen:
-            return chosen[0]
+    found: dict = {}
+    for key, graph in graphs:
+        for value in graph.objects(subject, rdflib.URIRef(predicate)):
+            literal = isinstance(value, rdflib.Literal)
+            found.setdefault((str(value), (value.language or "")
+                              if literal else "", literal), set()).add(key)
+    return [{"value": value, "lang": lang, "literal": literal,
+             "modules": sorted(keys)}
+            for (value, lang, literal), keys in sorted(found.items())]
+
+
+def published_text(variants: list[dict], what: str, required: bool,
+                   notes: list) -> str:
+    """The text shown for one annotation: the English values, else the
+    untagged ones. Never a choice between them: where a language has two
+    values, every one is shown, joined, and a note says they conflict.
+    The notes are the findings the shapes make on the same input."""
+    for variant in variants:
+        if not variant["literal"]:
+            notes.append({"kind": "not-literal", "about": what,
+                          "text": "Its %s is not a literal: %s"
+                          % (what, variant["value"])})
+    literal = [v for v in variants if v["literal"]]
+    for lang in sorted({v["lang"] for v in literal}):
+        same = [v for v in literal if v["lang"] == lang]
+        if len(same) > 1:
+            notes.append({"kind": "conflict", "about": what, "lang": lang,
+                          "text": "%d different %s values %s, from %s" % (
+                              len(same), what,
+                              "tagged " + lang if lang else "untagged",
+                              ", ".join(sorted({m for v in same
+                                                for m in v["modules"]})))})
+    for lang in ("en", ""):
+        same = [v["value"] for v in literal if v["lang"] == lang]
+        if same:
+            return " / ".join(same)
+    if variants:
+        return " / ".join(v["value"] for v in (literal or variants))
     if required:
-        raise Refused("%s has no %s. The site publishes what the ontology "
-                      "asserts, with no fallback." % (subject, what))
+        notes.append({"kind": "missing", "about": what,
+                      "text": "No %s is asserted." % what})
     return ""
 
 
@@ -267,7 +310,10 @@ def short_id(iri: str, known: list[tuple[str, str]]) -> str:
     return iri
 
 
-def category_of(iri: str, kind: str, merged) -> str:
+def category_of(iri: str, kind: str, merged, notes=None) -> str:
+    """The most specific category the class reaches. A class reaching two
+    unrelated ones is shown under both, joined, and noted: the realist
+    shapes report it, through the disjointness of the categories."""
     import rdflib
 
     if kind == "property":
@@ -282,21 +328,39 @@ def category_of(iri: str, kind: str, merged) -> str:
                         rdflib.URIRef(other), sub)}
                     for other in reached)]
     if len(specific) > 1:
-        raise Refused(
-            "%s reaches unrelated categories %s. A class that is two kinds "
-            "of thing is a question for the ontology."
-            % (iri, [CATEGORY_ROOTS[r] for r in specific]))
+        names = sorted(CATEGORY_ROOTS[r] for r in specific)
+        if notes is not None:
+            notes.append({"kind": "categories", "about": "category",
+                          "text": "It falls under unrelated categories: %s. "
+                                  "Nothing can be both." % ", ".join(names)})
+        return " / ".join(names)
     return CATEGORY_ROOTS[specific[0]] if specific else "other"
+
+
+def several(variants: list[dict]) -> list[dict]:
+    """The variants worth publishing beside the text: all of them where
+    there is more than one value or one is not a literal, none where the
+    one value is the text itself. Every term carrying its one label and
+    definition twice tripled the BPO port's index, to 6.6 MB."""
+    if len(variants) > 1 or [v for v in variants if not v["literal"]]:
+        return variants
+    return []
 
 
 def term_records(sources: list[dict], merged,
                  known: list[tuple[str, str]]) -> list[dict]:
-    """One record per term, authored and upstream. Authored terms must
-    carry a label and a definition; an upstream stub may lack the latter."""
+    """One record per term, authored and upstream, with every variant of
+    its label and definition and the module each comes from. An authored
+    term's text is read from every authored module, not only the one
+    declaring it: an inlined copy elsewhere is the same IRI, and its text
+    is what a reader of that module sees. `notes` are what the site found
+    wrong; the validator finds the same (tests/test_term_contract.py)."""
     import rdflib
 
     namespace = project.namespace()
-    records, seen = [], {}
+    authored_graphs = [(s["key"], s["graph"]) for s in sources
+                       if s["origin"] == "authored"]
+    declared: dict = {}
     for source in sources:
         graph = source["graph"]
         for type_iri, kind in sorted(TERM_TYPES.items()):
@@ -311,57 +375,95 @@ def term_records(sources: list[dict], merged,
                 if not authored and not list(graph.objects(
                         subject, rdflib.URIRef(RDFS + "label"))):
                     continue
-                if iri in seen:
-                    if seen[iri] == source["key"]:
-                        continue
-                    raise Refused("%s is declared by both %s and %s"
-                                  % (iri, seen[iri], source["key"]))
-                seen[iri] = source["key"]
-                parent_predicate = (RDFS + "subClassOf" if kind == "class"
-                                    else RDFS + "subPropertyOf")
-                records.append({
-                    "id": short_id(iri, known),
-                    "iri": iri,
-                    "label": literal(graph, subject, RDFS + "label",
-                                     "rdfs:label", required=True),
-                    "definition": literal(graph, subject,
-                                          SKOS + "definition",
-                                          "skos:definition",
-                                          required=authored),
-                    "kind": kind,
-                    "category": category_of(iri, kind, merged),
-                    "module": source["key"],
-                    "origin": source["origin"],
-                    "source": source["path"],
-                    "parents": sorted(
-                        str(o) for o in merged.objects(
-                            subject, rdflib.URIRef(parent_predicate))
-                        if isinstance(o, rdflib.URIRef)),
-                    "synonyms": sorted(
-                        str(o) for o in graph.objects(
-                            subject, rdflib.URIRef(SKOS + "altLabel"))),
-                })
+                entry = declared.setdefault(iri, {"kind": kind,
+                                                  "sources": []})
+                if source not in entry["sources"]:
+                    entry["sources"].append(source)
+
+    records = []
+    for iri, entry in sorted(declared.items()):
+        subject = rdflib.URIRef(iri)
+        first, kind = entry["sources"][0], entry["kind"]
+        authored = first["origin"] == "authored"
+        graphs = (authored_graphs if authored else
+                  [(s["key"], s["graph"]) for s in entry["sources"]])
+        notes: list = []
+        modules = sorted(s["key"] for s in entry["sources"])
+        if len(modules) > 1:
+            notes.append({"kind": "declared-twice", "about": "declaration",
+                          "text": "It is declared in %d modules: %s"
+                          % (len(modules), ", ".join(modules))})
+        labels = text_variants(graphs, subject, RDFS + "label")
+        definitions = text_variants(graphs, subject, SKOS + "definition")
+        label = published_text(labels, "rdfs:label", True, notes)
+        definition = published_text(definitions, "skos:definition",
+                                    authored, notes)
+        parent_predicate = (RDFS + "subClassOf" if kind == "class"
+                            else RDFS + "subPropertyOf")
+        records.append({
+            "id": short_id(iri, known),
+            "iri": iri,
+            "label": label or short_id(iri, known),
+            "definition": definition,
+            "variants": {"label": several(labels),
+                         "definition": several(definitions)},
+            "notes": notes,
+            "kind": kind,
+            "category": category_of(iri, kind, merged, notes),
+            "module": modules[0],
+            "declared_in": modules,
+            "origin": first["origin"],
+            "source": first["path"],
+            "parents": sorted(
+                str(o) for o in merged.objects(
+                    subject, rdflib.URIRef(parent_predicate))
+                if isinstance(o, rdflib.URIRef)),
+            "synonyms": sorted({
+                str(o) for _key, graph in graphs
+                for o in graph.objects(subject,
+                                       rdflib.URIRef(SKOS + "altLabel"))}),
+        })
     records.sort(key=lambda r: (r["label"].lower(), r["iri"]))
     return records
 
 
+def attach_accepted(records: list, entries: list) -> None:
+    """Each record gets the register's entries about its term, so that a
+    finding accepted rather than fixed is published with the term and its
+    reason, not hidden by being accepted."""
+    accepted: dict = {}
+    for entry in entries:
+        accepted.setdefault(entry["focus"], []).append(
+            {key: entry[key] for key in ACCEPTED_FIELDS if key in entry})
+    for record in records:
+        record["accepted"] = sorted(
+            accepted.get(record["iri"], []),
+            key=lambda e: (e["check"], e["where"], e["rule"],
+                           e.get("text", "")))
+
+
 def ontology_header(graph, source: str) -> dict:
+    """The module's header as shown. With no header, or two, nothing is
+    chosen: every header IRI is shown and the validator's module check
+    reports it; header text is shown as `published_text` shows a term's."""
     import rdflib
 
     headers = sorted(str(s) for s in graph.subjects(
         rdflib.URIRef(RDF_TYPE), rdflib.URIRef(OWL + "Ontology")))
-    if len(headers) != 1:
-        raise Refused("%s has %d ontology headers: %s"
-                      % (source, len(headers), headers))
-    subject = rdflib.URIRef(headers[0])
+    graphs = [(source, graph)]
+
+    def text(predicate):
+        values = []
+        for header in headers:
+            values.extend(text_variants(graphs, rdflib.URIRef(header),
+                                        predicate))
+        return published_text(values, "", False, [])
+
     return {
-        "iri": headers[0],
-        "title": literal(graph, subject, DCTERMS + "title", "dcterms:title",
-                         required=False),
-        "version": literal(graph, subject, OWL + "versionInfo",
-                           "owl:versionInfo", required=False),
-        "comment": literal(graph, subject, RDFS + "comment", "rdfs:comment",
-                           required=False),
+        "iri": " / ".join(headers),
+        "title": text(DCTERMS + "title"),
+        "version": text(OWL + "versionInfo"),
+        "comment": text(RDFS + "comment"),
     }
 
 
@@ -639,6 +741,16 @@ def gather() -> dict:
     linter = load_tool("site_lint", "tools/ontology/iri_lint.py")
     lint_findings = linter.lint(linter.default_paths())
 
+    # The validator's own module check, so the modules page and the
+    # validator cannot disagree about a header.
+    validator = load_tool("site_validate", "tools/ontology/validate.py")
+    module_findings = validator.module_findings(
+        [(s["file"], s["graph"]) for s in authored], _root)
+    entries = register.load()
+    records = term_records(authored + [u for u in upstream
+                                       if not u["derived"]], merged, known)
+    attach_accepted(records, entries)
+
     tags = [t for t in git("tag", "--merged", "HEAD", "--list", "v*")
             .splitlines() if t]
 
@@ -656,15 +768,14 @@ def gather() -> dict:
         "upstream": upstream,
         "merged": merged,
         "authored_graph": authored_graph,
-        "records": term_records(authored + [u for u in upstream
-                                            if not u["derived"]],
-                                merged, known),
+        "records": records,
+        "module_findings": module_findings,
         "spec_path": specs[0] if specs else None,
         "reviews": reviews,
         "shapes": [e.resolve() for e in layout.components(
             "ontology-validation")],
         "extracts": read_json(EXTRACTS),
-        "register": register.load(),
+        "register": entries,
         "decisions": sorted((p for p in layout.component("docs.decisions")
                              .members("*.md") if p.name != "README.md"),
                             key=lambda p: p.name),
@@ -696,8 +807,15 @@ def scheme_trees(graph, known) -> str:
                 "own, as a skos:ConceptScheme.</p>")
 
     def label(node):
-        return literal(graph, node, SKOS + "prefLabel", "skos:prefLabel",
-                       required=False) or short_id(str(node), known)
+        """Every preferred label in the shown language, joined and
+        marked when there is more than one: the wellformedness shapes
+        report it, and the page does not choose."""
+        notes: list = []
+        text = published_text(text_variants([("", graph)], node,
+                                            SKOS + "prefLabel"),
+                              "skos:prefLabel", False, notes)
+        return (text or short_id(str(node), known)) + (
+            " (conflicting labels)" if notes else "")
 
     def branch(node, scheme, seen):
         children = sorted(
@@ -864,6 +982,34 @@ def register_section(entries: list) -> str:
             % (summary, listed))
 
 
+def published_findings_section(records: list, module_findings: list,
+                               known) -> str:
+    """Every term published with a finding the site can see, and every
+    module finding, in one table: nothing the explorer marks is only in
+    the explorer."""
+    rows = []
+    for result in module_findings:
+        rows.append((result["focus"], "module", result["severity"],
+                     result["message"]))
+    for record in records:
+        for note in record["notes"]:
+            rows.append((record["id"], record["origin"], "", note["text"]))
+    if not rows:
+        return ("<p>None. Every term has one label and one definition per "
+                "language, and every module one header.</p>")
+    body = "\n".join(
+        "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td></tr>" % (
+            code(focus), esc(origin), esc(severity), esc(text))
+        for focus, origin, severity, text in sorted(rows))
+    return ("<p>%d finding(s) the published pages show as they are rather "
+            "than choose between. The validator reports each of these; "
+            "the register says which are accepted, and why.</p>\n"
+            '<div class="scroll-x"><table>\n<thead><tr><th>Term or module'
+            "</th><th>Origin</th><th>Severity</th><th>Finding</th></tr>"
+            "</thead>\n<tbody>\n%s\n</tbody></table></div>"
+            % (len(rows), body))
+
+
 def build(out: Path) -> list[tuple[str, str]]:
     site = read_json(CONTENT)
     commit, epoch = stamp()
@@ -983,6 +1129,8 @@ def build(out: Path) -> list[tuple[str, str]]:
             len(upstream_terms), len(pins()))),
         ("Open validation findings", "%d, each accepted in the findings "
          "register" % len(validate_entries)),
+        ("Terms published with conflicting or missing text", "%d" % sum(
+            1 for r in data["records"] if r["notes"])),
         ("IRI lint findings", "%d, %d of them accepted in the register" % (
             len(data["lint_findings"]), len(lint_entries))),
         ("Competency questions answered", "%d of %d answerable" % (
@@ -1131,6 +1279,8 @@ def build(out: Path) -> list[tuple[str, str]]:
         "mapping_sets": mapping_sections(data, ctx),
         "decisions": decisions,
         "validation": validation,
+        "published_findings": published_findings_section(
+            data["records"], data["module_findings"], known),
         "unresolved": unresolved,
         "releases": release_list(data, ctx),
         "bundle": bundle_html,

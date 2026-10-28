@@ -192,6 +192,12 @@ def test_the_gate_passes_on_the_live_corpus(validation, validator):
 WELLFORMEDNESS_CONSTRAINTS = [
     "Class has no rdfs:label.",
     "Class has no skos:definition.",
+    "Class has an rdfs:label that is not a literal.",
+    "Class has a skos:definition that is not a literal.",
+    "Property has no rdfs:label.",
+    "Property has no skos:definition.",
+    "Property has an rdfs:label that is not a literal.",
+    "Property has a skos:definition that is not a literal.",
     "Concept has no skos:prefLabel.",
 ]
 
@@ -231,7 +237,8 @@ def test_the_wellformedness_fixture_does_not_flag_what_is_legitimate(
     rung = validation["rungs"]["validation.wellformedness"]
     flagged = {v["focus"] for v in rung["fixture"]["detail"]}
     for good in ("FixtureMultilingual", "FixtureWellFormed",
-                 "FixtureRepeatedValue", "FixtureConceptWellFormed"):
+                 "FixtureRepeatedValue", "FixtureConceptWellFormed",
+                 "fixtureWellFormedProperty"):
         assert not [f for f in flagged if f and f.endswith("#" + good)], (
             "%s was built to conform and did not" % good)
 

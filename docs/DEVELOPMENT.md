@@ -83,7 +83,7 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `disposition.py --check` | a tracked file that may not be redistributed; a vendored extract whose required attribution is missing from `vendor/NOTICE.md` |
 | `vendor_upstream.py` | an upstream term the corpus or the shapes name that no extract describes; an extract whose digest is not what the manifest records |
 | `findings.py` | a register entry without a check, identity, severity, reason, owner or review date; a proposal's `TODO` placeholder left in; a review that is not a date; an entry repeated; an entry about an upstream term that does not name the upstream |
-| `validate.py --gate` | a violation or warning no register entry accepts; an entry that matches nothing; a shape set the fixture does not exercise; a rung blocked on missing vocabulary |
+| `validate.py --gate` | a violation or warning no register entry accepts; an entry that matches nothing; a shape set the fixture does not exercise; a rung blocked on missing vocabulary. Among the findings: every rule the site's term contract depends on -- an authored class **or property** without one literal label and definition per language, a term whose text differs between modules; and, read module by module, a module without exactly one header, header text that is not one literal per language, a term declared in two modules |
 | `iri_lint.py` | an upstream IRI its pinned release does not have (`unverified`), a readable name where the upstream mints ids (`readable_label`, with the id suggested), an id in the wrong case (`case_mismatch`), a deprecated upstream term, an authored file typing an upstream term (`redeclared_upstream`), an authored IRI nothing declares (`dangling_ref`) -- each unless the findings register accepts it -- and, over the whole scope, an entry that matches nothing; and, as exit 2, a file it cannot read or parse |
 | `competency.py` | an answerable question whose query gives a different answer, or none where rows were expected; an expectation nothing can fail (`rows: []`, `count: 0`, `ask: false`); a question depending on a term nobody defines; an example file that does not exist or lies outside `examples/` |
 | `profile_shapes.py --check` | `shapes/annotation_profile_shapes.ttl` differing from what `config/annotation-profile.yaml` generates; a profile property no pinned upstream or W3C vocabulary defines |
@@ -541,14 +541,26 @@ disk will not run the explorer's scripts: `python -m http.server -d _site 8000`.
 labels, the reviewer guidance, the notices -- and no figure the build can read. The
 fragments in `site/pages/` and the assets in `site/src/` are the template's.
 
-**What the build refuses**: an authored term with no label or definition, or two in one
-language; a class reaching two unrelated BFO categories; a placeholder nothing fills; a page
-fragment no navigation entry names; an asset that is not `.css` or `.js`; and a source file
-with CRLF line endings, because the downloads are those bytes and would differ from CI's.
+**One term contract.** The build refuses nothing about the ontology's content. A term with
+no definition, two labels in one language, text that differs between modules, a label that
+is an IRI, two unrelated BFO categories, a module with no header or two: each is a finding
+`validate.py --gate` fails on, and one the register can accept -- so a site that refused it
+would fail at deploy on an ontology every check passed. The term is published as it is:
+every variant of its label and definition with the modules each comes from, the finding
+noted on the term and listed on the status page, and the register's accepted findings about
+it shown with their reasons. Nothing is chosen between variants. `tests/test_term_contract.py`
+puts one planted corpus through the site and the validator and requires them to agree.
+
+**What the build refuses** is its own inputs: a placeholder nothing fills; a page fragment
+no navigation entry names; an asset that is not `.css` or `.js`; a vendored file no pin
+produces; and a source file with CRLF line endings, because the downloads are those bytes
+and would differ from CI's. The Checks job builds and checks the site, so each fails a pull
+request, not a deploy.
 **What the checker refuses**: a page without its structure (lang, one title, one `<h1>`,
 `<main id="main">`), a resource from another origin, an inline script or `on*` handler, a
-root-absolute or unresolved link or fragment, and a download or bundle that does not match
-its checksums.
+root-absolute or unresolved link or fragment, a download or bundle that does not match
+its checksums, and a term whose text differs within a language published without a note,
+as one of its variants, or missing from the status page.
 
 **Publishing.** The ontology is public; how it was made need not be. The Pages workflow
 builds, checks and proves the build reproducible on every push and pull request (pull

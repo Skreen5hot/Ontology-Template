@@ -30,6 +30,13 @@
  * They are selectable text with a copy button, and if the clipboard
  * refuses -- it does, without a user gesture or a secure context -- the
  * refusal is visible rather than a button that silently does nothing.
+ *
+ * Nothing is chosen for the reader. A term whose label or definition
+ * differs between modules is shown with every variant and the modules
+ * each comes from, under the findings the build noted; and each finding
+ * the register accepts about the term is shown with its reason. The
+ * index carries all of it (`variants`, `notes`, `accepted`), and the
+ * status page lists the same notes, so none is only here.
  */
 
 (function () {
@@ -112,7 +119,10 @@
     link.appendChild(el("span", "result-id", record.id));
     link.appendChild(el("span", "result-meta",
                         record.category + " · " + record.module
-                        + (record.origin === "upstream" ? " · upstream" : "")));
+                        + (record.origin === "upstream" ? " · upstream" : "")
+                        + (record.notes.length
+                           ? " · " + record.notes.length + " finding(s)"
+                           : "")));
     if (record.definition) {
       link.appendChild(el("p", "result-definition",
                           excerpt(record.definition, 160)));
@@ -185,8 +195,50 @@
     }
     body.appendChild(el("h3", "detail-label", record.label));
     body.appendChild(el("p", "detail-id", record.id));
-    if (record.definition) {
+    if (record.notes.length) {
+      var box = el("section", "notice-block");
+      box.setAttribute("aria-label", "Findings on this term");
+      box.appendChild(el("h2", null, "Findings on this term"));
+      var noted = document.createElement("ul");
+      record.notes.forEach(function (note) {
+        noted.appendChild(el("li", null, note.text));
+      });
+      box.appendChild(noted);
+      box.appendChild(el("p", "muted",
+        "Shown as the ontology states it. The validator reports the same; "
+        + "the status page lists every term like this."));
+      body.appendChild(box);
+    }
+    var conflicting = { label: false, definition: false };
+    record.notes.forEach(function (note) {
+      if (note.kind === "conflict" || note.kind === "not-literal") {
+        conflicting[note.about === "rdfs:label" ? "label" : "definition"]
+          = true;
+      }
+    });
+    ["label", "definition"].forEach(function (field) {
+      if (!conflicting[field]) { return; }
+      body.appendChild(el("h4", null, field === "label"
+        ? "Every label, by module" : "Every definition, by module"));
+      var list = document.createElement("ul");
+      record.variants[field].forEach(function (variant) {
+        var li = el("li", null, variant.value);
+        li.appendChild(el("span", "muted",
+          " — " + (variant.lang ? variant.lang + ", " : "")
+          + (variant.literal ? "" : "not a literal, ")
+          + "in " + variant.modules.join(", ")));
+        list.appendChild(li);
+      });
+      body.appendChild(list);
+    });
+    if (conflicting.definition) {
+      /* Listed above, each with its module; no one of them is the
+       * definition. */
+    } else if (record.definition) {
       body.appendChild(el("p", "detail-definition", record.definition));
+    } else if (record.origin === "authored") {
+      body.appendChild(el("p", "muted",
+        "No definition is asserted. That is a finding, listed above."));
     } else {
       /* Upstream stubs are declared and labelled, nothing more. Saying so
        * is better than an empty paragraph that reads as a rendering bug. */
@@ -204,11 +256,28 @@
       : "Authored in this repository"));
     meta.appendChild(el("dt", null, "Category"));
     meta.appendChild(el("dd", null, record.category));
-    meta.appendChild(el("dt", null, "Module"));
-    meta.appendChild(el("dd", null, record.module));
+    meta.appendChild(el("dt", null, record.declared_in.length > 1
+      ? "Declared in" : "Module"));
+    meta.appendChild(el("dd", null, record.declared_in.join(", ")));
     meta.appendChild(el("dt", null, "Source"));
     meta.appendChild(el("dd", null, record.source));
     body.appendChild(meta);
+
+    if (record.accepted.length) {
+      body.appendChild(el("h4", null, "Findings accepted in the register"));
+      var accepted = document.createElement("ul");
+      record.accepted.forEach(function (entry) {
+        var li = el("li", null, entry.severity + ", " + entry.check + ": "
+                    + (entry.text || entry.rule));
+        li.appendChild(el("p", "muted",
+          "Accepted because: " + entry.reason + " Owner: " + entry.owner
+          + ". Review by " + entry.review + "."
+          + (entry.upstream ? " The defect is upstream: " + entry.upstream
+             + "." : "")));
+        accepted.appendChild(li);
+      });
+      body.appendChild(accepted);
+    }
 
     if (record.synonyms.length) {
       body.appendChild(el("h4", null, "Also known as"));

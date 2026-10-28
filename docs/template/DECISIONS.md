@@ -108,3 +108,29 @@ Effect: the template repository is public, so its site links into it -- source f
 commit, issues and releases -- as the build does for any public repository. Decision 10
 stands for projects: a project's repository may stay private, and its site then links
 nothing into it. WP2 begins.
+
+**13. "WP2 is accepted as complete. Proceed with WP3."** (2026-10-28)
+
+In answer to the WP2 report. The whole text, with five numbered decisions, is recorded
+verbatim in
+[`evaluations/2026-10-28-wp2-acceptance.md`](evaluations/2026-10-28-wp2-acceptance.md)
+(SHA-256 of the text below its rule
+`5f8d8c2c1e5a637d066796e230f2e94e7b748d78cece9807ee307cc8439b15d9`). Effect:
+
+- WP2 is accepted on its functional tests, regression results and the template's measured
+  times. Phase 10 is done.
+- The BPO-scale times are an outstanding verification requirement, carried to WP6, and
+  are not represented as measured. They are to be measured in the BPO team's private
+  repository and its GitHub Actions runner: the complete Checks and Reasoning jobs, under
+  documented runner conditions, against the approved budgets. No BPO content, credential or
+  execution log goes into this repository's public CI.
+- The 3,716 BPO findings are BPO's to evaluate, resolve or accept. That the register can
+  hold them says nothing about whether they should be accepted, and upstream BFO/CCO
+  findings stay distinguishable from BPO's.
+- WP3 begins. Validation must enforce every requirement publication depends on, the site
+  must not conceal conflicting definitions or other material findings, and regression tests
+  must show both.
+- The final evaluation must establish whether using the template measurably improves the
+  ontology itself, not only that its tests pass.
+
+The ROADMAP's "Carried to WP6" section holds the open items.
