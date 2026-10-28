@@ -307,6 +307,13 @@ def plan(root: Path, old: dict, new: dict) -> tuple[dict, list, list]:
     if not removals:
         raise Refused("no component is declared template: only, so this "
                       "is not the template, or the contract has changed")
+    # The template's own correspondence is not the project's. The new
+    # project file names no correspondent, so a team folder left behind
+    # is one the project's own communications check refuses.
+    record = layout.component("communications").path
+    for team in sorted(old.get("correspondents") or []):
+        if (root / record / team.lower()).is_dir():
+            removals.append("%s/%s" % (record, team.lower()))
 
     owned = {c.path for c in layout.components() if c.template == "owned"}
     for relative in writes:

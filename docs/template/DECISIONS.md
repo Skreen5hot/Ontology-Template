@@ -134,3 +134,25 @@ verbatim in
   ontology itself, not only that its tests pass.
 
 The ROADMAP's "Carried to WP6" section holds the open items.
+
+**14. "WP3 is accepted as complete. Proceed with WP4 (T8–T12, T23)."** (2026-10-28)
+
+In answer to the WP3 report. The whole text, with seven numbered points, is recorded
+verbatim in
+[`evaluations/2026-10-28-wp3-acceptance.md`](evaluations/2026-10-28-wp3-acceptance.md)
+(SHA-256 of the text below its rule `35da88b9279dda22afd550afb266c0f5bf7ed3edc89fc2fd4e7c6369cb71404c`). Effect:
+
+- WP3 is accepted; phase 11 is done. Publishing BPO's conflicts shows them; it does not
+  approve or resolve them.
+- A browser-level check of the explorer is an outstanding follow-up, not a blocker: that
+  the rendered page shows every conflicting variant, its module, and the term's findings.
+  It is in the ROADMAP's "Carried to WP6" section.
+- BPO's findings stay BPO's. Accepted findings, unresolved ontology issues and upstream
+  BFO/CCO findings stay distinguishable.
+- WP4 begins. For each gap (T8 to T12, T23) it must show detection, accurate reporting, a
+  disposition, and a test that a correction does not regress.
+- The T9 request to Legal is initiated: `communications/legal/outgoing/2026-10-28-t9-third-party-text.md`,
+  with Legal added as a correspondent. No legal interpretation or permission is assumed in
+  the implementation: the template ships no default licence, attribution or permission.
+- WP6's obligations are unchanged, and its assessment must separate improvements in the
+  template from improvements in BPO's content.

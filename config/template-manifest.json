@@ -1,5 +1,5 @@
 {
-  "digest": "7f2410036ef8171a8897bcb59c37326484c1b7b5d50f8b5f7b3fbfafc048f866",
+  "digest": "a72c07d65babfed37d276cdae834c7cdbd0563e90823d11efbe7f49758a326ed",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "494d0543a0fe1858fee58b5beefec708fdd1bbbc972f39e4fe183ffa3d24d39f",
@@ -81,7 +81,7 @@
     "tools/communications.py": "eb3cc330fb481d008fac6ea593a2540cc01b1979cc338ae9f6faa248600b0938",
     "tools/findings.py": "7f5935a5803da1ab2f696f0cfa434457dd5732ca012aa383f641cc05493134a5",
     "tools/hooks/claude_ttl_lint.py": "0e4351ddb4ec278857030434b505a97931fcefa49637b2c340b36129063c9258",
-    "tools/init_project.py": "512638b56cceaad2625f8ea6af7d3cc91a4e2190e0e15a93b1232afb5bc0f98b",
+    "tools/init_project.py": "795e7d90c2d72c0486aec77d6f6627f6f16b6e92e8b7db4f54ea4a9db9c3d8c3",
     "tools/layout.py": "a09e3626e3b2153006b454e7d12872615f424d684a94bee7aa530574154c03c0",
     "tools/licensing/disposition.py": "dcbe828836172f65895b090809dfddde16c33668a91a9c2f00e4c55a0c20cdda",
     "tools/ontology/benchmark.py": "5f4a98e9a5b14d6b15b05e92a3fca77d23c88321e44e6e023441a88828a1b6a5",

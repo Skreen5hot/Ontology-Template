@@ -28,8 +28,8 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 8 | Prove it: the BPO port | **port done** (2026-10-26); success criterion not met |
 | 9 | WP1 Scale: validation, release build, a size benchmark | **done** (2026-10-27) |
 | 10 | WP2 One findings register, every Checks step run | **done** (accepted 2026-10-28, decision 13) |
-| 11 | WP3 One term contract for validation and the site | **built** (2026-10-28), for the architect's acceptance |
-| 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | not started |
+| 11 | WP3 One term contract for validation and the site | **done** (accepted 2026-10-28, decision 14) |
+| 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | in progress; T9's policy text awaits Legal |
 | 13 | WP5 Project ergonomics and documentation (alongside) | not started |
 | 14 | WP6 The final BPO evaluation | not started |
 
@@ -450,7 +450,8 @@ Open items the work packages cannot close themselves, kept here until WP6 closes
 | BPO-scale time of the complete Checks job, against its 30-minute budget | A run in BPO's private repository on GitHub's standard runner, with the runner's conditions recorded. Not in this repository's public CI | WP1, WP2 |
 | BPO-scale time of the Reasoning job | The same run | WP1 |
 | BPO's 3,716 findings: which are real, which are fixed, which are accepted | The BPO team's own decisions, each entry with BPO's reason and owner. The trial entries are evidence that the register can hold them, nothing more. Entries about BFO/CCO terms carry `upstream` | WP2 |
-| Whether the template improves the ontology, not only whether its tests pass | Response §7's first verdict: S2 against S0 on confirmed real defects, each traced to a decision and to a check that fails if it returns | decision 13 |
+| Whether the template improves the ontology, not only whether its tests pass | Response §7's first verdict: S2 against S0 on confirmed real defects, each traced to a decision and to a check that fails if it returns. Improvements in the template are reported apart from improvements in BPO's content | decisions 13, 14 |
+| The explorer, rendered in a browser: every conflicting variant, its module, the term's notes and accepted findings | A browser run of the built site on a planted conflict, and on the BPO port's | decision 14 |
 
 ## Capabilities compared with ODK
 
