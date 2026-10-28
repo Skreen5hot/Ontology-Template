@@ -204,21 +204,24 @@ def test_the_ontology_scope_is_not_empty_by_accident(layout):
 def test_every_tracked_file_has_an_owning_component_or_a_stated_rule(
         layout, repo, disposition):
     """The inverse direction. A file nothing declares is a file nobody
-    decided about, and it will be classified by a suffix guess."""
-    undeclared = []
-    for relative in tracked(repo):
-        if layout.owning_component(relative) is None:
-            undeclared.append(relative)
+    decided about, and it will be classified by a suffix guess.
 
-    # Files under tooling directories are covered by a stated fallback
-    # rather than declared one by one; anything else is a gap.
-    unexplained = [p for p in undeclared
-                   if not p.startswith((".github/", "tools/", "tests/",
-                                        "config/"))
-                   and "/" in p]
-    assert not unexplained, (
+    No exemptions. This test once excused every file at the root and
+    everything under .github/, tools/, tests/ and config/; a CI rehearsal
+    planted an undeclared file at the root, and every check passed."""
+    undeclared = [relative for relative in tracked(repo)
+                  if layout.owning_component(relative) is None]
+    assert not undeclared, (
         "%d tracked file(s) belong to no component: %s"
-        % (len(unexplained), unexplained[:8]))
+        % (len(undeclared), undeclared[:8]))
+
+
+def test_an_undeclared_file_anywhere_is_caught(layout):
+    """Guards the test above, at the places it once exempted. (.github/
+    and tests/ are declared whole, so a file there is declared.)"""
+    for path in ("planted.txt", "tools/planted.py",
+                 "config/planted.yaml"):
+        assert layout.owning_component(path) is None, path
 
 
 def test_a_component_pointing_nowhere_is_caught(layout, repo, tmp_path):

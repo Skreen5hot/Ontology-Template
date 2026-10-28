@@ -166,6 +166,22 @@ components:
 
   # ---- Documentation -------------------------------------------------
 
+  - id: config.gitattributes
+    path: .gitattributes
+    role: configuration
+    template: owned
+    description: >-
+      LF line endings throughout. Every digest in the repository is over
+      LF bytes, so a CRLF checkout would change them all.
+
+  - id: config.gitignore
+    path: .gitignore
+    role: configuration
+    template: owned
+    description: >-
+      What is never tracked: the virtual environments, caches, the built
+      site and release output.
+
   - id: docs.readme
     path: README.md
     role: documentation

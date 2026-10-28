@@ -1,7 +1,8 @@
 {
-  "digest": "150331c9cb9146235fd1690d84f09fa0f65a4cc94f1bc9ff252f507c712434a7",
+  "digest": "08b90071672286d59fd6cc0aca2f7c1ac92f006f1121e6c2c5e256f5f22c2895",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
+    ".gitattributes": "494d0543a0fe1858fee58b5beefec708fdd1bbbc972f39e4fe183ffa3d24d39f",
     ".githooks/pre-commit": "e39d41b2b6c3a892468a61de9fd62c8fc0c1c69cb5cfba4bcfd5e141bdddd679",
     ".github/ISSUE_TEMPLATE/config.yml": "13064e7bea658e01e718b414fbb7b3b244f36411fe25ee2055c151f7b534547a",
     ".github/ISSUE_TEMPLATE/defect.yml": "e11ea8b87a6e680957feee05cc4cd9d73145f4f8e635274d14066edc5170c593",
@@ -15,6 +16,7 @@
     ".github/workflows/release.yml": "611dd4b2e9ffc964b880e103178eb6802dd86ba5fe8dd2ae7e6b59e91ea2feeb",
     ".github/workflows/scale.yml": "0b913bf25e63d5efe4dc202c2d2704a48c6886b01f5fc0d76b1bdf3d7fd78810",
     ".github/workflows/term-diff.yml": "1c79a2806d8e98fb7cb32fab01fef430cf8ec8c6f1bc144a5e027a87cff67595",
+    ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
     "docs/DEVELOPMENT.md": "9bab7a7083aa4b1ff727908992dc7d33c9a232422810a74906e348d9d4a58498",
     "docs/process/PROCESS.md": "7d05fe31365cbecfc27faa028671b0f95b12a196b91ff53bac4ccc01d4eea446",
     "requirements-dev.txt": "5b5c90992b2a4aa663c493c71fe5df9746a09b3745c4382e77065f41df7f31d5",
@@ -69,7 +71,7 @@
     "tests/test_project.py": "64b6d4e7f80d268d962c3f0a936007a967d966b3cbcb3f6f3a3cd5965d97208e",
     "tests/test_reasoning.py": "20bb50f7a02dc110103f90c4911ce4f74eaddeaff91453f448729d4ca584d22f",
     "tests/test_release.py": "f82456810f19dc30c6c5bbaca1ca361efd1180612dc6fac33f19b3ba3a510016",
-    "tests/test_repository_layout.py": "d225aeb6ba3cdaa4a6eddcb799af888c15433a273fcc535e5463ae85fcd07696",
+    "tests/test_repository_layout.py": "d666c466a317900f42894d055ade31b6c4139d5031608a72f07a371c23b197f0",
     "tests/test_scale.py": "0f70716251c9078aa3b7b1a6bbccef808cd0e385072dd5ea85d792a86a5fad50",
     "tests/test_site.py": "a6de449e1e7f24639466c833e8873fbce956f8711c31482ae3ad466528afc96f",
     "tests/test_template.py": "3133a358ae805be904e56e65f7d41bfd4eeb82786e0ead3980cbdb5488201aa4",
