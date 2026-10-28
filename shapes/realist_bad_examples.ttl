@@ -174,3 +174,48 @@ example:NoDefinitionSource a owl:Class ;
     rdfs:label "no definition source" ;
     rdfs:subClassOf obo:BFO_0000040 ;
     skos:definition "A material entity whose definition cites nothing." .
+
+# -- T10: an object property between two classes ----------------------
+#
+# The BPO port's requiresCapability, requiresRole and requiresPermission
+# were used so before the PO re-typed them.
+
+example:RealistPunned a owl:Class ;
+    rdfs:label "realist punned" ;
+    rdfs:subClassOf obo:BFO_0000015 ;
+    skos:definition "A process that the fixture relates to a class by an object property." ;
+    cco:ont00001754 "constructed for the realist fixture" ;
+    example:fxHasParticipant example:RealistGood .
+
+# -- T10: a restriction on an annotation property ----------------------
+
+example:fxNote a owl:AnnotationProperty ;
+    rdfs:label "fixture note" ;
+    skos:definition "An annotation property the fixture restricts on." .
+
+example:RealistAnnotationRestricted a owl:Class ;
+    rdfs:label "realist annotation restricted" ;
+    rdfs:subClassOf obo:BFO_0000015 ,
+        [ a owl:Restriction ;
+          owl:onProperty example:fxNote ;
+          owl:someValuesFrom obo:BFO_0000040 ] ;
+    skos:definition "A process restricted on an annotation property." ;
+    cco:ont00001754 "constructed for the realist fixture" .
+
+# -- T11: a qualifier in a parent's label ------------------------------
+#
+# The qualifier is reported once, on the class carrying it. The child's
+# definition names its genus without the qualifier, and is not reported:
+# before T11 it was, and the BPO port had 78 genus warnings of this kind.
+
+example:RealistQualified a owl:Class ;
+    rdfs:label "realist anchor (shared anchor)" ;
+    rdfs:subClassOf obo:BFO_0000015 ;
+    skos:definition "A process the fixture labels with an editorial qualifier." ;
+    cco:ont00001754 "constructed for the realist fixture" .
+
+example:RealistQualifiedChild a owl:Class ;
+    rdfs:label "realist qualified child" ;
+    rdfs:subClassOf example:RealistQualified ;
+    skos:definition "A realist anchor that sits under a qualified label." ;
+    cco:ont00001754 "constructed for the realist fixture" .

@@ -30,3 +30,31 @@ ap:AuthoredClassProfileShape
         sh:minCount 1 ;
         sh:severity sh:Warning ;
         sh:message "Class has no definition source. CCO cites the source of each definition with this annotation; a definition that says where it came from can be checked against it." ] .
+
+# Agree across modules: one value per language, on every authored
+# term. rdfs:label and skos:definition are listed too, and checked
+# by the wellformedness shapes. One node shape per property, because
+# a SPARQL constraint takes its severity from its node shape.
+
+# rdfs:comment
+ap:AuthoredTermAgreementShape1
+    a sh:NodeShape ;
+    sh:severity sh:Warning ;
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes ap:prefixes ;
+        sh:select """SELECT ?this WHERE {
+          ?this a ?type .
+          FILTER(?type IN (owl:Class, owl:ObjectProperty,
+                           owl:DatatypeProperty, owl:AnnotationProperty))
+          FILTER(STRSTARTS(STR(?this), "https://fandaws.com/ontology/example#"))
+        }""" ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Term {$this} carries two different rdfs:comment values in the same language. Inlined copies of a term have drifted, so its comment reads differently depending on which module is loaded." ;
+        sh:prefixes ap:prefixes ;
+        sh:select """SELECT $this WHERE {
+          $this <http://www.w3.org/2000/01/rdf-schema#comment> ?a, ?b .
+          FILTER(isLiteral(?a) && isLiteral(?b))
+          FILTER(STR(?a) < STR(?b))
+          FILTER(LANG(?a) = LANG(?b)) }""" ] .

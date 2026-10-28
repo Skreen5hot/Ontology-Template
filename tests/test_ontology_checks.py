@@ -344,12 +344,16 @@ REALIST_CASES = {
         "realist-incomplete-header", "Violation"),
     "Ontology header has no owl:versionInfo": (
         "realist-incomplete-header", "Violation"),
+    "by the object property": ("RealistPunned", "Violation"),
+    "which is an annotation property": ("RealistAnnotationRestricted",
+                                        "Violation"),
+    "ends in a parenthetical qualifier": ("RealistQualified", "Warning"),
 }
 
 REALIST_CONTROLS = ("RealistGood", "RealistGoodChild",
                     "RealistGoodRestriction",
                     "RealistDeprecatedWithReplacement",
-                    "realist-complete-header")
+                    "realist-complete-header", "RealistQualifiedChild")
 
 
 def results_for(validation, rung, focus_name):

@@ -1,0 +1,32 @@
+# Third-party text inside the ontology (T9, T23).
+#
+# A module that quotes another work -- a framework's descriptions, a
+# standard's definitions -- is still one file under this project's
+# licence, so the per-file licensing check cannot see the quotation. List
+# here each annotation property that carries such text, and the checks
+# hold every module using it to the declaration:
+#
+#   property     the annotation property's IRI
+#   source       the work, as the module header names it in dcterms:source
+#   release      its release, named in that same dcterms:source value
+#   licence      what you have been told it is under: an SPDX identifier,
+#                or "unknown"
+#   attribution  the attribution you have been told is required, carried
+#                verbatim in the module header's dcterms:rights
+#
+# The values are the project's, from whoever advises it on licensing.
+# The template ships none and judges none of them: these checks say the
+# declaration is present, not that redistribution is permitted
+# (tools/licensing/third_party.py).
+#
+# Example, not a recommendation:
+#
+#   - property: https://example.org/vocabulary#sourceText
+#     source: Example Framework
+#     release: v1.0
+#     licence: unknown
+#     attribution: Contains text from Example Framework v1.0.
+
+format_version: 1
+
+declarations: []

@@ -25,3 +25,21 @@ concepts: '^[A-Za-z0-9][A-Za-z0-9_\-]*$'
 
 #: owl:NamedIndividual -- not checked by default.
 individuals: null
+
+#: Scheme rules: a local-name pattern that must, or must not, sit under a
+#: category through rdfs:subClassOf (T12). A project's IRI scheme, not a
+#: realist rule, so none ships enabled. tools/ontology/validate.py gates
+#: them under `where: naming`. Each:
+#:   id                  a name for the rule, in its findings
+#:   pattern             matched against the whole local name
+#:   must_sit_under      a class IRI, or
+#:   must_not_sit_under  a class IRI (exactly one of the two)
+#:   severity            violation | warning
+#:   why                 one sentence
+#: For example, a scheme minting `P<number>` for process types only:
+#:   - id: process-ids-are-processes
+#:     pattern: 'P[0-9]+'
+#:     must_sit_under: http://purl.obolibrary.org/obo/BFO_0000015
+#:     severity: violation
+#:     why: A P-number names a process type.
+scheme_rules: []

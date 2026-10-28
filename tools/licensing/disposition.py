@@ -38,6 +38,7 @@ from pathlib import Path
 from typing import NamedTuple
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import layout  # noqa: E402
 
@@ -430,6 +431,36 @@ def research_findings(rows) -> list:
     return out
 
 
+def embedded_text(root=None) -> list[dict]:
+    """Declared third-party text inside the authored modules: per module
+    and property, how many values and the licence as declared. Listed
+    apart from the module's own disposition, which is per file and cannot
+    see a quotation (T9). The validator holds each module to its
+    declaration; this only classifies."""
+    import rdflib
+
+    import third_party
+
+    declarations = third_party.load(root)
+    out = []
+    if not declarations:
+        return out
+    base = root or layout.repository_root()
+    for path in layout.ontology_files():
+        graph = rdflib.Graph()
+        graph.parse(path, format="turtle")
+        for declaration in declarations:
+            count = third_party.values_in(graph, declaration)
+            if count:
+                out.append({"module": path.relative_to(base).as_posix(),
+                            "property": declaration["property"],
+                            "values": count,
+                            "source": "%s %s" % (declaration["source"],
+                                                 declaration["release"]),
+                            "licence": declaration["licence"]})
+    return out
+
+
 def findings(rows: list[Disposition]) -> list[str]:
     """What is wrong, as opposed to what is unusual."""
     out = attribution_findings(rows) + research_findings(rows)
@@ -467,6 +498,20 @@ def main(argv=None) -> int:
         counts[key] = counts.get(key, 0) + 1
     for (disposition, licence), count in sorted(counts.items()):
         print("    %-26s %-14s %4d" % (disposition, licence, count))
+
+    embedded = embedded_text()
+    if embedded:
+        import third_party
+
+        print()
+        print("  third-party text inside modules, as declared in %s:"
+              % third_party.DECLARATIONS)
+        for row in embedded:
+            print("    %-36s %6d value(s) of %s -- from %s, licence as "
+                  "declared: %s" % (row["module"], row["values"],
+                                    row["property"], row["source"],
+                                    row["licence"]))
+        print("  " + third_party.STATEMENT)
 
     problems = findings(rows)
     if problems:

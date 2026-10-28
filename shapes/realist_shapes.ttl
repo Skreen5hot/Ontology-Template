@@ -146,6 +146,34 @@ rs:AuthoredClassPlacementShape
           ?domain rdfs:subClassOf* ?y .
           ?x owl:disjointWith|^owl:disjointWith ?y .
           FILTER(isIRI(?domain))
+        }""" ] ;
+
+    # An object property between two classes (T10). An object property
+    # relates instances. Asserted from one class to another, OWL 2 reads
+    # both as individuals (punning), and the reasoner concludes nothing
+    # about the classes; the BPO port's three requires... properties were
+    # used so. A class-level relation is a restriction, or an annotation.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Class {$this} is related to the class {?other} by the object property {?property}. An object property relates instances; between two classes OWL reads both as individuals and draws nothing from it. Use a restriction (rdfs:subClassOf [ owl:onProperty ... ]) or an annotation property." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT DISTINCT $this ?property ?other WHERE {
+          $this ?property ?other .
+          ?property a owl:ObjectProperty .
+          ?other a owl:Class .
+        }""" ] ;
+
+    # An annotation property in a restriction (T10). An annotation carries
+    # no logical meaning, so a restriction on one is not OWL 2 DL and a
+    # reasoner either rejects it or reads nothing from it.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Class {$this} is restricted on {?property}, which is an annotation property. A restriction on an annotation property is not OWL 2 DL: the property carries no logical meaning to restrict." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT DISTINCT $this ?property WHERE {
+          $this (rdfs:subClassOf|owl:equivalentClass) ?restriction .
+          ?restriction owl:onProperty ?property .
+          ?property a owl:AnnotationProperty .
         }""" ] .
 
 
@@ -192,8 +220,24 @@ rs:AuthoredClassReviewShape
           FILTER EXISTS { $this skos:definition ?any }
           FILTER NOT EXISTS {
             $this skos:definition ?definition .
-            FILTER(CONTAINS(LCASE(STR(?definition)), LCASE(STR(?label))))
+            FILTER(CONTAINS(LCASE(STR(?definition)),
+                   LCASE(REPLACE(STR(?label), "[ ]*[(][^()]*[)][ ]*$", ""))))
           }
+        }""" ] ;
+
+    # A qualifier in a label. "Act of Planning (shared anchor)" is an
+    # editorial note written into the name: it reads as part of the term,
+    # and every child's definition would have to repeat it. The genus
+    # check above ignores a trailing "(...)", so the qualifier is this one
+    # finding rather than a genus warning on every child (BPO, B10, T11).
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "The label of {$this}, \"{?label}\", ends in a parenthetical qualifier. A qualifier is a note about the term, not its name: put it in skos:altLabel, rdfs:comment or the definition." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT $this ?label WHERE {
+          $this rdfs:label ?label .
+          FILTER(isLiteral(?label))
+          FILTER(REGEX(STR(?label), "[ ][(][^()]*[)][ ]*$"))
         }""" ] ;
 
     # Range: the filler not known to fall under it, and not known not to.

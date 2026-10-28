@@ -79,6 +79,23 @@ example:FixtureIriDefinition a owl:Class ;
     rdfs:label "IRI definition" ;
     skos:definition example:FixtureWellFormed .
 
+# -- W8: two comments, same language (T8) ----------------------------
+#
+# Checked by the annotation profile's agree_across_modules list, not by
+# these shapes: rdfs:comment is not part of the term contract. The BPO
+# port had 129 comment rows of this kind across its modules.
+
+example:FixtureDriftedComment a owl:Class ;
+    rdfs:label "Drifted comment" ;
+    skos:definition "A class whose comment differs between modules." ;
+    rdfs:comment "As one module says it." , "As another module says it." .
+
+# A comment in two languages is not drift.
+example:FixtureMultilingualComment a owl:Class ;
+    rdfs:label "Multilingual comment"@en ;
+    skos:definition "A class with one comment per language."@en ;
+    rdfs:comment "In English."@en , "En francais."@fr .
+
 # -- P1 to P5: properties, held to the class contract -----------------
 #
 # The BPO port's properties had no definitions, and the shapes, written

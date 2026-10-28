@@ -17,6 +17,13 @@
 #              config/findings-register.yaml.
 #   why        one sentence: why this project asks for it.
 #
+# `agree_across_modules` lists the annotation properties a term may carry
+# only one value of per language, across every module (T8): an inlined
+# copy of a term whose text has moved apart is a finding, by identity.
+# Same fields. rdfs:label and skos:definition must be listed, as
+# violations: the wellformedness shapes check them as the term contract,
+# whatever this list says. Each other entry gets a drift constraint.
+#
 # The default is CCO v2.0's own convention: a definition says where it
 # comes from. A warning, because a new project's definitions are often
 # its own; raise it to a violation once every definition has a source.
@@ -31,3 +38,22 @@ annotations:
     why: >-
       CCO cites the source of each definition with this annotation; a
       definition that says where it came from can be checked against it.
+
+agree_across_modules:
+
+  - property: http://www.w3.org/2000/01/rdf-schema#label
+    label: rdfs:label
+    severity: violation
+    why: Checked by the wellformedness shapes as the term contract.
+
+  - property: http://www.w3.org/2004/02/skos/core#definition
+    label: skos:definition
+    severity: violation
+    why: Checked by the wellformedness shapes as the term contract.
+
+  - property: http://www.w3.org/2000/01/rdf-schema#comment
+    label: rdfs:comment
+    severity: warning
+    why: >-
+      Inlined copies of a term have drifted, so its comment reads
+      differently depending on which module is loaded.

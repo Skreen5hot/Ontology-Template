@@ -64,7 +64,17 @@ The shapes see one merged graph, and some of what the site publishes is
 per module: the header it shows a module under, and which module a term
 is declared in. Those are read module by module here (`module_findings`)
 and gated through the same register, under `where: modules`, so that
-nothing the site depends on goes unchecked until a deploy.
+nothing the site depends on goes unchecked until a deploy. The same
+reading holds a module carrying declared third-party text to its
+declaration (config/third-party-text.yaml): the header names the source
+and its release, and carries the declared attribution (T9, T23).
+
+SCHEME RULES
+
+config/naming.yaml may hold `scheme_rules`: a local-name pattern that
+must, or must not, sit under a category through rdfs:subClassOf (T12).
+They are a project's IRI scheme, not realist rules, so the template ships
+none; a project's are gated under `where: naming`.
 """
 
 from __future__ import annotations
@@ -81,6 +91,9 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import findings  # noqa: E402
 import layout  # noqa: E402
 import project  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "licensing"))
+import third_party  # noqa: E402
 
 FORMAT_VERSION = 2
 GENERATOR = "tools/ontology/validate.py"
@@ -112,6 +125,10 @@ TERM_TYPES = (OWL + "Class", OWL + "ObjectProperty", OWL + "DatatypeProperty",
 
 #: `where` for the module findings in the register.
 MODULES = "modules"
+#: `where` for the scheme-rule findings.
+NAMING = "naming"
+DCTERMS = "http://purl.org/dc/terms/"
+RDFS_SUBCLASS = "http://www.w3.org/2000/01/rdf-schema#subClassOf"
 
 
 def shape_sets() -> dict[str, Path]:
@@ -439,6 +456,7 @@ def measure() -> dict:
         }
 
     module_results = module_findings(modules, root)
+    naming_results = scheme_findings(data, scheme_rules(root))
     return {
         "format_version": FORMAT_VERSION,
         "generated_by": GENERATOR,
@@ -455,6 +473,8 @@ def measure() -> dict:
         "unresolved": missing,
         "rungs": rungs,
         "modules": {"files": len(modules), "detail": module_results},
+        "naming": {"rules": len(scheme_rules(root)),
+                   "detail": naming_results},
         "note": (
             "A shape set reporting no violations is ambiguous by itself: "
             "clean data and a constraint selecting nothing look the same. "
@@ -469,22 +489,26 @@ def measure() -> dict:
         "blocked_rungs": sorted(n for n, r in rungs.items()
                                 if not r["evaluable"]),
         "passed": passed_of(rungs) and not any(
-            r["severity"] == "Violation" for r in module_results),
+            r["severity"] == "Violation"
+            for r in module_results + naming_results),
     }
 
 
 # ------------------------------------------------------------ modules
 
 
-def module_findings(modules, root=None) -> list[dict]:
+def module_findings(modules, root=None, declarations=None) -> list[dict]:
     """What only a module-by-module reading can find, for (path, graph)
     pairs: a module without exactly one ontology header, header text that
-    is not one literal per language, and an authored term declared in
-    more than one module. Records in the shape of a shape result, with
-    `shape` naming the rule."""
+    is not one literal per language, an authored term declared in more
+    than one module, and declared third-party text whose header does not
+    name its source and release or carry its attribution. Records in the
+    shape of a shape result, with `shape` naming the rule."""
     import rdflib
 
     root = root or layout.repository_root()
+    if declarations is None:
+        declarations = third_party.load(root)
     out, declared = [], {}
 
     def found(focus, rule, severity, message):
@@ -518,6 +542,31 @@ def module_findings(modules, root=None) -> list[dict]:
                     found(header, "header-drift", "Violation",
                           "Ontology header %s carries two different %s "
                           "values in the same language." % (header, name))
+        for declaration in declarations:
+            count = third_party.values_in(graph, declaration)
+            if not count:
+                continue
+            sources = [str(v) for h in headers for v in graph.objects(
+                rdflib.URIRef(h), rdflib.URIRef(DCTERMS + "source"))]
+            rights = [str(v) for h in headers for v in graph.objects(
+                rdflib.URIRef(h), rdflib.URIRef(DCTERMS + "rights"))]
+            if not [s for s in sources if declaration["source"] in s
+                    and declaration["release"] in s]:
+                found(where, "third-party-source", "Violation",
+                      "Module %s holds %d value(s) of %s, declared as text "
+                      "from %s %s, and its header names that source and "
+                      "release in no dcterms:source. A reader cannot tell "
+                      "which release the text was taken from."
+                      % (where, count, declaration["property"],
+                         declaration["source"], declaration["release"]))
+            if not [r for r in rights
+                    if declaration["attribution"].strip() in r]:
+                found(where, "third-party-attribution", "Violation",
+                      "Module %s holds %d value(s) of %s, declared as text "
+                      "from %s, and its header does not carry the declared "
+                      "attribution in dcterms:rights."
+                      % (where, count, declaration["property"],
+                         declaration["source"]))
         for type_iri in TERM_TYPES:
             for subject in graph.subjects(rdflib.URIRef(RDF_TYPE),
                                           rdflib.URIRef(type_iri)):
@@ -532,6 +581,84 @@ def module_findings(modules, root=None) -> list[dict]:
                   "drift; declare it once and let the others use it."
                   % (iri, len(wheres), ", ".join(sorted(wheres))))
     out.sort(key=lambda r: (r["shape"], r["focus"], r["message"]))
+    return out
+
+
+# -------------------------------------------------------- scheme rules
+
+
+def scheme_rules(root=None) -> list[dict]:
+    """`scheme_rules` from config/naming.yaml, checked. Each: id, pattern
+    (a regular expression matched against the whole local name), exactly
+    one of must_sit_under and must_not_sit_under (a class IRI), severity
+    (violation | warning) and why."""
+    import re
+
+    import yaml
+
+    path = (root or layout.repository_root()) / "config/naming.yaml"
+    if not path.is_file():
+        return []
+    raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
+    rules = raw.get("scheme_rules") or []
+    seen = set()
+    for number, rule in enumerate(rules, 1):
+        where = "config/naming.yaml: scheme rule %d" % number
+        for key in ("id", "pattern", "severity", "why"):
+            if not rule.get(key):
+                raise SystemExit("%s declares no %r" % (where, key))
+        sides = [k for k in ("must_sit_under", "must_not_sit_under")
+                 if rule.get(k)]
+        if len(sides) != 1:
+            raise SystemExit("%s needs exactly one of must_sit_under and "
+                             "must_not_sit_under" % where)
+        if rule["severity"] not in ("violation", "warning"):
+            raise SystemExit("%s severity %r is not violation or warning"
+                             % (where, rule["severity"]))
+        if rule["id"] in seen:
+            raise SystemExit("%s repeats the id %r" % (where, rule["id"]))
+        seen.add(rule["id"])
+        re.compile(rule["pattern"])
+    return rules
+
+
+def scheme_findings(data, rules) -> list[dict]:
+    """Every authored class whose local name matches a rule's pattern and
+    which sits, or does not sit, under the rule's category -- read through
+    rdfs:subClassOf in the merged graph, vendored extracts included."""
+    import re
+
+    import rdflib
+
+    out = []
+    if not rules:
+        return out
+    subclass = rdflib.URIRef(RDFS_SUBCLASS)
+    classes = sorted(str(s) for s in data.subjects(
+        rdflib.URIRef(RDF_TYPE), rdflib.URIRef(OWL + "Class"))
+        if isinstance(s, rdflib.URIRef)
+        and str(s).startswith(AUTHORED_NAMESPACE))
+    for rule in rules:
+        pattern = re.compile(rule["pattern"])
+        category = rule.get("must_sit_under") or rule["must_not_sit_under"]
+        required = bool(rule.get("must_sit_under"))
+        for iri in classes:
+            local = iri[len(AUTHORED_NAMESPACE):]
+            if not pattern.fullmatch(local):
+                continue
+            under = category in {str(a) for a in data.transitive_objects(
+                rdflib.URIRef(iri), subclass) if str(a) != iri}
+            if under == required:
+                continue
+            out.append({
+                "focus": iri, "shape": "scheme:" + rule["id"],
+                "severity": rule["severity"].capitalize(),
+                "message": "Class %s has a local name matching scheme rule "
+                           "%s (%s) and %s %s. %s" % (
+                               iri, rule["id"], rule["pattern"],
+                               "does not sit under" if required
+                               else "sits under", category,
+                               " ".join(rule["why"].split()))})
     return out
 
 
@@ -552,10 +679,11 @@ def register_findings(record: dict) -> list[dict]:
             out.append(findings.finding(
                 CHECK, name, result["focus"], result["shape"],
                 result["message"], result["severity"]))
-    for result in (record.get("modules") or {}).get("detail", []):
-        out.append(findings.finding(
-            CHECK, MODULES, result["focus"], result["shape"],
-            result["message"], result["severity"]))
+    for where in (MODULES, NAMING):
+        for result in (record.get(where) or {}).get("detail", []):
+            out.append(findings.finding(
+                CHECK, where, result["focus"], result["shape"],
+                result["message"], result["severity"]))
     return out
 
 
@@ -656,6 +784,11 @@ def main(argv=None) -> int:
     print("    corpus  %-9s %d result(s) across %d module(s)"
           % ("conforms" if not module_results else "FINDINGS",
              len(module_results), record["modules"]["files"]))
+    naming_results = record["naming"]["detail"]
+    print("  %s" % NAMING)
+    print("    corpus  %-9s %d result(s) from %d scheme rule(s)"
+          % ("conforms" if not naming_results else "FINDINGS",
+             len(naming_results), record["naming"]["rules"]))
     print()
     if args.gate:
         pass

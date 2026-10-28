@@ -500,7 +500,19 @@ components:
     role: configuration
     description: >-
       The local-name conventions for authored classes, properties and
-      concepts, checked by the IRI linter and the vocabulary generator.
+      concepts, checked by the IRI linter and the vocabulary generator;
+      and the project's scheme rules (none by default), gated by the
+      validator.
+
+  - id: config.third-party-text
+    path: config/third-party-text.yaml
+    role: configuration
+    description: >-
+      The annotation properties that carry third-party text, each with
+      the source, release, licence and attribution the project was told
+      of. The template declares none. The validator holds each module
+      using one to its declaration; the disposition report lists the
+      text apart from the module's licence.
 
   - id: config.layout
     path: config/repository-layout.yaml
@@ -594,6 +606,14 @@ components:
     description: >-
       Exactly one disposition per tracked file, derived from role and
       adjudication rather than from a list of filenames.
+
+  - id: tool.third-party-text
+    path: tools/licensing/third_party.py
+    role: tool
+    template: owned
+    description: >-
+      Reads and checks the third-party text declarations. Records what a
+      project declares and checks it is present; judges no licence.
 
   - id: tool.vendor-upstream
     path: tools/ontology/vendor_upstream.py

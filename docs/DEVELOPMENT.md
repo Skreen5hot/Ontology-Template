@@ -83,7 +83,7 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `disposition.py --check` | a tracked file that may not be redistributed; a vendored extract whose required attribution is missing from `vendor/NOTICE.md` |
 | `vendor_upstream.py` | an upstream term the corpus or the shapes name that no extract describes; an extract whose digest is not what the manifest records |
 | `findings.py` | a register entry without a check, identity, severity, reason, owner or review date; a proposal's `TODO` placeholder left in; a review that is not a date; an entry repeated; an entry about an upstream term that does not name the upstream |
-| `validate.py --gate` | a violation or warning no register entry accepts; an entry that matches nothing; a shape set the fixture does not exercise; a rung blocked on missing vocabulary. Among the findings: every rule the site's term contract depends on -- an authored class **or property** without one literal label and definition per language, a term whose text differs between modules; and, read module by module, a module without exactly one header, header text that is not one literal per language, a term declared in two modules |
+| `validate.py --gate` | a violation or warning no register entry accepts; an entry that matches nothing; a shape set the fixture does not exercise; a rung blocked on missing vocabulary. Among the findings: every rule the site's term contract depends on -- an authored class **or property** without one literal label and definition per language, a term whose text differs between modules; and, read module by module, a module without exactly one header, header text that is not one literal per language, a term declared in two modules, declared third-party text whose module header lacks its source, release or attribution; and a class breaking one of the project's scheme rules |
 | `iri_lint.py` | an upstream IRI its pinned release does not have (`unverified`), a readable name where the upstream mints ids (`readable_label`, with the id suggested), an id in the wrong case (`case_mismatch`), a deprecated upstream term, an authored file typing an upstream term (`redeclared_upstream`), an authored IRI nothing declares (`dangling_ref`) -- each unless the findings register accepts it -- and, over the whole scope, an entry that matches nothing; and, as exit 2, a file it cannot read or parse |
 | `competency.py` | an answerable question whose query gives a different answer, or none where rows were expected; an expectation nothing can fail (`rows: []`, `count: 0`, `ask: false`); a question depending on a term nobody defines; an example file that does not exist or lies outside `examples/` |
 | `profile_shapes.py --check` | `shapes/annotation_profile_shapes.ttl` differing from what `config/annotation-profile.yaml` generates; a profile property no pinned upstream or W3C vocabulary defines |
@@ -280,7 +280,10 @@ shapes or pins, together with the `corpus` tests. Locally:
 | a restriction's filler not disjoint with the property's range, the restricted class not disjoint with its domain | violation |
 | the filler, or the class, not known to fall under that range or domain | warning |
 | one asserted named parent | warning |
-| the definition names the parent's label (genus–differentia) | warning |
+| the definition names the parent's label (genus–differentia), ignoring a trailing `(…)` in that label | warning |
+| a label does not end in a parenthetical qualifier — a note about the term belongs in `skos:altLabel`, `rdfs:comment` or the definition | warning |
+| no object property asserted from one class to another (punning: OWL reads both as individuals) | violation |
+| no restriction on an annotation property | violation |
 | a deprecated term names `dcterms:isReplacedBy` or a `skos:historyNote` | violation |
 | every ontology header under the IRI base has a title, licence, creator, version IRI and version info | violation |
 
@@ -306,6 +309,28 @@ Edit the YAML and regenerate; never the shapes:
 ```bash
 python tools/ontology/profile_shapes.py
 ```
+
+Its `agree_across_modules` list names the annotations a term may carry only one value of
+per language, across every module: by default `rdfs:label`, `skos:definition` and
+`rdfs:comment`. A module that inlines another's term carries a copy of its text, and the
+copies drift; each difference is a finding, by identity. Label and definition must stay on
+the list as violations — the wellformedness shapes check them as the term contract — and
+each other entry gets its own generated constraint, with its own severity.
+
+## Third-party text inside a module
+
+The licensing disposition is per file, so a module quoting another work is one file under
+your licence, and the quotation is invisible to it. Declare each annotation property that
+carries third-party text in `config/third-party-text.yaml`: the source, its release, the
+licence and the attribution you were told of. Then every module holding values of it must
+name the source and release in a `dcterms:source` on its header, and carry the attribution
+in `dcterms:rights`; `validate.py --gate` fails a module that does not, and
+`disposition.py` lists the text apart from the module's licence.
+
+The template ships no declaration and decides nothing: the values are whoever advises you
+on licensing. What these checks may say about the result is with Legal
+(`communications/legal/`), and the report says so until they answer. Nothing can find
+third-party text that is not declared.
 
 ## Competency questions and examples
 
@@ -449,7 +474,10 @@ that is not BFO-aligned never becomes a claim about this ontology's types.
 ## Naming, deprecation, and what changed
 
 `docs/governance/` holds the policy, each rule beside the check that holds it. Local names
-follow `config/naming.yaml` (the linter's `naming_convention`); a deprecated term names a
+follow `config/naming.yaml` (the linter's `naming_convention`). An IRI scheme that gives a
+local-name pattern a meaning — `P<number>` for a process type — is a **scheme rule** there:
+a pattern that must, or must not, sit under a category through `rdfs:subClassOf`, gated by
+the validator under `where: naming`. None ships enabled. A deprecated term names a
 replacement or a reason (the realist deprecated-term shape).
 `tools/ontology/term_diff.py` reports the terms added, removed, deprecated or changed
 between two commits — the Term diff workflow comments it on every pull request, and the

@@ -440,6 +440,61 @@ Measured:
 
 Not covered: the explorer's rendering is checked by reading the script, not in a browser.
 
+### Phase 12, WP4, as built (2026-10-28)
+
+Each gap: found on planted input that is not BPO's, reported with its severity and words,
+dispositioned through the register, and held. The corrected form passes, and the register
+entry for the old finding goes stale, so the fix must be recorded
+(`tests/test_detection_gaps.py`).
+
+- **T8.** `agree_across_modules` in `config/annotation-profile.yaml`: label, definition and
+  comment by default. The generator adds a drift constraint for each entry beyond the term
+  contract's two, on classes and properties alike.
+- **T9 and T23.** `config/third-party-text.yaml` declares the annotation properties that
+  carry third-party text: source, release, licence and attribution. The template declares
+  none.
+  - The validator's module check fails a module holding declared text whose header names
+    no `dcterms:source` with that source and release (T23), or carries no declared
+    attribution in `dcterms:rights` (T9).
+  - `disposition.py` lists the text apart from the module's licence.
+  - The one sentence bounding what this means is held as "PENDING LEGAL" until Legal
+    answers the T9 request. A test pins it, so it cannot change in passing.
+- **T10.** Two realist violations: an object property asserted from one class to another,
+  and a restriction on an annotation property.
+- **T11.** The genus check ignores a trailing `(…)` in the parent's label. The response
+  said "the qualifier warning stays", but there was none: the qualifier was only ever seen
+  through its children's genus warnings. So the qualifier is now its own warning, once, on
+  the class whose label carries it.
+- **T12.** `scheme_rules` in `config/naming.yaml`: a local-name pattern that must, or must
+  not, sit under a category. Gated under `where: naming`. None ships enabled.
+- **Found on the way:**
+  - A SPARQL constraint takes its severity from its node shape, and the set-based engine
+    ignores one written on the constraint. The first generated comment-drift check ran as
+    a violation while the profile said warning. Each entry now gets its own node shape;
+    the test that caught it is kept.
+  - Two of the response's BPO figures counted something other than what the checks find.
+    They are corrected in the table below, not reproduced.
+
+Measured. BPO S1 is the port, in a scratch copy, never pushed. Its trial declaration and
+D7 rule are marked trial evidence, and its attribution is a placeholder, not Legal's or
+BPO's. BPO S0 is `BusinessProcessOntology` at `bc64e91`, read from its history; its working
+tree is untouched.
+
+| Item | The response's criterion | Measured |
+|---|---|---|
+| T8 | BPO's 110 pairs in `config/annotation-drift.tsv`, reproduced exactly | S1: 110 found, and the same 110 by term and property. 57 label or definition (wellformedness, as before), 53 comment (new, warnings) |
+| T9 | 3,757 `apqcSourceText` values reported as third-party, attribution missing | S1: 14 modules, 3,757 values, each module a violation for the missing attribution |
+| T10 | the 3 `requires…` properties flagged | S0: 2 properties used class to class, `requiresCapability` and `requiresRole`, in 494 assertions on 453 classes. The third, `requiresPermission`, is declared and never used, so there is nothing to flag. S1: none (the PO re-typed them) |
+| T11 | genus warnings drop by those caused only by qualifiers; "the 78 qualifier warnings remain" | S1: the 78 genus warnings are gone (their register entries go stale), and 18 qualifier warnings appear on the labels carrying one. 8 are editorial ("(shared anchor)", "(capability)"), 10 are PCF names with an acronym or clarification ("(AR)", "(RFP/RFQ)"), which BPO will have to judge |
+| T12 | BPO configures D7 and reproduces Gate F's 39 | S1: 39, the same 39 classes as Gate F's rule (a P-number directly under Organization Capability) |
+| T23 | 17 of 18 slice files flagged | S0: 14 of the 15 modules holding APQC text name no release: all 13 slices and the reference file. "17 of 18" counted every header; the check applies only to modules holding declared text. S1: none |
+| Mutations of the new checks | -- | 15 of 15 caught, after two test gaps were closed: a scheme rule with both sides, and the pending-Legal sentence |
+| Template suite (budget 10 min) | -- | 381 passed. **Not measured**: 31 min locally with the CPU at 100% from other work, and tests WP4 did not touch ran about 3 times their WP3 times. The Checks job's time on GitHub's runner is in the commit that follows |
+
+Not covered:
+- T9's policy text, and whether attribution on the header is enough, wait for Legal.
+- Whether BPO may redistribute the APQC text (B2) is BPO's to take to Legal.
+
 ### Carried to WP6
 
 Open items the work packages cannot close themselves, kept here until WP6 closes them
