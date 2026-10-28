@@ -5,10 +5,12 @@
 # names no project: every value it needs comes from config/project.yaml
 # through the tools it runs.
 #
-# Deliberately small to begin with. A workflow that runs everything from
-# day one is a workflow whose failures nobody reads; this runs the
-# contract, the licensing classification and the suite, and grows as the
-# checks do.
+# Every check step runs whatever the steps before it did, and the last
+# step fails the job, naming every check that failed. The Business Process
+# Ontology port found why: the job stopped at its first failure, so one
+# accepted IRI-lint finding hid the seven checks after it, and they were
+# run by hand or not at all. A check step is marked continue-on-error and
+# given an id; tests/test_findings.py fails on one that is not.
 #
 # Actions are pinned to commit SHAs. A tag can be moved to a different
 # commit; a commit cannot. Everything else in this repository pins
@@ -64,63 +66,121 @@ jobs:
       # of the template that was never set up -- every check green, about
       # a placeholder ontology called `example`.
       - name: This is a project, not an uninitialized copy of the template
+        id: project
+        continue-on-error: true
         run: python tools/project.py --check
 
       - name: The layout contract describes the tree
+        id: layout
+        continue-on-error: true
         run: python tools/layout.py
 
       - name: Every tracked file has exactly one disposition
+        id: disposition
+        continue-on-error: true
         run: python tools/licensing/disposition.py
 
       - name: Nothing unpublishable is tracked
+        id: publishable
+        continue-on-error: true
         run: python tools/licensing/disposition.py --check
 
       - name: The vendored extracts cover what the corpus and shapes name
+        id: extracts
+        continue-on-error: true
         run: python tools/ontology/vendor_upstream.py
 
-      # The SHACL ladder, gated against config/validation-baseline.json.
-      # This is the check that says "no new findings" -- known defects are
-      # recorded, and this is what stops them growing.
+      # Every finding a check accepts rather than fails on, one entry each,
+      # with a reason, an owner and a review date. A malformed entry fails
+      # here, once, rather than in each check that reads it.
+      - name: The findings register can be used
+        id: register
+        continue-on-error: true
+        run: python tools/findings.py
+
+      # The SHACL ladder, gated through config/findings-register.yaml: a
+      # violation or warning no entry accepts fails, and so does an entry
+      # that matches nothing.
       - name: No new ontology findings
+        id: validate
+        continue-on-error: true
         run: python tools/ontology/validate.py --gate
 
       # Every upstream IRI is a term of its pinned release, every authored
       # one is declared. A file that does not parse fails here (exit 2),
       # never passes as a file with nothing wrong in it.
       - name: Every IRI is a real term or a declared one
+        id: iri_lint
+        continue-on-error: true
         run: python tools/ontology/iri_lint.py
 
       # What the ontology must be able to answer. A fresh project has no
       # questions, and says so; an answerable question with a wrong answer
       # fails here.
       - name: Every answerable competency question gives its answer
+        id: competency
+        continue-on-error: true
         run: python tools/ontology/competency.py
 
       - name: Every crosswalk holds
+        id: mappings
+        continue-on-error: true
         run: python tools/ontology/mappings.py
 
       - name: The generated vocabulary, shapes and Protégé files are current
+        id: generated
+        continue-on-error: true
         run: |
           python tools/ontology/vocabulary.py --check
           python tools/ontology/profile_shapes.py --check
           python tools/ontology/protege.py --check
 
       - name: Modules declared canonical are in canonical form
+        id: canonical
+        continue-on-error: true
         run: python tools/ontology/normalize.py --check
 
       - name: The communications record follows its protocol
+        id: communications
+        continue-on-error: true
         run: python tools/communications.py
 
       # In the template, a stale manifest fails. In a project it reports
       # where the project has diverged from the template, and passes.
       - name: Where this has diverged from the template
+        id: template_status
+        continue-on-error: true
         run: python tools/template_status.py --check
 
       # Everything but the tests that need Java and ROBOT, which the
       # Reasoning workflow runs. Deselected by marker, named here, rather
       # than skipped where they stand: a skip reads as a pass.
       - name: Tests
+        id: tests
+        continue-on-error: true
         run: python -m pytest tests/ -q -p no:randomly -m "not reasoning and not scale and not corpus"
+
+      # The job's verdict. Runs whatever happened above, and fails if any
+      # check step did not succeed, listing each one -- a step skipped
+      # because setup failed is listed too, never read as a pass.
+      - name: Every check passed
+        if: always()
+        env:
+          STEPS: ${{ toJSON(steps) }}
+        run: |
+          python - <<'PY'
+          import json, os, sys
+          steps = json.loads(os.environ["STEPS"])
+          bad = [(name, s["outcome"]) for name, s in steps.items()
+                 if s["outcome"] != "success"]
+          for name, outcome in steps.items():
+              print("  %-16s %s" % (name, outcome["outcome"]))
+          if bad:
+              print("\n%d check(s) did not pass: %s" % (
+                  len(bad), ", ".join("%s (%s)" % b for b in bad)))
+              sys.exit(1)
+          print("\nevery check passed")
+          PY
 
   vendored:
     # The check the offline one cannot make: that the committed extracts

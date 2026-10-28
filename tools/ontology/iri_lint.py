@@ -4,10 +4,24 @@
     python tools/ontology/iri_lint.py                   # the authored Turtle
     python tools/ontology/iri_lint.py a.ttl b.ttl       # these files, as one corpus
     python tools/ontology/iri_lint.py --output json
+    python tools/ontology/iri_lint.py --propose         # register entries for
+                                                        # the new findings
 
-Exit codes: 0 no findings; 1 findings; 2 the lint could not be run -- a
-file that does not parse, a file that cannot be read, a register that is
-missing. A file that cannot be read is never a file with no findings.
+Exit codes: 0 no findings but accepted ones; 1 a new finding, or (over
+the whole authored scope) an entry that matches nothing; 2 the lint could
+not be run -- a file that does not parse, a file that cannot be read, a
+register that is missing. A file that cannot be read is never a file with
+no findings.
+
+ACCEPTED FINDINGS
+
+A finding a project accepts rather than fixes -- an IRI kept for a
+reason, as the Business Process Ontology's port kept one -- is an entry in
+config/findings-register.yaml (tools/findings.py), naming the file, the
+rule and the term. Without one, an accepted finding kept the Checks job
+red for good, and every step after this one stopped running. Line numbers
+are not part of the identity: an edit above a finding moves it, and does
+not make it a different finding.
 
 THE RULES
 
@@ -74,8 +88,11 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+import findings  # noqa: E402
 import layout  # noqa: E402
 import project  # noqa: E402
+
+CHECK = "iri_lint"
 
 FORMAT_VERSION = "1.0"
 GENERATOR = "tools/ontology/iri_lint.py"
@@ -527,32 +544,78 @@ def json_of(findings: list[dict], paths: list[Path], error: str | None):
     }
 
 
+def register_findings(records: list[dict], root: Path) -> list[dict]:
+    """Each lint record as the register identifies it: the file relative
+    to the repository, the rule, the term. No line, no suggestion."""
+    out = []
+    for record in records:
+        name = record["file"]
+        try:
+            name = Path(name).resolve().relative_to(root.resolve()).as_posix()
+        except ValueError:
+            pass
+        out.append(dict(findings.finding(
+            CHECK, name, record["subject"], record["type"],
+            "%s %s" % (record["type"], record["subject"]), "Violation"),
+            record=record))
+    return out
+
+
+def verdict_of(records: list[dict], root: Path, complete: bool) -> dict:
+    return findings.judge(CHECK, register_findings(records, root),
+                          findings.load(root), complete=complete)
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("files", nargs="*")
     ap.add_argument("--output", choices=("text", "json"), default="text")
+    ap.add_argument("--propose", action="store_true",
+                    help="print register entries for the new findings")
+    ap.add_argument("--reason", help="with --propose: the reason to write")
+    ap.add_argument("--owner", help="with --propose: the owner to write")
+    ap.add_argument("--review", help="with --propose: the review date")
     args = ap.parse_args(argv)
 
     root = layout.repository_root()
     paths = [Path(f) for f in args.files]
+    # Stale entries can only be judged over the whole scope: run on one
+    # file, an entry for another matches nothing and is not stale.
+    complete = not paths
     try:
         paths = paths or default_paths(root)
         sources = upstreams(root)
-        findings = lint(paths, root)
+        records = lint(paths, root)
+        verdict = verdict_of(records, root, complete)
     except Unrunnable as error:
         if args.output == "json":
             print(json.dumps(json_of([], paths, str(error)), indent=2))
         print("  CANNOT LINT: %s" % error, file=sys.stderr)
         return 2
 
+    if args.propose:
+        print(findings.propose(verdict["new"], args.reason, args.owner,
+                               args.review)
+              or "# no new findings: nothing to propose")
+        return 0
+    new = [f["record"] for f in verdict["new"]]
     if args.output == "json":
-        print(json.dumps(json_of(findings, paths, None), indent=2))
+        out = json_of(records, paths, None)
+        accepted = {id(f["record"]) for f in verdict["accepted"]}
+        for record in out["violations"]:
+            record["accepted"] = id(record) in accepted
+        out["register"] = {key: len(verdict[key]) for key in
+                           ("accepted", "new", "stale", "expired")}
+        print(json.dumps(out, indent=2))
     else:
-        if findings:
-            print(text_of(findings, sources, root))
-        print("  %d file(s), %d finding(s)" % (len(paths), len(findings)),
+        if new:
+            print(text_of(new, sources, root))
+        print("  %d file(s), %d finding(s), %d accepted by the register"
+              % (len(paths), len(records), len(verdict["accepted"])),
               file=sys.stderr)
-    return 1 if findings else 0
+        if verdict["stale"] or verdict["expired"]:
+            findings.report(CHECK, dict(verdict, new=[]), out=sys.stderr)
+    return 0 if verdict["passed"] else 1
 
 
 if __name__ == "__main__":

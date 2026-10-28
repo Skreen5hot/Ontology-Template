@@ -33,7 +33,7 @@ WHAT IT DOES
      in the layout contract.
   6. Regenerates every generated file, because each one names the
      project: the extracts' headers carry its IRI and title, and the
-     digest and baseline describe its module.
+     digest describes its module.
 
 Files declared `template: owned` are not touched. They are what
 tools/template_status.py compares against the template, and editing
@@ -92,7 +92,6 @@ GENERATORS = (
     ("tools/ontology/profile_shapes.py",),
     ("tools/ontology/protege.py",),
     ("tools/ontology/corpus_digest.py", "-o", "config/corpus-digest.json"),
-    ("tools/ontology/validate.py", "--record"),
 )
 
 

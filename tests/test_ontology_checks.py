@@ -177,110 +177,13 @@ def test_the_violations_are_attributed_to_whose_terms_they_are(validation):
             "are findings about the extract" % corpus["against_vendored_terms"])
 
 
-def test_the_baseline_describes_reality(validation, validator):
-    """The gate, run as a test.
-
-    The count of open findings used to be written into this file as
-    `== 10`. It now lives in config/validation-baseline.json, so the team
-    inheriting this can see what is owed without reading test code, and
-    so there is one source of truth rather than a number here and another
-    in a report.
-    """
-    problems = validator.compare(validation, validator.baseline())
+def test_the_gate_passes_on_the_live_corpus(validation, validator):
+    """The gate, run as a test: every finding is accepted by an entry in
+    the findings register, and every entry matches one. The policy itself
+    is tested on planted cases in tests/test_findings.py."""
+    problems, verdict = validator.gate(validation, validator.findings.load())
     assert problems == [], problems
-
-
-def test_every_rung_is_recorded(validation, validator):
-    """Both directions. A rung with no baseline entry would be adopted
-    silently; an entry for a rung that no longer exists is coverage for
-    nothing."""
-    recorded = set((validator.baseline().get("rungs") or {}))
-    assert recorded == set(validation["rungs"]), (
-        "recorded but gone: %s; present but unrecorded: %s"
-        % (sorted(recorded - set(validation["rungs"])),
-           sorted(set(validation["rungs"]) - recorded)))
-
-
-
-# ------------------------------------------------------- the gate
-
-
-def rung(findings=0, evaluable=True, exercised=True, vendored=0):
-    return {"evaluable": evaluable, "can_still_fail": exercised,
-            "blocked_by_missing_vocabulary": [] if evaluable else ["CCO"],
-            "corpus": {"against_authored_terms": findings,
-                       "against_vendored_terms": vendored}}
-
-
-def test_the_gate_accepts_only_a_baseline_that_matches(validator):
-    """Falsifies the gate, one disagreement at a time.
-
-    Run against constructed records rather than the live ladder, because
-    several of these states -- a rung that has vanished, a vocabulary
-    that has gone missing, a finding at all -- cannot be reached from
-    this repository today. A branch that cannot be reached is a branch
-    nobody has executed.
-    """
-    baseline = {"rungs": {"a": {"authored_findings": 10}}}
-
-    assert validator.compare({"rungs": {"a": rung(10)}}, baseline) == []
-
-    got = validator.compare({"rungs": {"a": rung(11)}}, baseline)
-    assert got and "1 new finding." in got[0], got
-
-    got = validator.compare({"rungs": {"a": rung(13)}}, baseline)
-    assert got and "3 new findings." in got[0], got
-
-    got = validator.compare({"rungs": {"a": rung(9)}}, baseline)
-    assert got and "re-record" in got[0], got
-
-    got = validator.compare({"rungs": {"a": rung(10), "b": rung(0)}}, baseline)
-    assert got and "no entry" in got[0], got
-
-    got = validator.compare({"rungs": {}}, baseline)
-    assert got and "no longer exists" in got[0], got
-
-    got = validator.compare({"rungs": {"a": rung(10, evaluable=False)}},
-                            baseline)
-    assert got and "cannot be evaluated" in got[0], got
-
-    got = validator.compare({"rungs": {"a": rung(10, exercised=False)}},
-                            baseline)
-    assert got and "did not fire on the fixture" in got[0], got
-
-    got = validator.compare({"rungs": {"a": rung(10, vendored=3)}}, baseline)
-    assert got and "vendored upstream terms" in got[0], got
-
-
-def test_recording_refuses_to_raise_a_count_without_a_reason(validator,
-                                                             tmp_path,
-                                                             monkeypatch):
-    """Without this, a regression certifies itself on the one run that
-    introduces it and the baseline becomes a transcript of whatever
-    happened rather than a commitment."""
-    import json
-
-    monkeypatch.setattr(validator.layout, "repository_root",
-                        lambda: tmp_path)
-    (tmp_path / "config").mkdir()
-    (tmp_path / "config" / "validation-baseline.json").write_text(
-        json.dumps({"rungs": {"a": {"authored_findings": 10}}}),
-        encoding="utf-8")
-
-    raised = {"rungs": {"a": rung(11)}}
-    assert validator.record_baseline(raised, None) == 1, (
-        "recording accepted a raised count with no reason given")
-
-    assert validator.record_baseline(raised, "deliberate, see ADR-9") == 0
-    after = json.loads(
-        (tmp_path / "config" / "validation-baseline.json").read_text(
-            encoding="utf-8"))
-    assert after["rungs"]["a"]["authored_findings"] == 11
-    assert after["rungs"]["a"]["why"] == "deliberate, see ADR-9", (
-        "the reason was not recorded beside the number it excuses")
-
-    # Lowering never needs a reason.
-    assert validator.record_baseline({"rungs": {"a": rung(4)}}, None) == 0
+    assert verdict["passed"], (verdict["new"][:5], verdict["stale"][:5])
 
 
 # --------------------------------------------- the wellformedness set
@@ -468,19 +371,6 @@ def test_the_realist_positive_controls_are_not_reported(validation):
         for rung in ("validation.realist", "validation.annotation-profile",
                      "validation.wellformedness"):
             assert results_for(validation, rung, case) == [], (rung, case)
-
-
-def test_a_warning_is_reported_and_not_gated(validator):
-    """The constructed case: a rung whose corpus has only warnings is not
-    a regression against a baseline of zero."""
-    record = {"rungs": {"a": {
-        "evaluable": True, "can_still_fail": True,
-        "blocked_by_missing_vocabulary": [],
-        "corpus": {"against_authored_terms": 0,
-                   "warnings_against_authored_terms": 5,
-                   "against_vendored_terms": 0}}}}
-    assert validator.compare(record,
-                             {"rungs": {"a": {"authored_findings": 0}}}) == []
 
 
 def test_independent_and_dependent_is_caught_only_through_derived_disjointness(

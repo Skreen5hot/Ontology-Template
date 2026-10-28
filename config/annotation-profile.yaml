@@ -12,8 +12,9 @@
 #              a pinned upstream (it is checked against the registers) or
 #              of a W3C or Dublin Core vocabulary.
 #   label      what the message calls it
-#   severity   violation | warning. A warning is reported; a violation is
-#              gated (config/validation-baseline.json).
+#   severity   violation | warning. Both are gated: a finding of either
+#              fails until it is fixed or accepted in
+#              config/findings-register.yaml.
 #   why        one sentence: why this project asks for it.
 #
 # The default is CCO v2.0's own convention: a definition says where it

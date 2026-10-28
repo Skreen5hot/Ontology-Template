@@ -85,6 +85,7 @@ _root = next(p for p in (_here, *_here.parents)
              if (p / "config/repository-layout.yaml").is_file())
 sys.path.insert(0, str(_root / "tools"))
 
+import findings as register  # noqa: E402
 import layout  # noqa: E402
 import project  # noqa: E402
 
@@ -94,7 +95,6 @@ ASSETS = "site/src"
 CONTENT = "site/content/site.json"
 PINS = "config/upstream-sources.yaml"
 EXTRACTS = "config/upstream-extracts.json"
-BASELINE = "config/validation-baseline.json"
 
 #: Assets copied verbatim. Anything else under site/src/ is refused rather
 #: than shipped or skipped: an artifact that deploys whatever it finds
@@ -664,7 +664,7 @@ def gather() -> dict:
         "shapes": [e.resolve() for e in layout.components(
             "ontology-validation")],
         "extracts": read_json(EXTRACTS),
-        "baseline": read_json(BASELINE),
+        "register": register.load(),
         "decisions": sorted((p for p in layout.component("docs.decisions")
                              .members("*.md") if p.name != "README.md"),
                             key=lambda p: p.name),
@@ -827,6 +827,43 @@ def release_list(data: dict, ctx: dict) -> str:
 # --------------------------------------------------------------- build
 
 
+def register_section(entries: list) -> str:
+    """The findings register as a reader needs it: how many are accepted,
+    by check and severity, and, apart from the rest, those whose defect is
+    in an upstream term rather than this ontology."""
+    counts: dict = {}
+    for entry in entries:
+        key = (entry["check"], entry["severity"])
+        counts[key] = counts.get(key, 0) + 1
+    summary = ("<p>Every finding a check accepts rather than fails on is an "
+               "entry in the findings register, with a reason, an owner and "
+               "a review date. %s</p>" % (
+                   "It has no entries." if not entries else
+                   "It has %d: %s." % (len(entries), ", ".join(
+                       "%d %s %s" % (n, esc(check), esc(severity.lower()))
+                       for (check, severity), n in sorted(counts.items())))))
+    upstream = sorted((e for e in entries if e.get("upstream")),
+                      key=lambda e: (e["upstream"], e["rule"], e["focus"]))
+    if upstream:
+        rows = "\n".join(
+            "<tr><td>%s</td><td>%s</td><td>%s</td><td>%s</td><td>%s</td>"
+            "<td>%s</td></tr>" % (
+                esc(e["upstream"].split()[0]), code(e["upstream"].split()[1]),
+                code(e["focus"]), esc(e["severity"]),
+                esc(" ".join(str(e["reason"]).split())), esc(e["owner"]))
+            for e in upstream)
+        listed = ("<table>\n<thead><tr><th>Upstream</th><th>Term</th>"
+                  "<th>Finding on</th><th>Severity</th><th>Reason</th>"
+                  "<th>Owner</th></tr></thead>\n<tbody>\n%s\n</tbody>\n"
+                  "</table>" % rows)
+    else:
+        listed = "<p>None recorded.</p>"
+    return ("%s\n<h3>Findings about upstream terms</h3>\n<p>Defects in a "
+            "pinned upstream's term, not in this ontology, listed apart so "
+            "they can be reported to the upstream.</p>\n%s"
+            % (summary, listed))
+
+
 def build(out: Path) -> list[tuple[str, str]]:
     site = read_json(CONTENT)
     commit, epoch = stamp()
@@ -847,8 +884,9 @@ def build(out: Path) -> list[tuple[str, str]]:
 
     authored_terms = [r for r in data["records"] if r["origin"] == "authored"]
     upstream_terms = [r for r in data["records"] if r["origin"] == "upstream"]
-    findings = sum(r.get("authored_findings", 0)
-                   for r in data["baseline"]["rungs"].values())
+    entries = data["register"]
+    validate_entries = [e for e in entries if e["check"] == "validate"]
+    lint_entries = [e for e in entries if e["check"] == "iri_lint"]
 
     # ---- data
     modules = ([{"key": s["key"], "title": ontology_header(
@@ -943,8 +981,10 @@ def build(out: Path) -> list[tuple[str, str]]:
         ("Authored terms", "%d" % len(authored_terms)),
         ("Upstream terms in use", "%d, from %d pinned sources" % (
             len(upstream_terms), len(pins()))),
-        ("Open validation findings", "%d" % findings),
-        ("IRI lint findings", "%d" % len(data["lint_findings"])),
+        ("Open validation findings", "%d, each accepted in the findings "
+         "register" % len(validate_entries)),
+        ("IRI lint findings", "%d, %d of them accepted in the register" % (
+            len(data["lint_findings"]), len(lint_entries))),
         ("Competency questions answered", "%d of %d answerable" % (
             answered, answerable)),
         ("Latest release", '<a href="releases/">%s</a>' % esc(latest)),
@@ -978,15 +1018,14 @@ def build(out: Path) -> list[tuple[str, str]]:
                     esc(source["file"].name, quote=True),
                     esc(source["file"].name))),
             ])))
+    set_ids = {c.resolve(): c.id
+               for c in layout.components("ontology-validation")}
     shape_rows = []
     for path in data["shapes"]:
-        rung = None
-        for name, entry in data["baseline"]["rungs"].items():
-            if layout.component(name).resolve() == path:
-                rung = entry
-        shape_rows.append("<li>%s &mdash; %s recorded finding(s)</li>" % (
-            source_link(ctx, relative(path)),
-            esc(str(rung["authored_findings"])) if rung else "no baseline"))
+        count = sum(1 for e in validate_entries
+                    if e["where"] == set_ids.get(path))
+        shape_rows.append("<li>%s &mdash; %d accepted finding(s)</li>" % (
+            source_link(ctx, relative(path)), count))
     upstream_sources = []
     for pin in pins():
         record = data["extracts"]["extracts"][pin["id"]]
@@ -1025,11 +1064,13 @@ def build(out: Path) -> list[tuple[str, str]]:
 
     validation = definition_list(
         [("Authored terms checked", "%d" % len(authored_terms))]
-        + [(name, "%d recorded finding(s)" % entry["authored_findings"])
-           for name, entry in sorted(data["baseline"]["rungs"].items())]) + (
+        + [(name, "%d accepted finding(s)" % sum(
+            1 for e in validate_entries if e["where"] == name))
+           for name in sorted(set_ids.values())]) + (
         "<p>With no authored term written, every shape set conforms "
         "vacuously. What shows the shapes work is the fixture built to break "
-        "them, which they reject.</p>" if not authored_terms else "")
+        "them, which they reject.</p>" if not authored_terms else "") + (
+        "\n" + register_section(entries))
 
     unresolved_parts = []
     for key, record in sorted(data["extracts"]["extracts"].items()):

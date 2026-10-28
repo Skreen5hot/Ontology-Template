@@ -29,7 +29,7 @@ against. Read `docs/template/ROADMAP.md` for what is built and what is next,
 - **A new shape set arrives with its negative fixture** and positive controls in the same
   commit, and its constraint messages are listed by name in a test.
 - **Generated files are regenerated, never edited**: `vendor/**`, `vendor/NOTICE.md`,
-  `config/upstream-extracts.json`, `config/validation-baseline.json`,
+  `config/upstream-extracts.json`,
   `config/corpus-digest.json`, `config/template-manifest.json`.
 - **Verify before asserting an upstream IRI.** Grep the vendored extract or the cached
   upstream; never write a `cco:`/`obo:` IRI from memory.

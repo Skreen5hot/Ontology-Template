@@ -26,8 +26,8 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 6 | Authoring ergonomics, the vocabulary and governance layer, crosswalks, the research record | **done** |
 | 7 | Public site and its Pages workflow, generalized | **done** |
 | 8 | Prove it: the BPO port | **port done** (2026-10-26); success criterion not met |
-| 9 | WP1 Scale: validation, release build, a size benchmark | in progress |
-| 10 | WP2 One findings register, every Checks step run | not started |
+| 9 | WP1 Scale: validation, release build, a size benchmark | **done** (2026-10-27) |
+| 10 | WP2 One findings register, every Checks step run | in progress |
 | 11 | WP3 One term contract for validation and the site | not started |
 | 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | not started |
 | 13 | WP5 Project ergonomics and documentation (alongside) | not started |
@@ -358,6 +358,41 @@ Measured:
 | Release build, benchmark | -- | 179 s for two builds, byte-identical |
 | Checks suite, BPO port (T3, budget 30 min) | did not finish | 18 min 34 s; 333 passed, 3 failed: BPO's accepted P10530 lint finding (T5), not the template |
 | Checks suite, template, with the scale tests (budget 10 min) | -- | 7 min 19 s, 326 passed |
+
+### Phase 10, WP2, as built (2026-10-28)
+
+- **T4, T22: one register.** `config/findings-register.yaml`, read through
+  `tools/findings.py`, replaces `config/validation-baseline.json`. One entry per accepted
+  finding, by identity (check, shape set or file, term, shape or rule, message digest,
+  severity), with a reason, owner and review date. Decision 11's policy as written: a new
+  violation or warning fails, a new info is reported, an entry that matches nothing fails,
+  an expired review is reported. `--propose` on each check prints the entries for its new
+  findings; an entry with the proposal's `TODO` placeholders still in it is refused.
+  `--record` is gone, because a register cannot be generated: an entry needs a person to
+  give its reason.
+- **T5.** The IRI linter reads the register too. Line numbers are not part of a lint
+  finding's identity, and a run over one file (the hooks) does not judge staleness. Every
+  Checks step continues on error, and a final step fails the job and names each check that
+  did not pass.
+- **T20.** The validator reports each shape set on stderr, and its JSON holds every finding.
+- **T24.** An entry may carry `upstream: <SOURCE> <IRI>`, and must when its focus is an
+  upstream term. The status page lists those entries apart.
+- **Found on the way:** PyYAML's pure-Python loader took 9.4 s to read BPO's 3,717-entry
+  register, which happens once per check and once per site build. The register is read with
+  libyaml's loader where PyYAML has one (1.0 s).
+
+Measured, on the BPO port (in a scratch copy, never pushed):
+
+| | Before | After |
+|---|---|---|
+| Findings identified | a count: 57, warnings not gated | 3,716 by identity: 57 violations, 3,659 warnings; all distinct |
+| Fix one drift, add an unrelated label (still 57) | passed | fails, naming the new finding and the stale entry |
+| P10530 lint finding, accepted | Checks red, 7 steps never run | lint exits 0; `test_iri_lint` passes; the BPO suite has 356 passed, 0 failed |
+| Checks suite, BPO port (budget 30 min) | 18 min 34 s (WP1) | not measured cleanly: 36 min with the machine at 70-96% load from other work. WP2's own tests add about 1 min. A runner measurement is open |
+| Template suite (budget 10 min) | 7 min 19 s | 6 min 36 s, 346 passed |
+
+The BPO entries were written with a reason marked as trial evidence. Accepting BPO's
+findings is BPO's decision, not the template's.
 
 ## Capabilities compared with ODK
 

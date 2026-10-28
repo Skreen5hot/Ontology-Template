@@ -94,7 +94,11 @@ def test_the_authored_turtle_lints_clean(linter, layout):
     assert module in paths
     assert not [p for p in paths if "bad_examples" in p.name], (
         "a fixture built to be invalid is in the lint scope")
-    assert linter.lint(paths) == []
+    # Clean, or every finding accepted in the findings register: a
+    # project keeps an IRI for a reason there, not by editing this test.
+    verdict = linter.verdict_of(linter.lint(paths),
+                                linter.layout.repository_root(), True)
+    assert verdict["passed"], (verdict["new"][:5], verdict["stale"][:5])
 
 
 def test_the_main_entry_point_exits_0_on_the_corpus(linter, capsys):

@@ -179,6 +179,36 @@ def test_a_private_repository_is_never_linked(built, project, checker):
     assert checker.check(out) == []
 
 
+def test_upstream_entries_are_listed(builder, project):
+    """T24: a register entry about an upstream term -- planted here on
+    CCO's Organization, the case the Business Process Ontology met -- is
+    listed apart on the status page, with the term, reason and owner."""
+    cco = builder.register.upstream_ids()["CCO"]
+    planted = {
+        "check": "validate", "where": "validation.realist",
+        "focus": project.namespace() + "Firm", "rule": "urn:planted:shape",
+        "digest": "0" * 16, "severity": "Warning",
+        "reason": "CCO 2.0 does not place Organization under Agent",
+        "owner": "the architect", "review": "2027-01-01",
+        "upstream": "CCO %sont00001180" % cco}
+    # The section alone: the page is shown to carry it by the test below,
+    # on the shared build, and a second whole build costs a minute on a
+    # ported corpus.
+    status = builder.register_section([planted])
+    section = status.split("Findings about upstream terms", 1)[1]
+    assert "%sont00001180" % cco in section
+    assert "does not place Organization under Agent" in section
+    assert "None recorded." not in section
+    assert "It has 1: 1 validate warning." in status
+
+
+def test_with_no_upstream_entry_none_is_listed(built):
+    out, _ = built
+    status = (out / "status/index.html").read_text(encoding="utf-8")
+    section = status.split("Findings about upstream terms", 1)[1]
+    assert "None recorded." in section or "<table>" in section
+
+
 def test_a_public_repository_is_linked(builder, project, checker, tmp_path,
                                        monkeypatch):
     """Guards the test above: a builder that never linked would pass it."""

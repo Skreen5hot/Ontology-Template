@@ -14,7 +14,7 @@ project on its first commit:
 | A layout contract that every tracked file must be declared in, with a role | `config/repository-layout.yaml` |
 | Licensing: one disposition per file, attribution checked, licensed reference material kept out of the index | `tools/licensing/disposition.py` |
 | BFO 2020 (whole) and CCO v2.0 (what is named) vendored from pinned commits, digest-checked, rebuilt weekly | `tools/ontology/vendor_upstream.py` |
-| A SHACL ladder gated against a baseline, where every shape set must fail on a fixture built to break it | `tools/ontology/validate.py` |
+| A SHACL ladder gated through a findings register (one entry per accepted finding, by identity), where every shape set must fail on a fixture built to break it | `tools/ontology/validate.py` |
 | Realist shapes: anchored in BFO, no two disjoint categories (BFO's `AllDisjointClasses` included), genus-differentia definitions, domains and ranges, headers, deprecations; and a configurable annotation profile | `shapes/realist_shapes.ttl`, `config/annotation-profile.yaml` |
 | Competency questions as SPARQL with the answer each must give, over example instance data | `competency-questions/`, `examples/`, `tools/ontology/competency.py` |
 | A corpus digest that survives blank-node renaming | `tools/ontology/corpus_digest.py` |

@@ -99,3 +99,12 @@ dispositions stand as written, the five changed remedies included; and the three
 take effect as proposed -- the time budgets (ladder and release build 15 min, the suite on
 the BPO port 30 min, the template's own suite 10 min, on GitHub's standard runner), a new
 warning fails the gate unless recorded, and an expired review date is reported, not failed.
+
+**12. "going public is the intent. Proceed with WP2"** (2026-10-28)
+
+In answer to whether making this repository public (found on 2026-10-27, when the Pages job
+failed on it) was intended, given decision 10's "the HOW it was made may be private".
+Effect: the template repository is public, so its site links into it -- source files, the
+commit, issues and releases -- as the build does for any public repository. Decision 10
+stands for projects: a project's repository may stay private, and its site then links
+nothing into it. WP2 begins.

@@ -1,0 +1,10 @@
+# The findings register: every finding this repository accepts rather
+# than fixes, one entry each, by identity. Read by every check that
+# gates (tools/findings.py states the fields and the policy). A new
+# violation or warning fails until it is fixed or entered here with a
+# reason, an owner and a review date; an entry that matches nothing
+# fails until it is removed. Entries are written by a person: each
+# check's --propose prints them for its new findings.
+
+format_version: 1
+entries: []

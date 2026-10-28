@@ -15,7 +15,7 @@ A realist ontology aligned to BFO 2020 and CCO v2.0. Terms are minted in
 ontology/   the authored modules ({{module}} to start)
 shapes/     SHACL shapes, and the fixtures built to break them
 vendor/     pinned partial extracts of BFO and CCO, with attribution
-config/     project values, layout contract, upstream pins, manifests, baseline, digest
+config/     project values, layout contract, upstream pins, manifests, findings register, digest
 tools/      layout, licensing, vendoring, validation and digest tools
 tests/      the suite, including the falsifications
 docs/       handoff, development, process, decisions

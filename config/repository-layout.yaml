@@ -456,6 +456,14 @@ components:
       repository. Written by tools/init_project.py; read by every tool
       through tools/project.py.
 
+  - id: config.findings-register
+    path: config/findings-register.yaml
+    role: configuration
+    description: >-
+      Every finding a check accepts rather than fails on, one entry each by
+      identity, with a reason, an owner and a review date. Written by a
+      person; read by the validator, the IRI linter and the site.
+
   - id: config.annotation-profile
     path: config/annotation-profile.yaml
     role: configuration
@@ -522,6 +530,14 @@ components:
       The suite, including the falsifications: every check here is shown
       to fail on the thing it protects against.
 
+  - id: tool.findings
+    path: tools/findings.py
+    role: tool
+    template: owned
+    description: >-
+      The findings register: reads and checks it, and judges a check's
+      findings against it -- accepted, new, stale, due for review.
+
   - id: tool.layout
     path: tools/layout.py
     role: tool
@@ -579,7 +595,7 @@ components:
     description: >-
       The SHACL ladder: every shape set against the authored ontology plus
       the vendored extracts, and against the fixtures built to break it.
-      Gates against the baseline.
+      Gates through the findings register.
 
   - id: tool.iri-lint
     path: tools/ontology/iri_lint.py
@@ -726,14 +742,6 @@ components:
     template: owned
     description: >-
       Ground digest and blank-node fingerprint of the authored ontology.
-
-  - id: generated.validation-baseline
-    path: config/validation-baseline.json
-    role: generated-artifact
-    generator: tool.validate
-    description: >-
-      The findings this repository is known to carry, per shape set. The
-      gate keeps it from growing without a recorded reason.
 
   - id: generated.corpus-digest
     path: config/corpus-digest.json

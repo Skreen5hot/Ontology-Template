@@ -82,9 +82,9 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `disposition.py` | a file matching two rules, or none; an adjudication naming no file; a `LICENSE` naming zero or two recognised licences |
 | `disposition.py --check` | a tracked file that may not be redistributed; a vendored extract whose required attribution is missing from `vendor/NOTICE.md` |
 | `vendor_upstream.py` | an upstream term the corpus or the shapes name that no extract describes; an extract whose digest is not what the manifest records |
-| `validate.py --gate` | a rung with more findings than `config/validation-baseline.json` records, a rung with fewer that has not been re-recorded, a shape set the fixture does not exercise, a rung blocked on missing vocabulary, a violation against a vendored term, and a rung the baseline does not mention |
-| `validate.py --record` | raising any recorded count without `--accept-regression "<why>"`. Lowering is always free |
-| `iri_lint.py` | an upstream IRI its pinned release does not have (`unverified`), a readable name where the upstream mints ids (`readable_label`, with the id suggested), an id in the wrong case (`case_mismatch`), a deprecated upstream term, an authored file typing an upstream term (`redeclared_upstream`), an authored IRI nothing declares (`dangling_ref`); and, as exit 2, a file it cannot read or parse |
+| `findings.py` | a register entry without a check, identity, severity, reason, owner or review date; a proposal's `TODO` placeholder left in; a review that is not a date; an entry repeated; an entry about an upstream term that does not name the upstream |
+| `validate.py --gate` | a violation or warning no register entry accepts; an entry that matches nothing; a shape set the fixture does not exercise; a rung blocked on missing vocabulary |
+| `iri_lint.py` | an upstream IRI its pinned release does not have (`unverified`), a readable name where the upstream mints ids (`readable_label`, with the id suggested), an id in the wrong case (`case_mismatch`), a deprecated upstream term, an authored file typing an upstream term (`redeclared_upstream`), an authored IRI nothing declares (`dangling_ref`) -- each unless the findings register accepts it -- and, over the whole scope, an entry that matches nothing; and, as exit 2, a file it cannot read or parse |
 | `competency.py` | an answerable question whose query gives a different answer, or none where rows were expected; an expectation nothing can fail (`rows: []`, `count: 0`, `ask: false`); a question depending on a term nobody defines; an example file that does not exist or lies outside `examples/` |
 | `profile_shapes.py --check` | `shapes/annotation_profile_shapes.ttl` differing from what `config/annotation-profile.yaml` generates; a profile property no pinned upstream or W3C vocabulary defines |
 | `reason.py` | an unsatisfiable authored class; an ontology with no model; example individuals inconsistent with it; and, as exit 2, no Java, a ROBOT jar that is not the pinned one, or an answer from ROBOT it cannot read |
@@ -528,7 +528,7 @@ disk will not run the explorer's scripts: `python -m http.server -d _site 8000`.
 
 | Page | Read from |
 |---|---|
-| Home, Status | the project file, the term counts, the validation baseline, the lint and competency results, `docs/decisions/`, the latest `v*` tag |
+| Home, Status | the project file, the term counts, the findings register, the lint and competency results, `docs/decisions/`, the latest `v*` tag |
 | Explore | every authored term and every upstream term, as `data/terms.json`; category from the `rdfs:subClassOf` chain, never a name |
 | Modules, Downloads | the modules, the shape sets, the pins and the extracts, with checksums; a byte-reproducible bundle of the authored files |
 | Vocabulary | each authored `skos:ConceptScheme`, as a tree |
@@ -601,18 +601,41 @@ template's roadmap.
 
 ## Conventions
 
-### Paying down a finding
+### Accepting a finding, and paying one down
 
-Findings are recorded per shape set in `config/validation-baseline.json`, and the gate
-requires the file to describe reality — *more* is a regression, *fewer* means re-record so
-the reduction shows up in a diff:
+A finding a project accepts rather than fixes is an entry in `config/findings-register.yaml`,
+one per finding, shared by the validator and the IRI linter. An entry names the finding by
+identity -- the check, the shape set or file, the term, the shape or rule, a digest of the
+message, the severity -- and says why it is accepted, who answers for it, and when it is
+looked at again. `tools/findings.py` states the fields; the policy is decision 11's:
+
+- a new violation fails;
+- a new warning fails unless it is entered;
+- a new info is reported;
+- an entry that matches nothing fails, so a fix removes its entry in the same commit;
+- a review date that has passed is reported, not failed.
+
+A finding about a pinned upstream's term (CCO's Organization, not under Agent) is entered
+with `upstream: CCO <IRI>`, and the status page lists those apart. Each check prints the
+entries for its new findings, for a person to complete:
 
 ```bash
-python tools/ontology/validate.py --record     # after fixing something
+python tools/ontology/validate.py --propose
+python tools/ontology/iri_lint.py --propose
 ```
 
-`--record` refuses to raise a count without `--accept-regression "<why>"`, and writes the
-reason beside the number it excuses.
+An entry still carrying the proposal's `TODO` is refused. `--reason`, `--owner` and
+`--review` fill every proposed entry at once, for a port that arrives with many findings
+of one kind; that is a decision about all of them, and the commit should say whose.
+
+`validate.py -o report.json` writes every finding, not a sample, and the validator says
+which shape set it is on, on stderr.
+
+### The Checks job
+
+Every check step is marked `continue-on-error` and has an id; the last step fails the job
+and lists every check that did not pass. One failure no longer hides the checks after it.
+`tests/test_findings.py` fails on a check step without either.
 
 ### Recording a decision
 

@@ -19,7 +19,7 @@ method.
 - **A new shape set arrives with its negative fixture** and positive controls in the same
   commit, and its constraint messages are listed by name in a test.
 - **Generated files are regenerated, never edited**: `vendor/**`, `vendor/NOTICE.md`,
-  `config/upstream-extracts.json`, `config/validation-baseline.json`,
+  `config/upstream-extracts.json`,
   `config/corpus-digest.json`. Each names its generator in the layout contract.
   `config/template-manifest.json` is the record of the template this was made from; leave it.
 - **Decisions are the architect's.** Record an act verbatim in `docs/decisions/` with the
@@ -45,6 +45,8 @@ method.
 ```
 
 If the ontology changed: `tools/ontology/corpus_digest.py -o config/corpus-digest.json`, and
-`tools/ontology/validate.py --record` if a finding was fixed. Commit messages carry the
+remove the entry in `config/findings-register.yaml` for a finding that was fixed. A finding
+is accepted only by an entry a person completes (`--propose` prints it); never write the
+reason or the owner for them. Commit messages carry the
 reasoning — what was wrong, why the fix is the fix, what was measured, what is not covered.
 Nothing is pushed without the architect's say-so.
