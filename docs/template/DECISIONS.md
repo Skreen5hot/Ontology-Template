@@ -156,3 +156,31 @@ verbatim in
   the implementation: the template ships no default licence, attribution or permission.
 - WP6's obligations are unchanged, and its assessment must separate improvements in the
   template from improvements in BPO's content.
+
+**15. "WP4 is accepted as technically complete at commit `a923694`."** (2026-10-29)
+
+In answer to the WP4 report. The whole text, with six numbered points, is recorded verbatim
+in [`evaluations/2026-10-29-wp4-acceptance.md`](evaluations/2026-10-29-wp4-acceptance.md)
+(SHA-256 of the text below its rule `1a74abf93314480ba3ca00bd1b549af1fc06af8bc57c6839b8bf9d4aa0567fee`). Effect:
+
+- WP4's detection controls and regression tests are accepted; phase 12 is done, except
+  T9's policy, which stays open.
+- The corrected BPO figures stand and supersede the response's estimates: T10, 2 used
+  properties in 494 assertions on 453 classes (`requiresPermission` is declared, unused,
+  and not counted); T11, the 78 genus warnings gone and 18 qualifier warnings that are new
+  findings; T23, 14 of the 15 modules holding APQC text. The checks are not to be changed
+  to reproduce the earlier figures.
+- T9's detection and reporting are accepted; its policy is not. The PENDING LEGAL sentence
+  and the test pinning it stay. No check is to be described as establishing legal
+  permission, the sufficiency of an attribution, or BPO's right to redistribute APQC text.
+  When Legal answers, the implementation, tests, report wording and publication controls
+  are assessed against the answer, and any change is recorded and verified before the
+  dependency closes. B2 stays BPO's and Legal's.
+- BPO-derived findings are evaluation evidence, not dispositions. The T11 qualifier
+  findings and the trial T12 rule are the BPO team's to decide. Nothing from the scratch
+  copies, trial configuration, placeholder attribution or accepted findings, is carried
+  into BPO.
+- GitHub Actions times are recorded apart from the local time, which is not a measurement.
+  BPO-scale times and the ontology-quality verdict stay WP6's.
+- The next work package, WP5, begins without waiting for Legal, so long as none of it
+  depends on the licensing policy.

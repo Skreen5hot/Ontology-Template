@@ -29,8 +29,8 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 9 | WP1 Scale: validation, release build, a size benchmark | **done** (2026-10-27) |
 | 10 | WP2 One findings register, every Checks step run | **done** (accepted 2026-10-28, decision 13) |
 | 11 | WP3 One term contract for validation and the site | **done** (accepted 2026-10-28, decision 14) |
-| 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | in progress; T9's policy text awaits Legal |
-| 13 | WP5 Project ergonomics and documentation (alongside) | not started |
+| 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | **done** (accepted 2026-10-29, decision 15); T9's policy awaits Legal |
+| 13 | WP5 Project ergonomics and documentation (alongside) | in progress |
 | 14 | WP6 The final BPO evaluation | not started |
 
 ## 1. Extract and generalize the core
@@ -489,10 +489,17 @@ tree is untouched.
 | T12 | BPO configures D7 and reproduces Gate F's 39 | S1: 39, the same 39 classes as Gate F's rule (a P-number directly under Organization Capability) |
 | T23 | 17 of 18 slice files flagged | S0: 14 of the 15 modules holding APQC text name no release: all 13 slices and the reference file. "17 of 18" counted every header; the check applies only to modules holding declared text. S1: none |
 | Mutations of the new checks | -- | 15 of 15 caught, after two test gaps were closed: a scheme rule with both sides, and the pending-Legal sentence |
-| Template suite (budget 10 min) | -- | 381 passed. **Not measured**: 31 min locally with the CPU at 100% from other work, and tests WP4 did not touch ran about 3 times their WP3 times. The Checks job's time on GitHub's runner is in the commit that follows |
+| Checks job on GitHub's standard runner, at `a923694` (run 40692653863) | -- | 1 min 35 s, every step green. The site step built 25 files and passed its check in about 1 s. The Tests step: 372 passed, 9 deselected (marked reasoning, scale or corpus, which run in their own jobs), 79.67 s |
+| Template suite, all 381 tests, locally | -- | **Not measured**: 31 min with the CPU at 100% from other work, and tests WP4 did not touch ran about 3 times their WP3 times. This is not a measurement of the suite (decision 15) |
+
+Accepted 2026-10-29 (decision 15), with the three corrected figures confirmed.
 
 Not covered:
-- T9's policy text, and whether attribution on the header is enough, wait for Legal.
+- T9's policy text, and whether attribution on the header is enough, wait for Legal. The
+  checks establish no legal permission, no sufficiency of an attribution, and no right to
+  redistribute. When Legal answers, the implementation, tests, report wording and
+  publication controls are assessed against the answer, and any change is recorded and
+  verified before the dependency closes (decision 15).
 - Whether BPO may redistribute the APQC text (B2) is BPO's to take to Legal.
 
 ### Carried to WP6
