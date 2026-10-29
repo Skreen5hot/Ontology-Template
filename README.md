@@ -21,7 +21,7 @@ project on its first commit:
 | An IRI linter: every upstream IRI a term of its pinned release, every authored one declared, and an upstream term written by a readable name (`cco:Organization`) answered with the opaque IRI it means -- in CI, a git hook, and a Claude Code hook | `tools/ontology/iri_lint.py` |
 | A communications record for other teams, and a decision record for the architect | `communications/`, `docs/decisions/` |
 | Protégé: an edit file importing every module and vendored file, with a catalog resolving each offline; canonical Turtle for modules edited there | `protege/`, `tools/ontology/normalize.py` |
-| Term-request and defect forms, a pull-request checklist, Dependabot for the pinned actions and Python, a citation file, a research record | `.github/`, `CITATION.cff`, `research/` |
+| Term-request and defect forms, a pull-request checklist, a citation file, a research record | `.github/`, `CITATION.cff`, `research/` |
 | Term intake as reviewed TSV rows, generated into a module; SKOS concept-scheme shapes; naming and deprecation rules; a term-level diff on every pull request and in every release | `vocabulary/`, `shapes/skos_shapes.ttl`, `docs/governance/`, `tools/ontology/term_diff.py` |
 | Crosswalks to other vocabularies as checked SSSOM mapping sets, kept out of the ontology graph | `mappings/`, `tools/ontology/mappings.py` |
 | Reasoning: ROBOT and ELK over the modules plus the full pinned BFO and CCO -- consistency, unsatisfiable classes, examples -- in a CI job of its own | `tools/ontology/reason.py`, `.github/workflows/reasoning.yml` |
@@ -77,7 +77,12 @@ What it does not have yet (an end-to-end proof in CI) is in [`docs/template/ROAD
    template's size (measured 2026-10-28). The tests marked `reasoning` need Java and add
    minutes; `scale` and `corpus` add minutes more, and run in workflows of their own. Every
    figure grows with the ontology.
-5. Enable GitHub Pages, before the first push: Settings > Pages > Source: **GitHub
+5. **Check every pin.** This is the project's first responsibility, before anything is
+   pushed. The template pins every dependency exactly and does not update them: no
+   Dependabot, no automatic updates. What arrives is what the template was released with,
+   which may already be stale or carry a published vulnerability. Every pin, where it is,
+   and how to check it: `docs/DEVELOPMENT.md`, "Pins".
+6. Enable GitHub Pages, before the first push: Settings > Pages > Source: **GitHub
    Actions**, or
 
    ```bash

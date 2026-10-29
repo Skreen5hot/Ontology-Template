@@ -62,8 +62,7 @@ https://github.com/Skreen5hot/Ontology-Template.
   three serialisations, byte-identical across hash seeds, each parsed back to its source
   graph (`tests/test_release.py`).
 - **Authoring aids**: a Protégé edit file and catalog, loaded offline through the OWL API
-  (`tests/test_authoring.py`); opt-in canonical form; issue and PR forms; Dependabot, already
-  proposing updates (#2, #3); `CITATION.cff`; `research/`, refusing sources.
+  (`tests/test_authoring.py`); opt-in canonical form; issue and PR forms; `CITATION.cff`; `research/`, refusing sources.
 - **Vocabulary and governance**: reviewed TSV term intake (`tests/test_vocabulary.py`), SKOS
   concept-scheme shapes, naming conventions, `docs/governance/`, and a term-level diff on
   every pull request and in every release.
@@ -96,10 +95,8 @@ https://github.com/Skreen5hot/Ontology-Template.
   first run is a project's first tag.
 - **ELK is OWL 2 EL.** Universal restrictions, cardinality and most unions are ignored by it;
   an unsatisfiability that depends on them is not found.
-- **Dependabot**: setup-java 6.1.0 (#3) is merged; setup-python 7.1.0 (#2) is held until
-  after 2026-11-05. `.github/workflows/dependabot-manifest.yml` re-records the template
-  manifest on Dependabot's pull requests; it has been rehearsed locally and has not yet run
-  on GitHub. Merging is a person's call.
+- **No Dependabot** (decision 16). Pins are checked by a person: `docs/DEVELOPMENT.md`,
+  "Pins", first in a new project and again before each release.
 - **The template's own site is public** at https://skreen5hot.github.io/Ontology-Template/,
   from a private repository, with no link into it (decision 10).
 - **No end-to-end proof in CI.** Phase 8.

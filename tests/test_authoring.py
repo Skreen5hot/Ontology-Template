@@ -1,6 +1,6 @@
 # SPDX-License-Identifier: MIT
 """The authoring aids: the Protégé entry point, canonical form, the GitHub
-forms and Dependabot, the citation file, and the research record's rule.
+forms, the citation file, and the research record's rule.
 
 The one check that needs Java -- ROBOT, through the OWL API Protégé uses,
 loading the edit file and resolving every import through the catalog,
@@ -160,13 +160,29 @@ def test_an_unknown_format_is_refused(layout, repo):
 # --------------------------------------------------------- GitHub files
 
 
-def test_dependabot_watches_the_actions_and_the_python_pins(repo):
-    import yaml
+def test_no_bot_updates_the_pins(repo):
+    """Decision 16: no Dependabot. Pins are checked by a person, so no
+    configuration ships that would open pull requests in every project
+    made from the template."""
+    for name in ("dependabot.yml", "dependabot.yaml"):
+        assert not (repo / ".github" / name).exists(), name
+    serving = [p.name for p in (repo / ".github/workflows").glob("*.yml")
+               if "dependabot[bot]" in p.read_text(encoding="utf-8")]
+    assert serving == [], "workflows still serve Dependabot: %s" % serving
 
-    config = yaml.safe_load((repo / ".github/dependabot.yml").read_text(
-        encoding="utf-8"))
-    assert {u["package-ecosystem"] for u in config["updates"]} == {
-        "github-actions", "pip"}
+
+def test_the_pins_section_names_every_pin_file(repo):
+    """Checking every pin is a project's first step (decision 16), so
+    the list it checks from must name each place a pin lives, and each
+    must exist."""
+    text = (repo / "docs/DEVELOPMENT.md").read_text(encoding="utf-8")
+    section = text[text.index("## Pins"):]
+    section = section[:section.index("\n## ", 1)]
+    for where in (".github/workflows/*.yml", "requirements-dev.txt",
+                  "config/upstream-sources.yaml", "config/reasoning.yaml"):
+        assert "`%s`" % where in section, where
+        if "*" not in where:
+            assert (repo / where).is_file(), where
 
 
 def test_the_term_request_form_asks_for_what_placing_a_term_needs(repo):

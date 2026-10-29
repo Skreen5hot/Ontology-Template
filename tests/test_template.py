@@ -181,45 +181,6 @@ def test_a_project_test_has_a_basename_of_its_own(repo):
         "them: %s" % clashes)
 
 
-def unrecorded_holds(text: str) -> list[str]:
-    """Dependabot `ignore` entries with no comment giving a review date.
-
-    A hold travels with every project made from the template (T19), so
-    it carries its reason and the date it is looked at again, in a
-    comment on the lines just above it.
-    """
-    lines = text.splitlines()
-    bare = []
-    for i, line in enumerate(lines):
-        if line.strip().startswith("- dependency-name:"):
-            above = []
-            for previous in reversed(lines[:i]):
-                if not previous.strip().startswith("#"):
-                    break
-                above.append(previous)
-            if not any(re.search(r"\d{4}-\d{2}-\d{2}", row)
-                       for row in above):
-                bare.append(line.strip())
-    return bare
-
-
-def test_every_dependabot_hold_is_on_the_record(repo):
-    text = (repo / ".github/dependabot.yml").read_text(encoding="utf-8")
-    assert unrecorded_holds(text) == []
-
-
-def test_a_hold_without_a_reason_is_found():
-    """Falsifies the test above on a constructed file."""
-    held = ("    ignore:\n"
-            "      # setup-python 7.1.0: released 2026-10-22; pins wait two\n"
-            "      # weeks. Look again 2026-11-05.\n"
-            "      - dependency-name: actions/setup-python\n"
-            "        versions: ['7.1.0']\n")
-    assert unrecorded_holds(held) == []
-    bare = "    ignore:\n      - dependency-name: actions/setup-python\n"
-    assert unrecorded_holds(bare) == ["- dependency-name: actions/setup-python"]
-
-
 def test_a_changed_owned_file_is_reported(status, monkeypatch):
     """Falsifies the comparison: one owned file with a different digest
     has to come back as changed, and only that one."""
@@ -263,38 +224,3 @@ def test_against_names_what_both_sides_changed(status, monkeypatch,
     report = status.against(tmp_path)
     assert report["both"] == [both], report
     assert theirs_only in report["template_changed"]["changed"]
-
-
-def test_the_dependabot_workflow_rerecords_the_manifest_and_nothing_else(repo):
-    """The guards that make it safe to give a Dependabot-triggered job
-    write permission, read from the workflow itself: it runs only when
-    both the author and the actor are Dependabot, only in the template,
-    refuses to push anything but the manifest, and re-runs the real
-    checks on the new commit rather than declaring it green."""
-    import yaml
-
-    workflow = yaml.safe_load((repo / ".github/workflows/"
-                               "dependabot-manifest.yml").read_text(
-        encoding="utf-8"))
-    job = workflow["jobs"]["rerecord"]
-    condition = " ".join(job["if"].split())
-    assert "github.event.pull_request.user.login == 'dependabot[bot]'" \
-        in condition
-    assert "github.actor == 'dependabot[bot]'" in condition
-    assert workflow["permissions"] == {"contents": "read"}
-    assert job["permissions"] == {"contents": "write", "actions": "write"}
-
-    steps = {step["name"]: step for step in job["steps"]}
-    record = steps["Re-record, and refuse anything but the manifest"]
-    assert "steps.state.outputs.template == 'true'" in record["if"]
-    assert '!= "config/template-manifest.json"' in record["run"]
-    push = steps["Push the one-file commit"]["run"]
-    assert "git add config/template-manifest.json" in push
-    assert "git add -A" not in push and "git add ." not in push
-    rerun = steps["Run Checks, Reasoning and Pages on the new commit"]["run"]
-    for workflow_file in ("checks.yml", "reasoning.yml", "pages.yml"):
-        assert workflow_file in rerun, workflow_file
-    text = (repo / ".github/workflows/dependabot-manifest.yml").read_text(
-        encoding="utf-8")
-    for forbidden in ("gh pr merge", "gh pr review", "--admin"):
-        assert forbidden not in text, forbidden

@@ -44,9 +44,12 @@ git config core.hooksPath .githooks                 # the IRI linter on every co
 python -m pytest tests/ -q -p no:randomly -m "not reasoning and not scale and not corpus"
 ```
 
-That last command is the Checks workflow's. The tests marked `reasoning` need Java; those
+The last command is the Checks workflow's. The tests marked `reasoning` need Java; those
 marked `scale` and `corpus` take minutes and run in workflows of their own. Drop the `-m`
-to run everything. The same checks run in CI on every push. What each one refuses is in
+to run everything.
+
+**Check every pin** before the first push and before each release: nothing here updates
+them by itself (`docs/DEVELOPMENT.md`, "Pins"). The same checks run in CI on every push. What each one refuses is in
 [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
 ## Provenance

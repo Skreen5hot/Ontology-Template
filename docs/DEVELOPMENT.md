@@ -412,6 +412,27 @@ requires the committed extracts to be byte-identical.
 
 ---
 
+## Pins
+
+Every dependency is pinned exactly, and nothing updates a pin by itself: there is no
+Dependabot (template decision 16). What a project starts with is what the template was
+released with, which may already be stale or carry a published vulnerability. **Checking
+every pin is the first thing a project does**, before its first push, and it is repeated
+before each release.
+
+| Pin | Where | How to check |
+|---|---|---|
+| GitHub Actions, by commit SHA, version in the trailing comment | `.github/workflows/*.yml` (`uses:`) | each action's releases page, or `gh api repos/<owner>/<action>/releases/latest` |
+| Python packages, exact versions | `requirements-dev.txt` | `python -m pip list --outdated`, and the advisories at https://osv.dev |
+| BFO and CCO, by commit and digest | `config/upstream-sources.yaml` | the upstream repositories; a move is a decision, then `vendor_upstream.py --rebuild` |
+| ROBOT, by version and digest | `config/reasoning.yaml` | the ROBOT releases; a move is a decision |
+
+An update changes a template-owned file, so `tools/template_status.py` will report it.
+That is expected: it is the record that the project moved the pin. Run the suite after
+each change.
+
+---
+
 ## The template
 
 `config/template-manifest.json` is the digest of every template-owned file as the template
@@ -499,13 +520,11 @@ Release workflow ships it as `CHANGES.md`, inside the checksums.
   parent, a source, and why.
 - **Pull requests** carry a checklist (`.github/pull_request_template.md`) of the checks a
   change of each kind needs.
-- **Dependabot** proposes updates to the SHA-pinned actions and the exact Python pins as
-  pull requests; each runs the checks and is merged by a person. It does not touch the
-  ontology or ROBOT pins, which move by decision. In the template, where those files are
-  template-owned, `.github/workflows/dependabot-manifest.yml` re-records
-  `config/template-manifest.json` on a Dependabot pull request -- that file and nothing
-  else -- and re-runs Checks and Reasoning on the result, so the pull request is judged on
-  what the update does. It approves and merges nothing.
+- **Pins are checked by a person, not updated by a bot.** There is no Dependabot (decision
+  16 of the template). The actions are pinned by commit SHA, the Python packages exactly,
+  BFO, CCO and ROBOT by commit or version and digest. Checking every one is the first step
+  of using the template ("Pins", above), and moving one is a
+  change like any other: the suite, and a commit that says why.
 - **`research/`** is the project's own notes. Sources go in `docs/Reference/`, never
   tracked; `disposition.py --check` refuses anything in `research/` that is not a note,
   table or bibliography, and any file that is a byte copy of reference material.

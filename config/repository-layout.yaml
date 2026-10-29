@@ -557,8 +557,8 @@ components:
     role: configuration
     template: owned
     description: >-
-      Dependabot (the SHA-pinned actions and the exact Python pins), the
-      term-request and defect issue forms, and the pull-request checklist.
+      The term-request and defect issue forms, and the pull-request
+      checklist. No Dependabot: pins are checked by a person (decision 16).
 
   - id: ci.workflows
     path: .github/workflows

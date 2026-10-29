@@ -515,7 +515,7 @@ of it depends on the T9 licensing policy (decision 15).
 | T16 | `tests/project/` is declared, not template-owned, with a README. A test there is collected and not divergence. A basename shared with `tests/` is refused by name instead of as pytest's import error | `test_a_project_test_is_not_divergence`; `test_a_project_test_has_a_basename_of_its_own` |
 | T17 | `docs/PORTING.md`: the namespace move and its decision; the mapping set (new to old, the justification); the module headers; the lossless check; the findings a port arrives with; the naming scheme it already has | `tests/test_porting.py` runs the guide's lossless check: equal on an exact port, unequal on a lost restriction, list member or subject-less axiom. Whether the next port asks no mapping question is measured by the next trial |
 | T18 | Readable names are the default for new terms, not a rule for ported ones: `docs/governance/naming.md`, `config/naming.yaml`, `config/project.yaml`, DEVELOPMENT, the skeletons. The README's line about the IRI linter, which read as if it wanted opaque ids, is corrected | -- (docs) |
-| T19 | `docs/template/RELEASING.md`: before a release, every open Dependabot update is taken, or held by an `ignore` entry in `.github/dependabot.yml` whose comment gives the reason and a review date, so projects inherit the decision and not the pull request | `test_every_dependabot_hold_is_on_the_record`, with its falsifier. "No Dependabot PR on day 0" is measured by the next trial |
+| T19 | No Dependabot (decision 16, which replaced the first remedy, dated holds in `dependabot.yml`). Checking every pin is a project's first step and a release's first item: `docs/DEVELOPMENT.md`, "Pins", and `docs/template/RELEASING.md` | `test_no_bot_updates_the_pins`; `test_the_pins_section_names_every_pin_file` |
 | T21 | The form ships blank as `docs/porting/port-report.md`, which init keeps. The manifest records `template_commit`, the commit it was recorded on, and `template_status.py` prints it | `test_the_manifest_records_the_template_commit`; `test_record_names_the_commit_it_was_made_on`; `test_the_porting_guide_and_form_survive_init` |
 
 Changed from the response:
@@ -539,8 +539,8 @@ Measured:
 | Mutations of the new behaviour | 20 of 20 caught, against a control run of the 18 tests unmutated. Three mutations were first written wrongly, two of them equivalent to the code (a rename `git add -A` still records as a rename; one of two mentions of `template_commit` removed) and one naming a file that does not exist; corrected, each was caught |
 | Template suite, all tests, locally | 400 passed in 21 min 1 s. **Not a measurement against the 10-minute budget**: the machine's load was not controlled, and the first run, which shared it with the mutation runs, took 18 min 10 s. The first run found 2 failures, both one defect: relative links added to DEVELOPMENT.md, which the site publishes, resolved to nothing there. They are code spans now. CI's time is in the commit's run |
 
-Open at the release, the architect's to decide (T19): Dependabot #2 (setup-python 7.1.0,
-held until 2026-11-05), #6 (markdown 3.11.2), #7 (upload-artifact 7.0.2).
+Dependabot is off (decision 16); its open pull requests #2, #6 and #7 are closed unmerged.
+The pins they proposed are checked with the rest before the release.
 
 ### Carried to WP6
 

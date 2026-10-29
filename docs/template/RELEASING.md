@@ -8,19 +8,10 @@ Template-only: init removes `docs/template/`, and a project releases its ontolog
 
 Each item is done, or recorded as not done with its reason, before the tag.
 
-1. **Every open Dependabot update is taken or ignored on the record (T19).** A new project
-   copies `.github/dependabot.yml` and the pins as they are, so an update left open here
-   becomes a pull request in every project made from this release, on its first day.
-   - Taken: merged, with the manifest re-recorded (the Dependabot manifest workflow does it
-     on the pull request).
-   - Held: an `ignore` entry in `.github/dependabot.yml` for that dependency and version,
-     with a comment giving the reason and the date it is looked at again. The hold then
-     travels with the release, and projects inherit the decision instead of the pull
-     request.
-
-   ```bash
-   gh pr list --author app/dependabot --state open
-   ```
+1. **Every pin is checked (T19, decision 16).** The template runs no Dependabot and updates
+   nothing by itself, so a release ships its pins as they are, into every project made from
+   it. Check each pin `docs/DEVELOPMENT.md` lists under "Pins": take the update, with the manifest
+   re-recorded, or keep the pin and say why in the release's ROADMAP entry.
 
 2. **The suite passes**, and the Checks, Reasoning and Scale workflows are green on the
    commit to be tagged.

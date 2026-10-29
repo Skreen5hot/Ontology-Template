@@ -184,3 +184,19 @@ in [`evaluations/2026-10-29-wp4-acceptance.md`](evaluations/2026-10-29-wp4-accep
   BPO-scale times and the ontology-quality verdict stay WP6's.
 - The next work package, WP5, begins without waiting for Legal, so long as none of it
   depends on the licensing policy.
+
+**16. "We are turning Dependabot OFF, we will make note in the template that the first responsibility is to check all the pins as part of using the tempate."** (2026-10-29)
+
+In answer to the WP5 report, which asked whether to keep Dependabot, limit it to security
+updates, or remove it. Recorded verbatim above (SHA-256 of the quoted text
+`cc29e8f4b66994eeb9614cdf553a042025facf487d8fef014d345e4f24bbeaa2`). Effect:
+
+- `.github/dependabot.yml` and the workflow that re-recorded the manifest on Dependabot's
+  pull requests are removed. The repository's Dependabot alerts and security updates were
+  already off. Its three open pull requests (#2, #6, #7) are closed unmerged.
+- Checking every pin is the first thing a project does, before its first push, and it is
+  repeated before each template release: `docs/DEVELOPMENT.md`, "Pins", lists each pin,
+  where it lives and how to check it. The README's setup steps and the project README
+  point to it.
+- T19's remedy changes with it: no Dependabot pull request can open on a new project's
+  first day, because nothing opens one.
