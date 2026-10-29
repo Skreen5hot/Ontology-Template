@@ -99,7 +99,8 @@ def initialized(repo, tmp_path_factory):
     root = copy_of(repo, tmp_path_factory.mktemp("copy") / "r")
     code, out = run(root, "tools/init_project.py", *ARGS, "--offline")
     assert code == 0, out
-    git(root, "add", "-A")
+    # No `git add` here: init stages its own changes, and the suite must
+    # pass on what it leaves (T13).
     return root
 
 
@@ -196,6 +197,36 @@ def test_the_template_only_parts_are_gone(initialized):
     assert cff["repository-code"] == "https://github.com/owner/Widget-Works"
 
 
+def test_the_porting_guide_and_form_survive_init(initialized):
+    """The form ships outside docs/template/, which init deletes (T21)."""
+    assert (initialized / "docs/PORTING.md").is_file()
+    assert (initialized / "docs/porting/port-report.md").is_file()
+    assert (initialized / "tests/project/README.md").is_file()
+
+
+def test_the_readme_names_each_setup_step(repo, initialized):
+    """What the BPO port had to find out for itself (T15): the command-line
+    route, the git hook, the suite command and its time, Pages through the
+    API; and the rendered CLAUDE.md does not forbid the push that the
+    last step needs."""
+    readme = read(repo, "README.md")
+    steps = readme[readme.index("## Starting a project"):
+                   readme.index("## Keeping up with the template")]
+    for needed in ("gh repo create", "--template Skreen5hot/Ontology-Template",
+                   "git config core.hooksPath .githooks",
+                   'python -m pytest tests/ -q -p no:randomly -m "not reasoning',
+                   "80 s on GitHub's standard runner",
+                   "gh api -X POST repos/owner/Widget-Ontology/pages -f "
+                   "build_type=workflow",
+                   "git diff --staged", "research/", "docs/PORTING.md"):
+        assert needed in steps, needed
+    claude = read(initialized, "CLAUDE.md")
+    assert "Nothing is pushed without the architect's say-so, except the " \
+           "first push" in claude.replace("\n", " ")
+    project_readme = read(initialized, "README.md")
+    assert "git config core.hooksPath .githooks" in project_readme
+
+
 def test_the_owned_files_are_untouched(repo, initialized):
     """init must not write a template-owned file: the manifest says what
     the template shipped, and a project should start with no divergence."""
@@ -205,12 +236,33 @@ def test_the_owned_files_are_untouched(repo, initialized):
             name)
 
 
-def test_the_copy_passes_its_own_suite(initialized):
-    """The copy's own checks, run in the copy: the layout contract, the
-    namespace agreement between the shapes and the project file, the
-    licensing classification, the project file, the communications
-    record, and the uninitialized-copy refusal -- with GITHUB_REPOSITORY
-    naming the new repository, as Actions would."""
+def test_init_stages_everything_it_changed(initialized):
+    """Nothing init or its generators did is left unstaged or untracked,
+    so `git diff --staged` is the whole of it and `git ls-files` -- which
+    the layout and licensing checks read -- describes the project."""
+    status = subprocess.run(["git", "status", "--porcelain"],
+                            cwd=str(initialized), capture_output=True,
+                            check=True).stdout.decode("utf-8")
+    loose = [row for row in status.splitlines()
+             if row[1] != " " or row.startswith("??")]
+    assert loose == [], loose
+    staged = subprocess.run(["git", "diff", "--staged", "--name-status",
+                             "-M"], cwd=str(initialized),
+                            capture_output=True, check=True
+                            ).stdout.decode("utf-8").splitlines()
+    assert any(row.startswith("R")
+               and row.endswith("ontology/widget-works.ttl")
+               for row in staged), (
+        "the module was not moved with git mv: %s" % staged)
+
+
+def test_the_suite_passes_straight_after_init(initialized):
+    """The copy's own checks, run in the copy straight after init, with
+    no staging by hand (T13): the layout contract, the namespace
+    agreement between the shapes and the project file, the licensing
+    classification, the project file, the communications record, and the
+    uninitialized-copy refusal -- with GITHUB_REPOSITORY naming the new
+    repository, as Actions would."""
     env = {"GITHUB_REPOSITORY": "owner/Widget-Works"}
     code, out = run(initialized, "tools/project.py", "--check",
                     env_extra=env)
@@ -262,13 +314,46 @@ def test_a_dry_run_writes_nothing(repo, tmp_path):
     assert status == b"", status
 
 
-def test_a_dirty_tree_is_refused(repo, tmp_path):
+@pytest.mark.parametrize("change", ["README.md", "notes.md",
+                                    "research-notes/a.md"])
+def test_any_other_change_still_blocks_init(repo, tmp_path, change):
     """init rewrites files across the tree; from a dirty checkout its
-    changes could not be told from the ones already there."""
+    changes could not be told from the ones already there. An edit, a
+    new file, and a directory merely named like research/: all refused."""
     root = copy_of(repo, tmp_path / "r")
-    (root / "README.md").write_bytes(b"edited\n")
+    (root / change).parent.mkdir(parents=True, exist_ok=True)
+    (root / change).write_bytes(b"edited\n")
     code, out = run(root, "tools/init_project.py", *ARGS, "--dry-run")
     assert code != 0 and "uncommitted changes" in out, out
+    assert change in out, out
+
+
+def test_research_notes_do_not_block_init(repo, tmp_path):
+    """A port report is filled in as the port goes, from before init
+    runs; research/ is where it lives, and init never writes there (T14).
+    So init runs, and leaves the notes as they were: unstaged."""
+    root = copy_of(repo, tmp_path / "r")
+    (root / "research/port-report.md").write_bytes(b"# Port report\n")
+    with open(root / "research/README.md", "ab") as handle:
+        handle.write(b"\nedited\n")
+    code, out = run(root, "tools/init_project.py", *ARGS, "--offline",
+                    "--no-regenerate")
+    assert code == 0, out
+    status = subprocess.run(["git", "status", "--porcelain", "--",
+                             "research/"], cwd=str(root),
+                            capture_output=True, check=True
+                            ).stdout.decode("utf-8").splitlines()
+    assert sorted(status) == [" M research/README.md",
+                              "?? research/port-report.md"], status
+
+
+def test_the_dirty_check_reads_porcelain_z():
+    """-z: a path with a space is one path, and a rename is two."""
+    init = load_tool("t_init_dirty", "tools/init_project.py")
+    status = ("?? research/a b.md\0 M README.md\0"
+              "R  docs/new.md\0research/old.md\0?? researcher.md\0")
+    assert init.changes_outside(status) == [
+        "README.md", "docs/new.md", "researcher.md"]
 
 
 @pytest.mark.parametrize("override, expect", [

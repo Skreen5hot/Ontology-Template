@@ -37,8 +37,9 @@ description: >-
   A placeholder project. The template repository carries it so that every
   check has something to run against; init replaces it.
 
-#: Where authored terms are minted. Readable local names
-#: (https://fandaws.com/ontology/<id>#SomeClass), not opaque ids.
+#: Where authored terms are minted. New terms get readable local names
+#: (https://fandaws.com/ontology/<id>#SomeClass), not opaque ids; a
+#: ported scheme is declared in config/naming.yaml.
 namespace: https://fandaws.com/ontology/example#
 
 #: The Turtle prefix for `namespace`.

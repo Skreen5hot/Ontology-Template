@@ -30,7 +30,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 10 | WP2 One findings register, every Checks step run | **done** (accepted 2026-10-28, decision 13) |
 | 11 | WP3 One term contract for validation and the site | **done** (accepted 2026-10-28, decision 14) |
 | 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | **done** (accepted 2026-10-29, decision 15); T9's policy awaits Legal |
-| 13 | WP5 Project ergonomics and documentation (alongside) | in progress |
+| 13 | WP5 Project ergonomics and documentation (alongside) | built (2026-10-29), awaiting acceptance |
 | 14 | WP6 The final BPO evaluation | not started |
 
 ## 1. Extract and generalize the core
@@ -501,6 +501,46 @@ Not covered:
   publication controls are assessed against the answer, and any change is recorded and
   verified before the dependency closes (decision 15).
 - Whether BPO may redistribute the APQC text (B2) is BPO's to take to Legal.
+
+### Phase 13, WP5, as built (2026-10-29)
+
+What the BPO port had to find out for itself, or work around, now in the template. None
+of it depends on the T9 licensing policy (decision 15).
+
+| Item | What changed | Regression tests |
+|---|---|---|
+| T13 | init stages what it does: `git mv` for the module, `git rm` for what it removes, `git add` for what it and the generators write. The suite runs straight after init with no `git add` by hand | `test_the_suite_passes_straight_after_init` (the fixture no longer stages); `test_init_stages_everything_it_changed` |
+| T14 | The clean-tree check ignores `research/`, and only `research/`, read from `git status --porcelain -z`. What is there stays unstaged | `test_research_notes_do_not_block_init`; `test_any_other_change_still_blocks_init` (an edit, a new file, `research-notes/`); `test_the_dirty_check_reads_porcelain_z` |
+| T15 | The README's steps: `gh repo create --template`, `git config core.hooksPath .githooks`, the Checks suite command with its measured CI time, Pages through `gh api`, `git diff --staged`. The rendered CLAUDE.md allows the first push, which setting up needs, and nothing after it without the say-so. The project README carries the hook and the suite command | `test_the_readme_names_each_setup_step` |
+| T16 | `tests/project/` is declared, not template-owned, with a README. A test there is collected and not divergence. A basename shared with `tests/` is refused by name instead of as pytest's import error | `test_a_project_test_is_not_divergence`; `test_a_project_test_has_a_basename_of_its_own` |
+| T17 | `docs/PORTING.md`: the namespace move and its decision; the mapping set (new to old, the justification); the module headers; the lossless check; the findings a port arrives with; the naming scheme it already has | `tests/test_porting.py` runs the guide's lossless check: equal on an exact port, unequal on a lost restriction, list member or subject-less axiom. Whether the next port asks no mapping question is measured by the next trial |
+| T18 | Readable names are the default for new terms, not a rule for ported ones: `docs/governance/naming.md`, `config/naming.yaml`, `config/project.yaml`, DEVELOPMENT, the skeletons. The README's line about the IRI linter, which read as if it wanted opaque ids, is corrected | -- (docs) |
+| T19 | `docs/template/RELEASING.md`: before a release, every open Dependabot update is taken, or held by an `ignore` entry in `.github/dependabot.yml` whose comment gives the reason and a review date, so projects inherit the decision and not the pull request | `test_every_dependabot_hold_is_on_the_record`, with its falsifier. "No Dependabot PR on day 0" is measured by the next trial |
+| T21 | The form ships blank as `docs/porting/port-report.md`, which init keeps. The manifest records `template_commit`, the commit it was recorded on, and `template_status.py` prints it | `test_the_manifest_records_the_template_commit`; `test_record_names_the_commit_it_was_made_on`; `test_the_porting_guide_and_form_survive_init` |
+
+Changed from the response:
+
+- **T17's worked example is not BPO's script.** The response named `port_from_bpo.py`, which
+  is in BPO's private repository; decision 13 keeps private BPO content out of this public
+  one. The guide carries a generic lossless check instead, and the suite runs it.
+- **The mapping justification.** SEMAPV has no term for a namespace move (its term list,
+  checked 2026-10-29). The guide recommends `semapv:ManualMappingCuration`, since a person
+  decided the rule and the rule wrote the rows, rather than the port's
+  `semapv:UnspecifiedMatching`, which SEMAPV defines for a mapping whose method is no
+  longer known.
+- **T21's commit is the parent.** A manifest cannot name the commit that carries it, whose
+  id depends on the manifest. It names the commit it was recorded on; at a release, the tag
+  names the commit that carries it (`RELEASING.md`, item 4).
+
+Measured:
+
+| | |
+|---|---|
+| Mutations of the new behaviour | 20 of 20 caught, against a control run of the 18 tests unmutated. Three mutations were first written wrongly, two of them equivalent to the code (a rename `git add -A` still records as a rename; one of two mentions of `template_commit` removed) and one naming a file that does not exist; corrected, each was caught |
+| Template suite, all tests, locally | 400 passed in 21 min 1 s. **Not a measurement against the 10-minute budget**: the machine's load was not controlled, and the first run, which shared it with the mutation runs, took 18 min 10 s. The first run found 2 failures, both one defect: relative links added to DEVELOPMENT.md, which the site publishes, resolved to nothing there. They are code spans now. CI's time is in the commit's run |
+
+Open at the release, the architect's to decide (T19): Dependabot #2 (setup-python 7.1.0,
+held until 2026-11-05), #6 (markdown 3.11.2), #7 (upload-artifact 7.0.2).
 
 ### Carried to WP6
 

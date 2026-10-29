@@ -34,6 +34,14 @@ WHAT IT DOES
   6. Regenerates every generated file, because each one names the
      project: the extracts' headers carry its IRI and title, and the
      digest describes its module.
+  7. Stages what it did: `git mv` for the rename, `git rm` for what it
+     removes, `git add` for what it and the generators wrote. Every
+     check that reads `git ls-files` then sees the project, not the
+     template, and `git diff --staged` is the whole of init's change.
+
+A clean checkout is required, except for research/, which init never
+writes: a port report filled in as the port goes (docs/porting/) lives
+there before init runs. What is in research/ is left unstaged.
 
 Files declared `template: owned` are not touched. They are what
 tools/template_status.py compares against the template, and editing
@@ -78,6 +86,9 @@ RENDERED = {
 TURTLE_ROLES = ("ontology-module", "ontology-module-set",
                 "ontology-validation", "test-fixture", "example-data")
 
+#: Left out of the clean-tree check, and out of what init stages.
+UNTOUCHED = ("research/",)
+
 MARK_BEGIN = "  # >>> template-only"
 MARK_END = "  # <<< template-only"
 
@@ -106,6 +117,28 @@ def git(root: Path, *args: str) -> str:
         raise Refused("git %s failed: %s" % (
             " ".join(args), result.stderr.decode("utf-8", "replace")[-300:]))
     return result.stdout.decode("utf-8")
+
+
+def changes_outside(status: str, kept=UNTOUCHED) -> list[str]:
+    """Paths `git status --porcelain -z` reports outside `kept`.
+
+    -z, so a path with a space or a rename's two paths are not split
+    or quoted. A rename carries its source as the next field.
+    """
+    fields = status.split("\0")
+    out, i = [], 0
+    while i < len(fields):
+        entry = fields[i]
+        i += 1
+        if not entry:
+            continue
+        code, path = entry[:2], entry[3:]
+        paths = [path]
+        if "R" in code or "C" in code:
+            paths.append(fields[i])
+            i += 1
+        out += [p for p in paths if not p.startswith(kept)]
+    return out
 
 
 def values_of(args, old: dict) -> dict:
@@ -388,10 +421,13 @@ def main(argv=None) -> int:
                       "repository is already a project")
     new = values_of(args, old)
 
-    if not args.allow_dirty and git(root, "status", "--porcelain").strip():
-        raise Refused("the working tree has uncommitted changes. init "
-                      "rewrites files across the tree; run it from a clean "
-                      "checkout so `git diff` shows exactly what it did")
+    dirty = changes_outside(git(root, "status", "--porcelain", "-z",
+                                "--untracked-files=all"))
+    if dirty and not args.allow_dirty:
+        raise Refused("the working tree has uncommitted changes outside "
+                      "research/: %s. init rewrites files across the tree; "
+                      "run it from a clean checkout so `git diff --staged` "
+                      "shows exactly what it did" % ", ".join(dirty[:5]))
 
     writes, renames, removals = plan(root, old, new)
 
@@ -409,14 +445,22 @@ def main(argv=None) -> int:
     for relative, data in writes.items():
         (root / relative).parent.mkdir(parents=True, exist_ok=True)
         (root / relative).write_bytes(data)
+    # Through git, so the index says what the disk does: a check reading
+    # `git ls-files` straight after init would otherwise see the
+    # template's module and docs, which are gone (T13). The module is
+    # rewritten at its old path above, and moved with its rewrite.
+    moved = dict(renames)
     for source, target in renames:
-        (root / source).rename(root / target)
+        git(root, "mv", source, target)
     for relative in removals:
         target = root / relative
+        if git(root, "ls-files", "--", relative).strip():
+            git(root, "rm", "-r", "-q", "--", relative)
         if target.is_dir():
             shutil.rmtree(target)
         elif target.exists():
             target.unlink()
+    git(root, "add", "--", *sorted(moved.get(p, p) for p in writes))
 
     layout._load.cache_clear()
     project.load.cache_clear()
@@ -430,6 +474,7 @@ def main(argv=None) -> int:
         print("  generators not run. Before the first commit, run:")
         for command in GENERATORS:
             print("    python " + " ".join(command))
+        print("  and stage what they write.")
         return 0
 
     commands = [c for c in GENERATORS
@@ -441,12 +486,17 @@ def main(argv=None) -> int:
         print("  $ python " + " ".join(command), flush=True)
         result = subprocess.run([sys.executable, *command], cwd=str(root))
         if result.returncode:
-            print("  FAILED: %s exited %d. The rewrite is done; fix what it "
-                  "reports and run the remaining generators by hand."
+            print("  FAILED: %s exited %d. The rewrite is done and staged; "
+                  "fix what it reports, run the remaining generators by "
+                  "hand, and stage what they write."
                   % (command[0], result.returncode))
             return 1
+    layout._load.cache_clear()
+    generated = sorted(c.path for c in layout.components()
+                       if c.generator and c.exists())
+    git(root, "add", "-A", "--", *generated)
     print()
-    print("  %s is set up. Review `git status` and `git diff`, run the "
+    print("  %s is set up and staged. Review `git diff --staged`, run the "
           "suite, and commit." % new["title"])
     print("  Then enable GitHub Pages (Settings > Pages > Source: GitHub "
           "Actions): the site is published from the first push to main, and "

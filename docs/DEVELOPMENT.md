@@ -30,6 +30,10 @@ Tests marked `corpus` do work that grows with the live ontology -- two release b
 -- and run in the Scale workflow; a project's own test that does the same should carry the
 mark.
 
+A project's own tests go in `tests/project/`, which the suite collects and the template does
+not own, so `tools/template_status.py` does not report them as divergence. Give each file a
+basename no file in `tests/` has; `tests/test_template.py` refuses a clash.
+
 `tools/` is deliberately not an installed package. It is a directory of scripts that the
 tests import by path, so there is no build step between writing a tool and testing the
 tool that ships.
@@ -108,8 +112,9 @@ python tools/ontology/corpus_digest.py -o config/corpus-digest.json
 
 ## Writing a term
 
-Authored terms live in the project namespace with readable local names
-(`<prefix>:MaintenanceAct`). Upstream terms are referenced by their own IRIs, which for BFO
+Authored terms live in the project namespace. New ones get readable local names
+(`<prefix>:MaintenanceAct`); a ported scheme of identifiers is kept and declared instead
+(`docs/PORTING.md`, section 6). Upstream terms are referenced by their own IRIs, which for BFO
 and CCO are opaque: `obo:BFO_0000015` is *process* and `cco:ont00001180` is
 *organization*, and neither is a name anybody should type from memory.
 
@@ -417,6 +422,10 @@ made from.
 python tools/template_status.py                                 # what this project changed
 python tools/template_status.py --against ../Ontology-Template  # what the template changed since
 ```
+
+The manifest's `template_commit` is the template commit it was recorded on, and `label` the
+template release (or `unreleased`). Porting an existing ontology into a project is
+`docs/PORTING.md`, with its report form in `docs/porting/`.
 
 ---
 

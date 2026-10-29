@@ -19,6 +19,8 @@ and divergence is reported, not refused.
 from __future__ import annotations
 
 import json
+import re
+import subprocess
 
 import pytest
 
@@ -111,6 +113,111 @@ def test_the_manifest_describes_the_owned_files(status, project):
         assert not status.diverged(difference), (
             "the template's manifest is stale -- run python "
             "tools/template_status.py --record: %s" % difference)
+
+
+def test_the_manifest_records_the_template_commit(status, project, repo):
+    """The manifest names the template commit it was recorded on, so a
+    project can say which template it was made from (T21). In the
+    template it is required, and where history is present (not a shallow
+    CI checkout) it is HEAD or an ancestor of it. In a project it is
+    whatever arrived, or absent if the template predates it."""
+    commit = status.recorded().get("template_commit")
+    if not project.is_template() and commit is None:
+        return
+    assert commit and re.fullmatch(r"[0-9a-f]{40}", commit), (
+        "the manifest names no template commit: %r. Run python "
+        "tools/template_status.py --record" % commit)
+    if not project.is_template():
+        return
+    present = subprocess.run(["git", "cat-file", "-e", commit + "^{commit}"],
+                             cwd=str(repo), capture_output=True)
+    if present.returncode:
+        return
+    ancestor = subprocess.run(["git", "merge-base", "--is-ancestor", commit,
+                               "HEAD"], cwd=str(repo), capture_output=True)
+    assert ancestor.returncode == 0, (
+        "the manifest names %s, which is not in this branch's history"
+        % commit)
+
+
+def test_record_names_the_commit_it_was_made_on(status, monkeypatch,
+                                                tmp_path):
+    """--record writes HEAD, the commit the record is made on."""
+    monkeypatch.setattr(status, "MANIFEST", "manifest.json")
+    monkeypatch.setattr(status.layout, "repository_root", lambda: tmp_path)
+    monkeypatch.setattr(status, "measure",
+                        lambda root=None: {"files": {}, "digest": "d"})
+    monkeypatch.setattr(status, "head_commit", lambda root: "c" * 40)
+    assert status.main(["--record"]) == 0
+    record = json.loads((tmp_path / "manifest.json").read_text(
+        encoding="utf-8"))
+    assert record["template_commit"] == "c" * 40
+
+
+def test_a_project_test_is_not_divergence(status, layout, monkeypatch):
+    """tests/project/ is the project's own: a test there is collected by
+    the suite and is not reported as added to the template's tests/
+    (T16). A file straight under tests/ still is."""
+    candidates = status.candidate_files(status.layout.repository_root())
+    monkeypatch.setattr(status, "candidate_files", lambda root=None: sorted(
+        candidates + ["tests/project/test_mine.py", "tests/test_mine.py"]))
+    owned = status.owned_files()
+    assert "tests/project/test_mine.py" not in owned
+    assert "tests/test_mine.py" in owned
+    owner = layout.owning_component("tests/project/test_mine.py")
+    assert owner is not None and owner.template != "owned", owner
+
+
+def test_a_project_test_has_a_basename_of_its_own(repo):
+    """The suite has no __init__.py, so pytest imports a test file by its
+    basename: a project test named like one of the template's is an
+    import error, reported here by name instead."""
+    template = {p.name for p in (repo / "tests").glob("test_*.py")}
+    clashes = sorted(p.relative_to(repo).as_posix()
+                     for p in (repo / "tests/project").rglob("test_*.py")
+                     if p.name in template)
+    assert clashes == [], (
+        "these project tests share a name with a file in tests/; rename "
+        "them: %s" % clashes)
+
+
+def unrecorded_holds(text: str) -> list[str]:
+    """Dependabot `ignore` entries with no comment giving a review date.
+
+    A hold travels with every project made from the template (T19), so
+    it carries its reason and the date it is looked at again, in a
+    comment on the lines just above it.
+    """
+    lines = text.splitlines()
+    bare = []
+    for i, line in enumerate(lines):
+        if line.strip().startswith("- dependency-name:"):
+            above = []
+            for previous in reversed(lines[:i]):
+                if not previous.strip().startswith("#"):
+                    break
+                above.append(previous)
+            if not any(re.search(r"\d{4}-\d{2}-\d{2}", row)
+                       for row in above):
+                bare.append(line.strip())
+    return bare
+
+
+def test_every_dependabot_hold_is_on_the_record(repo):
+    text = (repo / ".github/dependabot.yml").read_text(encoding="utf-8")
+    assert unrecorded_holds(text) == []
+
+
+def test_a_hold_without_a_reason_is_found():
+    """Falsifies the test above on a constructed file."""
+    held = ("    ignore:\n"
+            "      # setup-python 7.1.0: released 2026-10-22; pins wait two\n"
+            "      # weeks. Look again 2026-11-05.\n"
+            "      - dependency-name: actions/setup-python\n"
+            "        versions: ['7.1.0']\n")
+    assert unrecorded_holds(held) == []
+    bare = "    ignore:\n      - dependency-name: actions/setup-python\n"
+    assert unrecorded_holds(bare) == ["- dependency-name: actions/setup-python"]
 
 
 def test_a_changed_owned_file_is_reported(status, monkeypatch):

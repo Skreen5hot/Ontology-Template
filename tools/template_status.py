@@ -113,11 +113,30 @@ def digest_of(files: dict) -> str:
     return sha256_of(rows.encode("utf-8"))
 
 
-def manifest_of(measured: dict, label: str) -> dict:
+def head_commit(root: Path) -> str:
+    """The commit the record is made on.
+
+    Not the commit that carries the record: that commit does not exist
+    yet when the record is written, and its id depends on the record.
+    So the manifest names its parent, and the template commit a project
+    was made from is the first commit after `template_commit` whose
+    manifest has this digest; at a release, the tag names it (T21).
+    """
+    result = subprocess.run(["git", "rev-parse", "HEAD"], cwd=str(root),
+                            capture_output=True)
+    if result.returncode:
+        raise Refused("git rev-parse HEAD failed, so the record could not "
+                      "name the commit it was made on: "
+                      + result.stderr.decode("utf-8", "replace")[-300:])
+    return result.stdout.decode("utf-8").strip()
+
+
+def manifest_of(measured: dict, label: str, commit: str) -> dict:
     return {
         "format_version": FORMAT_VERSION,
         "generated_by": GENERATOR,
         "template_repository": project.repository(),
+        "template_commit": commit,
         "label": label,
         "digest": measured["digest"],
         "files": measured["files"],
@@ -126,7 +145,10 @@ def manifest_of(measured: dict, label: str) -> dict:
             "shipped it. A project keeps this as it arrived: it is the "
             "record of what the project was made from, and "
             "tools/template_status.py compares the project's files, and "
-            "a newer template's manifest, against it."),
+            "a newer template's manifest, against it. template_commit is "
+            "the template commit this record was made on; the commit "
+            "that carries the record follows it, and a release tag names "
+            "that commit."),
     }
 
 
@@ -187,7 +209,8 @@ def main(argv=None) -> int:
                 "record of what it was made from, and rewriting it would "
                 "make every local change look like the template's.")
         path = root / MANIFEST
-        path.write_bytes(json.dumps(manifest_of(now, args.label), indent=2,
+        record = manifest_of(now, args.label, head_commit(root))
+        path.write_bytes(json.dumps(record, indent=2,
                                     sort_keys=True).encode("utf-8") + b"\n")
         print("  wrote %s: %d owned file(s), digest %s"
               % (MANIFEST, len(now["files"]), now["digest"][:16]))
@@ -216,6 +239,9 @@ def main(argv=None) -> int:
     print("  %d owned file(s); recorded %s (%s), now %s"
           % (len(now["files"]), record["digest"][:16], record.get("label"),
              now["digest"][:16]))
+    print("  made from %s, recorded on commit %s"
+          % (record.get("template_repository"),
+             record.get("template_commit") or "(not recorded)"))
     for key in ("changed", "removed", "added"):
         for name in difference[key]:
             print("    %-8s %s" % (key, name))

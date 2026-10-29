@@ -18,7 +18,7 @@ project on its first commit:
 | Realist shapes: anchored in BFO, no two disjoint categories (BFO's `AllDisjointClasses` included), genus-differentia definitions, domains and ranges, headers, deprecations; and a configurable annotation profile | `shapes/realist_shapes.ttl`, `config/annotation-profile.yaml` |
 | Competency questions as SPARQL with the answer each must give, over example instance data | `competency-questions/`, `examples/`, `tools/ontology/competency.py` |
 | A corpus digest that survives blank-node renaming | `tools/ontology/corpus_digest.py` |
-| An IRI linter: every upstream IRI a term of its pinned release, every authored one declared, the opaque id suggested for a readable name -- in CI, a git hook, and a Claude Code hook | `tools/ontology/iri_lint.py` |
+| An IRI linter: every upstream IRI a term of its pinned release, every authored one declared, and an upstream term written by a readable name (`cco:Organization`) answered with the opaque IRI it means -- in CI, a git hook, and a Claude Code hook | `tools/ontology/iri_lint.py` |
 | A communications record for other teams, and a decision record for the architect | `communications/`, `docs/decisions/` |
 | Protégé: an edit file importing every module and vendored file, with a catalog resolving each offline; canonical Turtle for modules edited there | `protege/`, `tools/ontology/normalize.py` |
 | Term-request and defect forms, a pull-request checklist, Dependabot for the pinned actions and Python, a citation file, a research record | `.github/`, `CITATION.cff`, `research/` |
@@ -34,15 +34,26 @@ What it does not have yet (an end-to-end proof in CI) is in [`docs/template/ROAD
 
 ## Starting a project
 
-1. On GitHub, **Use this template** → create the new repository. Clone it.
-2. Set up Python 3.12 and the pinned dependencies:
+1. Create the repository from the template and clone it, from the command line:
+
+   ```bash
+   gh repo create owner/Widget-Ontology --template Skreen5hot/Ontology-Template --private --clone
+   ```
+
+   or on GitHub, **Use this template** → create the new repository, then clone it.
+   Porting an existing ontology? Read [`docs/PORTING.md`](docs/PORTING.md) first, and copy
+   the form in `docs/porting/` to `research/port-report.md` now: init leaves `research/`
+   alone.
+2. Set up Python 3.12, the pinned dependencies, and the git hook that runs the IRI linter
+   on every commit (git does not turn a repository's hooks on by itself):
 
    ```bash
    python -m venv .venv && .venv/Scripts/activate      # Windows; source .venv/bin/activate elsewhere
    python -m pip install -r requirements-dev.txt
+   git config core.hooksPath .githooks
    ```
 
-3. Initialize, from a clean checkout:
+3. Initialize, from a clean checkout (`research/` excepted):
 
    ```bash
    python tools/init_project.py --id widget --title "Widget Ontology" \
@@ -53,14 +64,31 @@ What it does not have yet (an end-to-end proof in CI) is in [`docs/template/ROAD
    This writes `config/project.yaml`, sets the namespace to
    `https://fandaws.com/ontology/widget#` in the module, the shapes and the fixtures,
    renames the module to `ontology/widget.ttl`, renders the project's README, CLAUDE.md and
-   HANDOFF, removes the template's own docs, and regenerates every generated file (which
-   fetches BFO and CCO once). `--dry-run` shows what it would change.
+   HANDOFF, removes the template's own docs, regenerates every generated file (which
+   fetches BFO and CCO once), and stages all of it. `--dry-run` shows what it would change.
 
-4. Run the suite, review `git diff`, commit.
-5. Enable GitHub Pages (Settings > Pages > Source: **GitHub Actions**). The site is published
-   from the first push to main, even from a private repository, and without Pages enabled
-   that push fails at *Configure Pages*. `"publish": false` in `site/content/site.json`
-   opts out.
+4. Run the suite, review `git diff --staged`, commit:
+
+   ```bash
+   python -m pytest tests/ -q -p no:randomly -m "not reasoning and not scale and not corpus"
+   ```
+
+   That is what the Checks workflow runs: 80 s on GitHub's standard runner at the
+   template's size (measured 2026-10-28). The tests marked `reasoning` need Java and add
+   minutes; `scale` and `corpus` add minutes more, and run in workflows of their own. Every
+   figure grows with the ontology.
+5. Enable GitHub Pages, before the first push: Settings > Pages > Source: **GitHub
+   Actions**, or
+
+   ```bash
+   gh api -X POST repos/owner/Widget-Ontology/pages -f build_type=workflow
+   ```
+
+   The site is published from the first push to main, even from a private repository, and
+   without Pages enabled that push fails at *Configure Pages*. `"publish": false` in
+   `site/content/site.json` opts out. Then push. The first push is part of setting up, and
+   the rendered CLAUDE.md says so; after it, nothing is pushed without the project owner's
+   say-so.
 
 Until step 3 runs, `python tools/project.py --check` — the first step in CI — fails the copy:
 it still says it is the template, and every check would be about a placeholder ontology.

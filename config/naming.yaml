@@ -2,7 +2,9 @@
 # (`naming_convention`) and by tools/ontology/vocabulary.py.
 #
 # Local names only -- the part after the namespace. Readable local names
-# are this template's decision 4; these say what readable means here.
+# for new terms are this template's decision 4; these say what readable
+# means here. A port that keeps an identifier scheme (P10002) widens them
+# and says why (docs/PORTING.md, section 6).
 # A pattern is a Python regular expression matched against the whole
 # local name; null turns the check off for that kind.
 #

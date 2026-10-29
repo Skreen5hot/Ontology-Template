@@ -219,6 +219,24 @@ components:
       from BFO-Aligned ValueNet, where the method was worked out, through
       ARO and the BCO.
 
+  - id: docs.porting
+    path: docs/PORTING.md
+    role: documentation
+    template: owned
+    description: >-
+      How to bring a predecessor ontology into a project made from this
+      template: the namespace move and its mapping set, the module
+      headers, the lossless check, the findings it arrives with, and the
+      naming scheme it already has.
+
+  - id: docs.porting-form
+    path: docs/porting
+    role: documentation
+    template: owned
+    description: >-
+      The port report form, kept blank. A port copies it to research/
+      and fills it in as it goes; init leaves research/ alone.
+
   - id: docs.governance
     path: docs/governance
     role: documentation
@@ -557,6 +575,15 @@ components:
     description: >-
       The suite, including the falsifications: every check here is shown
       to fail on the thing it protects against.
+
+  - id: tests.project
+    path: tests/project
+    role: tool
+    description: >-
+      The project's own tests: what the project's decisions require of
+      its ontology, beyond what the template checks. Collected by the
+      suite like any other test, and not template-owned, so a test here
+      is not reported as divergence from the template (T16).
 
   - id: tool.findings
     path: tools/findings.py

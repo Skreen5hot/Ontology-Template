@@ -2,8 +2,9 @@
 
 ## Local names
 
-Readable, in the project namespace, following `config/naming.yaml` (checked by the IRI
-linter as `naming_convention`, and by the vocabulary generator):
+New terms get readable local names, in the project namespace, following
+`config/naming.yaml` (checked by the IRI linter as `naming_convention`, and by the
+vocabulary generator):
 
 | Kind | Convention | Example |
 |---|---|---|
@@ -12,6 +13,15 @@ linter as `naming_convention`, and by the vocabulary generator):
 | concept, concept scheme | letters, digits, `-`, `_` | `P10020`, `asset-status` |
 
 A local name is never reused for a different term, even after the first is deprecated.
+
+## Identifiers a port keeps
+
+Readable names are the default for new terms, not a rule for ported ones. A predecessor
+ontology that minted identifiers on purpose (a classification's codes, `P10002`) keeps
+them: renaming would break every reference to the term, and the code is often the point.
+Such a project widens the patterns in `config/naming.yaml` to admit its scheme, says what
+the scheme means in scheme rules there, and states the policy here: which names are codes,
+which are readable, and what a new term gets. `docs/PORTING.md` section 6 has the steps.
 
 ## Labels
 

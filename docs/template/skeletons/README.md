@@ -3,7 +3,9 @@
 {{description}}
 
 A realist ontology aligned to BFO 2020 and CCO v2.0. Terms are minted in
-`{{namespace}}` (prefix `{{prefix}}:`) with readable local names.
+`{{namespace}}` (prefix `{{prefix}}:`). New terms get readable local names; the conventions,
+and any identifier scheme the project keeps, are in
+[`docs/governance/naming.md`](docs/governance/naming.md).
 
 > **New here?** Read [`docs/HANDOFF.md`](docs/HANDOFF.md) first for what is in this
 > repository and what is not. [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) is how to run
@@ -17,8 +19,8 @@ shapes/     SHACL shapes, and the fixtures built to break them
 vendor/     pinned partial extracts of BFO and CCO, with attribution
 config/     project values, layout contract, upstream pins, manifests, findings register, digest
 tools/      layout, licensing, vendoring, validation and digest tools
-tests/      the suite, including the falsifications
-docs/       handoff, development, process, decisions
+tests/      the suite, including the falsifications; the project's own in tests/project/
+docs/       handoff, development, process, decisions, porting
 ```
 
 ## Foundations
@@ -38,10 +40,13 @@ attribution is in [`vendor/NOTICE.md`](vendor/NOTICE.md).
 ```bash
 python -m venv .venv && .venv/Scripts/activate      # Windows; source .venv/bin/activate elsewhere
 python -m pip install -r requirements-dev.txt
-python -m pytest tests/ -q -p no:randomly
+git config core.hooksPath .githooks                 # the IRI linter on every commit
+python -m pytest tests/ -q -p no:randomly -m "not reasoning and not scale and not corpus"
 ```
 
-The same checks run in CI on every push. What each one refuses is in
+That last command is the Checks workflow's. The tests marked `reasoning` need Java; those
+marked `scale` and `corpus` take minutes and run in workflows of their own. Drop the `-m`
+to run everything. The same checks run in CI on every push. What each one refuses is in
 [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
 ## Provenance
