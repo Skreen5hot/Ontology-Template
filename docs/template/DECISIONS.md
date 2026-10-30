@@ -225,3 +225,12 @@ that order: `6845385672a0a90b1aec8c932fd1f7cac9cb46df5029c883eaadf63247df01c8`).
 - ROBOT moves from 1.9.10 to 1.9.11 (`config/reasoning.yaml`), which fixes catalog
   handling in `merge`, the command the Protégé catalog test runs. The jar's digest is the
   one GitHub publishes for the asset.
+
+**19. "v0.1.0, tag and push (Recommended)"** (2026-10-30)
+
+The architect's answer to which version the first template release is, recorded verbatim
+(SHA-256 `9868d332c6124daebc1118bdabd374342d8ef6aec7ce7a5dd0bfaa19ac4deed6`). Effect:
+
+- The first template release is `v0.1.0`: pre-1.0, since WP6 and T9's policy are open.
+  The manifest is recorded with that label in its own commit, the tag goes on that commit
+  (`RELEASING.md`, items 4 and 6), and the tag is pushed.

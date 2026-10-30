@@ -11,9 +11,12 @@
 # Every check the Checks and Reasoning workflows run runs here first, on
 # the tagged commit: a tag on a commit those never saw is still checked.
 #
-# In the template repository itself this stops at the first step: its
-# ontology is the `example` placeholder, and a template version is
-# recorded in config/template-manifest.json, not released as an ontology.
+# In the template repository itself the release job is skipped: its
+# ontology is the `example` placeholder, and a template version is its
+# tag and config/template-manifest.json, not an ontology release. The
+# first job says so and passes, so a template tag carries no failed run;
+# if it ever misread the flag, the release job's first step still
+# refuses the template.
 #
 # Only the publishing step can write; everything before it reads.
 
@@ -31,8 +34,29 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  which:
+    name: Template or project
+    runs-on: ubuntu-latest
+    outputs:
+      template: ${{ steps.flag.outputs.template }}
+    steps:
+      - name: Check out
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Read the template flag
+        id: flag
+        run: |
+          if grep -qx 'template: true' config/project.yaml; then
+            echo "template=true" >> "$GITHUB_OUTPUT"
+            echo "::notice::The ontology template: a template version is its tag and manifest, not an ontology release. Nothing to publish."
+          else
+            echo "template=false" >> "$GITHUB_OUTPUT"
+          fi
+
   release:
     name: Check, build twice, publish
+    needs: which
+    if: needs.which.outputs.template != 'true'
     runs-on: ubuntu-latest
     permissions:
       contents: write

@@ -227,6 +227,25 @@ def test_the_readme_names_each_setup_step(repo, initialized):
     assert "git config core.hooksPath .githooks" in project_readme
 
 
+def test_a_template_tag_skips_the_release_and_a_project_tag_does_not(
+        repo, initialized):
+    """The Release workflow's first job greps project.yaml for the line
+    that marks the template. That line must be in the template's file,
+    exactly, and not in a project's after init, or a project's tag would
+    publish nothing and pass."""
+    import yaml
+
+    workflow = yaml.safe_load(read(repo, ".github/workflows/release.yml"))
+    jobs = workflow["jobs"]
+    assert jobs["release"]["needs"] == "which"
+    assert jobs["release"]["if"] == "needs.which.outputs.template != 'true'"
+    flag = "grep -qx 'template: true' config/project.yaml"
+    assert any(flag in step.get("run", "") for step in jobs["which"]["steps"])
+    assert "template: true" in read(repo, "config/project.yaml").splitlines()
+    assert "template: true" not in read(
+        initialized, "config/project.yaml").splitlines()
+
+
 def test_init_ends_by_asking_for_the_pins_then_pages(repo):
     """Decision 16: checking every pin is the first step after init, so
     the message init ends with names it, before Pages and the push, as

@@ -33,6 +33,8 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | not started |
 
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; see "Release v0.1.0", below.
+
 ## 1. Extract and generalize the core
 
 Carry the BCO's generic tooling, take every project-specific value out of it, and make
@@ -542,9 +544,32 @@ Measured:
 Dependabot is off (decision 16); its open pull requests #2, #6 and #7 are closed unmerged.
 The pins they proposed are checked with the rest before the release.
 
-### The first template release: pins (2026-10-30)
+### Release v0.1.0 (2026-10-30)
 
-`RELEASING.md` item 1, every pin checked against its upstream (decisions 16, 18).
+The first template release (decision 19), made under `RELEASING.md`. It contains phases 1
+to 13 as the status table gives them: the core, upstreams, the IRI linter, the shape
+library, reasoning and release, authoring and governance, the site, and WP1 to WP5.
+
+Still open, and not in it: WP6, the final BPO evaluation, with everything "Carried to
+WP6" below; T9's licensing policy, awaiting Legal (decision 15); the move to CCO v2.2,
+after WP6 (decision 18); and the Release workflow publishing an ontology, which has still
+never run, because only a project's tag runs it.
+
+Item 3, a full init with the network rebuild in a fresh clone, found two defects, both
+fixed before the tag:
+
+- `test_record_names_the_commit_it_was_made_on` (WP5, T21) passed in the template and
+  failed in every project: it relied on `project.yaml` having been read, and cached, by an
+  earlier test. The post-init test missed it because its list of test files left out
+  eight of the suite's; it now runs the suite (`15427fd`).
+- init's closing message skipped checking the pins, decision 16's first step (`2b9c9f3`).
+
+And one found while preparing the tag: in the template, a tag ran the Release workflow to
+its deliberate refusal, so a template release would carry a failed run. A first job now
+reads the template flag and skips the release job, with a notice; the refusal stays as the
+backstop.
+
+Pins: item 1, every pin checked against its upstream (decisions 16, 18).
 
 | Pin | Was | Now |
 |---|---|---|

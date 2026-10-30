@@ -1,5 +1,5 @@
 {
-  "digest": "db731630590029b90224e613657f3cd68c3e18c71637ec394f392884355ae3a4",
+  "digest": "78171edf99a5dfb2cba2d51a449eaf8d82de37a3d99c69ada624f71d5cc1d755",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "494d0543a0fe1858fee58b5beefec708fdd1bbbc972f39e4fe183ffa3d24d39f",
@@ -11,7 +11,7 @@
     ".github/workflows/checks.yml": "628f28615867b3838181006e43b84748c163cc8b0d31adac7659838b0ce3a68c",
     ".github/workflows/pages.yml": "8dedb614134dc4384df02d1765da579adf21cfa2bb9fe63d4180b39321f1284c",
     ".github/workflows/reasoning.yml": "c707b85ef9b4091f1db483587cab706245daf9441f3e570245e6c8487712502f",
-    ".github/workflows/release.yml": "abcb6966acbd0063cd59ab9b18e0f06e196a128dd15e9b12a9b39bbe731a4b12",
+    ".github/workflows/release.yml": "412aa672624d338b80a90784ffdc9fef08880872449cc373c3fa54b3994a588d",
     ".github/workflows/scale.yml": "fcf91624125b2c502f6a9fbb6e941a8bb82602bc40ddf31af5538ce270dbf7ac",
     ".github/workflows/term-diff.yml": "5c2be401357a6a39138c77a0294c7aad506216d19edf23cb745d51033329b4fa",
     ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
@@ -112,6 +112,6 @@
   "generated_by": "tools/template_status.py",
   "label": "unreleased",
   "note": "The digest of every template-owned file as the template shipped it. A project keeps this as it arrived: it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
-  "template_commit": "15427fd43beaae78967d8806a7e2e899ea2851ae",
+  "template_commit": "2b9c9f3d4c5950a7e5ad3b1b5a25ee0f210647e5",
   "template_repository": "Skreen5hot/Ontology-Template"
 }
