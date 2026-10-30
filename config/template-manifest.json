@@ -1,5 +1,5 @@
 {
-  "digest": "b584dbbc048ea34c594b90dc1dec76fd93c9cd3dc1f59fb665ecab615a6759ff",
+  "digest": "db731630590029b90224e613657f3cd68c3e18c71637ec394f392884355ae3a4",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "494d0543a0fe1858fee58b5beefec708fdd1bbbc972f39e4fe183ffa3d24d39f",
@@ -83,7 +83,7 @@
     "tools/communications.py": "eb3cc330fb481d008fac6ea593a2540cc01b1979cc338ae9f6faa248600b0938",
     "tools/findings.py": "7f5935a5803da1ab2f696f0cfa434457dd5732ca012aa383f641cc05493134a5",
     "tools/hooks/claude_ttl_lint.py": "0e4351ddb4ec278857030434b505a97931fcefa49637b2c340b36129063c9258",
-    "tools/init_project.py": "f93165ac5f304ef7f5cf8005649b41f6a44b5c8035f1137eef270505bd0db2c9",
+    "tools/init_project.py": "ffeaa2a3b16f245070be2bcaf9e586a2b7db54bb88d706d8a3e12e1449ed7058",
     "tools/layout.py": "a09e3626e3b2153006b454e7d12872615f424d684a94bee7aa530574154c03c0",
     "tools/licensing/disposition.py": "0257c80ed00bc1504321181f1d46e1ed4dc64474753715131889064c795f8bee",
     "tools/licensing/third_party.py": "98b9c022b7a95ff5f3e95c2aac9bb9587165fb6de2ed1e126af73f9b2c4019c2",
@@ -112,6 +112,6 @@
   "generated_by": "tools/template_status.py",
   "label": "unreleased",
   "note": "The digest of every template-owned file as the template shipped it. A project keeps this as it arrived: it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
-  "template_commit": "b08935d3b1b2f908e3d2035030c074a4d2dea04f",
+  "template_commit": "15427fd43beaae78967d8806a7e2e899ea2851ae",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

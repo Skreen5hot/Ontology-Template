@@ -89,6 +89,17 @@ TURTLE_ROLES = ("ontology-module", "ontology-module-set",
 #: Left out of the clean-tree check, and out of what init stages.
 UNTOUCHED = ("research/",)
 
+#: What init's closing message asks for after the commit, in the
+#: README's order. Checking the pins comes first (decision 16): nothing
+#: updates them, and the first push publishes the site.
+NEXT_STEPS = (
+    "Then check every pin before anything is pushed: nothing updates them "
+    "by itself (docs/DEVELOPMENT.md, \"Pins\").",
+    "Then enable GitHub Pages (Settings > Pages > Source: GitHub Actions): "
+    "the site is published from the first push to main, and that push "
+    "fails until Pages is enabled.",
+)
+
 MARK_BEGIN = "  # >>> template-only"
 MARK_END = "  # <<< template-only"
 
@@ -498,9 +509,8 @@ def main(argv=None) -> int:
     print()
     print("  %s is set up and staged. Review `git diff --staged`, run the "
           "suite, and commit." % new["title"])
-    print("  Then enable GitHub Pages (Settings > Pages > Source: GitHub "
-          "Actions): the site is published from the first push to main, and "
-          "that push fails until Pages is enabled.")
+    for line in NEXT_STEPS:
+        print("  " + line)
     return 0
 
 

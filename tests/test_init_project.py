@@ -227,6 +227,19 @@ def test_the_readme_names_each_setup_step(repo, initialized):
     assert "git config core.hooksPath .githooks" in project_readme
 
 
+def test_init_ends_by_asking_for_the_pins_then_pages(repo):
+    """Decision 16: checking every pin is the first step after init, so
+    the message init ends with names it, before Pages and the push, as
+    the README's steps do."""
+    init = load_tool("t_init_next", "tools/init_project.py")
+    pins = [i for i, s in enumerate(init.NEXT_STEPS) if '"Pins"' in s]
+    pages = [i for i, s in enumerate(init.NEXT_STEPS) if "Pages" in s]
+    assert pins and pages and pins[0] < pages[0], init.NEXT_STEPS
+    readme = read(repo, "README.md")
+    assert readme.index("**Check every pin.**") < readme.index(
+        "Enable GitHub Pages")
+
+
 def test_the_owned_files_are_untouched(repo, initialized):
     """init must not write a template-owned file: the manifest says what
     the template shipped, and a project should start with no divergence."""
