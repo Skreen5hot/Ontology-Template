@@ -1,5 +1,5 @@
 {
-  "digest": "cd2c9c34db7e7ea1e27b22307fd134abece936c0510c51bd85bf90c632cc0748",
+  "digest": "b584dbbc048ea34c594b90dc1dec76fd93c9cd3dc1f59fb665ecab615a6759ff",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "494d0543a0fe1858fee58b5beefec708fdd1bbbc972f39e4fe183ffa3d24d39f",
@@ -76,7 +76,7 @@
     "tests/test_repository_layout.py": "d666c466a317900f42894d055ade31b6c4139d5031608a72f07a371c23b197f0",
     "tests/test_scale.py": "0f70716251c9078aa3b7b1a6bbccef808cd0e385072dd5ea85d792a86a5fad50",
     "tests/test_site.py": "b09f5a5044b793924b11a523dba1057b1661a68d2a5edcdbaec8f454943c5931",
-    "tests/test_template.py": "e679159ef6e3bb279752972df2fafe442cf7b69e0932e3b1c95765c9cebeb2f6",
+    "tests/test_template.py": "e8f0824ded9ffeda76e6a7a7b919f4dd179e8111efdebb3cb26663802e3c3d80",
     "tests/test_term_contract.py": "4c6394e578c0fce724c18acdb80651fc24751aad003388d817c3fbf63dbc8563",
     "tests/test_upstream_vendoring.py": "69080894500f8002532da1793ea5a45bc761eeff58cf6a77fd3b3ad7ace97593",
     "tests/test_vocabulary.py": "a0b53c5d5a70a1b9f9d4d28194c93e215394c4f38714289fd3040f752e841ad7",
@@ -112,6 +112,6 @@
   "generated_by": "tools/template_status.py",
   "label": "unreleased",
   "note": "The digest of every template-owned file as the template shipped it. A project keeps this as it arrived: it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
-  "template_commit": "98b15050a455fcf8afe2a61a97e38443334b858c",
+  "template_commit": "b08935d3b1b2f908e3d2035030c074a4d2dea04f",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

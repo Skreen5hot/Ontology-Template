@@ -142,7 +142,11 @@ def test_the_manifest_records_the_template_commit(status, project, repo):
 
 def test_record_names_the_commit_it_was_made_on(status, monkeypatch,
                                                 tmp_path):
-    """--record writes HEAD, the commit the record is made on."""
+    """--record writes HEAD, the commit the record is made on. It runs as
+    the template, whatever repository runs the suite: in a project
+    --record refuses, and project.yaml is not under tmp_path."""
+    monkeypatch.setattr(status.project, "is_template", lambda: True)
+    monkeypatch.setattr(status.project, "repository", lambda: "owner/t")
     monkeypatch.setattr(status, "MANIFEST", "manifest.json")
     monkeypatch.setattr(status.layout, "repository_root", lambda: tmp_path)
     monkeypatch.setattr(status, "measure",

@@ -258,11 +258,11 @@ def test_init_stages_everything_it_changed(initialized):
 
 def test_the_suite_passes_straight_after_init(initialized):
     """The copy's own checks, run in the copy straight after init, with
-    no staging by hand (T13): the layout contract, the namespace
-    agreement between the shapes and the project file, the licensing
-    classification, the project file, the communications record, and the
-    uninitialized-copy refusal -- with GITHUB_REPOSITORY naming the new
-    repository, as Actions would."""
+    no staging by hand (T13): the layout contract, the licensing
+    classification, the project file, and the whole suite but this file
+    -- with GITHUB_REPOSITORY naming the new repository, as Actions
+    would. The suite was a list of files once, and a test the list left
+    out passed in the template and failed in every project."""
     env = {"GITHUB_REPOSITORY": "owner/Widget-Works"}
     code, out = run(initialized, "tools/project.py", "--check",
                     env_extra=env)
@@ -272,17 +272,13 @@ def test_the_suite_passes_straight_after_init(initialized):
     code, out = run(initialized, "tools/licensing/disposition.py", "--check")
     assert code == 0, out
     code, out = run(initialized, "-m", "pytest", "-q", "-p", "no:randomly",
-                    "-p", "no:cacheprovider",
-                    "tests/test_namespace.py",
-                    "tests/test_repository_layout.py",
-                    "tests/test_licensing.py", "tests/test_project.py",
-                    "tests/test_communications.py",
-                    "tests/test_iri_lint.py",
-                    "tests/test_competency.py",
-                    "tests/test_release.py", "tests/test_vocabulary.py",
-                    "tests/test_authoring.py", "tests/test_mappings.py",
-                    "tests/test_site.py", "tests/test_scale.py",
-                    "-m", "not reasoning and not scale and not corpus",
+                    "-p", "no:cacheprovider", "tests/",
+                    "--ignore=tests/test_init_project.py",
+                    # --offline leaves the extracts as the template's,
+                    # headers and all; a network init rebuilds them, and
+                    # RELEASING.md item 3 runs one before each release.
+                    "--deselect", "tests/test_upstream_vendoring.py::"
+                    "test_the_extract_headers_name_this_project", "-m", "not reasoning and not scale and not corpus",
                     env_extra=env)
     assert code == 0, out[-3000:]
     code, out = run(initialized, "tools/site/build_site.py",
