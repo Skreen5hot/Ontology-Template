@@ -234,3 +234,29 @@ The architect's answer to which version the first template release is, recorded 
 - The first template release is `v0.1.0`: pre-1.0, since WP6 and T9's policy are open.
   The manifest is recorded with that label in its own commit, the tag goes on that commit
   (`RELEASING.md`, items 4 and 6), and the tag is pushed.
+
+**20. Their reply: "Record it verbatim (Recommended)". A1 to A7: "Accept all as proposed (Recommended)". A8: "Note BPOTEST is BPOT (Recommended)". The pin-check command: "Build now, release after WP6 (Recommended)".** (2026-10-30)
+
+In answer to the BPO Testing Team's reply to the WP6 readiness request,
+`BPOTEST-EXAMPLE-2026-10-30-wp6-readiness-answer` in `communications/bpotest/incoming/`,
+which asks for these acts (`requires_act: true`). Recorded verbatim (SHA-256 of the four
+answers, one per line, in that order:
+`bce97a90463d71a9ed9b7f132a4a211fe078fc84396c9a498ed98d044f4db6bf`). Effect:
+
+- Their reply is recorded in this public repository byte for byte, as the protocol
+  requires. It is a message written to us for this exchange; it carries no ontology
+  content, credentials or execution logs.
+- The §7 protocol is amended by A1 to A7 as proposed. WP6 runs in two phases: Phase A (S0
+  and S1, the process verdict, the template-controls verdict, the browser run) and Phase B
+  (S2, the BPO-quality verdict, the S2 release evidence). S0 is rebuilt by the port tool
+  with BPO's approved changes off, tagged, and checked lossless against `bc64e91`. Every
+  state is measured on one branch on v0.1.0, its content shown byte-identical to its tag
+  first. A real defect new at S2 counts against it. The reasons for dispositions are
+  written and approved per class of finding, with one register entry per finding. The
+  classification is fixed in Phase A, before any correction. **No template release lands
+  between Phase A and Phase B**; if one must, both phases are re-measured with it.
+- A8: `BPOTEST` stays this record's code for the team, and its README says that the team's
+  own code is `BPOT`. No message already committed changes.
+- T19's amendment: a pin-check command whose output can be cited is built on `main` and
+  stays unreleased until WP6 ends (A7). Phase A records the pins by hand, as the team
+  proposed. v0.1.0 stays the instrument.
