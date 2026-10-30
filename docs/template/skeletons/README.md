@@ -49,7 +49,7 @@ marked `scale` and `corpus` take minutes and run in workflows of their own. Drop
 to run everything.
 
 **Check every pin** before the first push and before each release: nothing here updates
-them by itself (`docs/DEVELOPMENT.md`, "Pins"). The same checks run in CI on every push. What each one refuses is in
+them by itself. `python tools/pins.py` checks them all (`docs/DEVELOPMENT.md`, "Pins"). The same checks run in CI on every push. What each one refuses is in
 [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md).
 
 ## Provenance

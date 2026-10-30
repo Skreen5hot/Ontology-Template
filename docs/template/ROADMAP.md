@@ -586,6 +586,15 @@ Current already: the other six actions; PyYAML, rdflib, pyoxigraph; BFO
 Python pin, before or after. The actions were checked for their latest release, not
 against an advisory database.
 
+### On main, unreleased (decision 20)
+
+What has landed since v0.1.0. Under A7 none of it is released until WP6 ends, so v0.1.0
+stays the BPO Testing Team's instrument.
+
+| What | Why | Tests |
+|---|---|---|
+| `tools/pins.py`: every pin checked against its upstream, in a report naming the commit it ran on. A newer release is reported; an advisory, a commit its tag does not name, or a pin not checked fails it | The team's T19 amendment: "every pin checked" should be evidence, not a claim | `tests/test_pins.py` |
+
 ### Carried to WP6
 
 Open items the work packages cannot close themselves, kept here until WP6 closes them

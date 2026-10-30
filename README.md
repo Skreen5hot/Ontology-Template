@@ -28,6 +28,7 @@ project on its first commit:
 | Releases on a version tag: base and full, as Turtle, RDF/XML and JSON-LD, byte-identical across builds, with checksums | `tools/release.py`, `.github/workflows/release.yml` |
 | A public site: term explorer, modules, concept schemes, competency questions, crosswalks, status, releases and checksummed downloads -- every figure read from the repository, byte-reproducible, checked, deployed to GitHub Pages only when the project says so | `tools/site/`, `site/`, `.github/workflows/pages.yml` |
 | CI with actions pinned to commit SHAs | `.github/workflows/checks.yml` |
+| Every pin checked against its upstream on request, with a report that can be cited; nothing updates a pin by itself | `tools/pins.py` |
 | The method, and the defects each rule exists because of | `docs/process/PROCESS.md` |
 
 What it does not have yet (an end-to-end proof in CI) is in [`docs/template/ROADMAP.md`](docs/template/ROADMAP.md).
@@ -80,8 +81,9 @@ What it does not have yet (an end-to-end proof in CI) is in [`docs/template/ROAD
 5. **Check every pin.** This is the project's first responsibility, before anything is
    pushed. The template pins every dependency exactly and does not update them: no
    Dependabot, no automatic updates. What arrives is what the template was released with,
-   which may already be stale or carry a published vulnerability. Every pin, where it is,
-   and how to check it: `docs/DEVELOPMENT.md`, "Pins".
+   which may already be stale or carry a published vulnerability.
+   `python tools/pins.py` checks every pin and prints a report that can be cited; where
+   each pin lives, and what to do with a newer release: `docs/DEVELOPMENT.md`, "Pins".
 6. Enable GitHub Pages, before the first push: Settings > Pages > Source: **GitHub
    Actions**, or
 

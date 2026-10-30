@@ -93,8 +93,9 @@ UNTOUCHED = ("research/",)
 #: README's order. Checking the pins comes first (decision 16): nothing
 #: updates them, and the first push publishes the site.
 NEXT_STEPS = (
-    "Then check every pin before anything is pushed: nothing updates them "
-    "by itself (docs/DEVELOPMENT.md, \"Pins\").",
+    "Then check every pin before anything is pushed, with python "
+    "tools/pins.py: nothing updates them by itself (docs/DEVELOPMENT.md, "
+    "\"Pins\").",
     "Then enable GitHub Pages (Settings > Pages > Source: GitHub Actions): "
     "the site is published from the first push to main, and that push "
     "fails until Pages is enabled.",

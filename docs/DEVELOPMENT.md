@@ -420,6 +420,17 @@ released with, which may already be stale or carry a published vulnerability. **
 every pin is the first thing a project does**, before its first push, and it is repeated
 before each release.
 
+```bash
+python tools/pins.py
+```
+
+checks all of them and prints a report that can be cited: the commit it ran on and when,
+then each pin with the latest release upstream. A newer release is reported, not failed;
+it exits 1 on a published advisory against a Python pin, on a pinned commit that is not
+what its tag names upstream, and on a pin it could not check. It needs the network, and
+uses `GITHUB_TOKEN` for the GitHub API's rate limit if it is set. The table says where each
+pin lives and how to check one by hand.
+
 | Pin | Where | How to check |
 |---|---|---|
 | GitHub Actions, by commit SHA, version in the trailing comment | `.github/workflows/*.yml` (`uses:`) | each action's releases page, or `gh api repos/<owner>/<action>/releases/latest` |

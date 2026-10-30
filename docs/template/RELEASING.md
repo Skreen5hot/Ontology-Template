@@ -10,8 +10,9 @@ Each item is done, or recorded as not done with its reason, before the tag.
 
 1. **Every pin is checked (T19, decision 16).** The template runs no Dependabot and updates
    nothing by itself, so a release ships its pins as they are, into every project made from
-   it. Check each pin `docs/DEVELOPMENT.md` lists under "Pins": take the update, with the manifest
-   re-recorded, or keep the pin and say why in the release's ROADMAP entry.
+   it. Run `python tools/pins.py` and keep its report with the release's ROADMAP entry. For
+   each pin with a newer release, take the update, with the manifest re-recorded, or keep
+   the pin and say why in that entry; it must report nothing failed.
 
 2. **The suite passes**, and the Checks, Reasoning and Scale workflows are green on the
    commit to be tagged.

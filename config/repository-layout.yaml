@@ -480,6 +480,16 @@ components:
       Checks the communications record against its protocol and lists
       open threads. Status is derived from replies, never stored.
 
+  - id: tool.pins
+    path: tools/pins.py
+    role: tool
+    template: owned
+    description: >-
+      Checks every pin docs/DEVELOPMENT.md lists against its upstream:
+      the latest release, an action's or upstream's commit against its
+      tag, published advisories against the Python pins. Its report
+      names the commit it ran on, so it can be cited.
+
   # ---- Configuration and tooling --------------------------------------
 
   - id: config.project
