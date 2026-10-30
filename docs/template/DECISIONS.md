@@ -211,3 +211,17 @@ In answer to the location of WP5's report, the ROADMAP's "Phase 13, WP5, as buil
   done.
 - Next is a tagged template release under `docs/template/RELEASING.md`, its first item
   every pin checked, then WP6.
+
+**18. CCO: "Keep v2.0 (Recommended)". ROBOT: "Move to 1.9.11 (Recommended)".** (2026-10-30)
+
+The architect's two choices when the pins were checked for the first template release
+(`RELEASING.md`, item 1), recorded verbatim (SHA-256 of the two answers, one per line, in
+that order: `6845385672a0a90b1aec8c932fd1f7cac9cb46df5029c883eaadf63247df01c8`). Effect:
+
+- CCO stays at `v2.0-2024-11-06` for this release, though v2.1 and v2.2 exist. v2.2
+  refactors the communication classes, removes Proposition and deprecates duplicate
+  datatype properties; the BPO port WP6 evaluates was built on v2.0, and moving now would
+  have WP6 measure two changes at once. The move is its own work, after WP6.
+- ROBOT moves from 1.9.10 to 1.9.11 (`config/reasoning.yaml`), which fixes catalog
+  handling in `merge`, the command the Protégé catalog test runs. The jar's digest is the
+  one GitHub publishes for the asset.

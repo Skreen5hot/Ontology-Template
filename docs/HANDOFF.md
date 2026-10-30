@@ -55,7 +55,7 @@ https://github.com/Skreen5hot/Ontology-Template.
   one failing, an expectation a query matching nothing would meet refused
   (`tests/test_competency.py`). A fresh project has none, and the tool says so.
 - **Reasoning** (`tools/ontology/reason.py`, `.github/workflows/reasoning.yml`): ROBOT
-  v1.9.10, pinned by digest, with ELK over the modules plus the full pinned BFO and CCO --
+  v1.9.11, pinned by digest, with ELK over the modules plus the full pinned BFO and CCO --
   inconsistency, unsatisfiable classes, and the examples' consistency
   (`tests/test_reasoning.py`, marked `reasoning`).
 - **Releases** (`tools/release.py`, `.github/workflows/release.yml`): base and full, in

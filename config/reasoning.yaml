@@ -9,17 +9,19 @@
 # stay Python-only.
 #
 # Chosen 2026-10-23: v1.9.10 (2026-02-18) rather than v1.9.11, which was
-# three weeks old. The url names the release tag, which a maintainer can
+# three weeks old. Moved to v1.9.11 (2026-10-01) on 2026-10-30, checking
+# the pins for the first template release (decision 18); its digest is
+# the one GitHub publishes for the asset. The url names the release tag, which a maintainer can
 # move; the digest is what makes that a refusal rather than a silent
 # substitution, and `commit` records what the tag pointed at when pinned.
 
 version: 1
 
 robot:
-  version: 1.9.10
-  url: https://github.com/ontodev/robot/releases/download/v1.9.10/robot.jar
-  sha256: 16a73c074f3df359a7338a84b4e0788785fe06117f931bb9796e9619ea776105
-  tag_commit: c7c03529334ad978235d7bc9c787d15807147ba4
+  version: 1.9.11
+  url: https://github.com/ontodev/robot/releases/download/v1.9.11/robot.jar
+  sha256: 53cd275c8e4c0dad1fc2c1c34174876795cd7d6b6926e1444adcbb0cb3c7ab26
+  tag_commit: 37d514d2ac8970b6ce7b9f5cfe83ba08dc97e9d8
   licence: BSD-3-Clause
 
 #: ELK: fast, and complete for OWL 2 EL -- subclass, existential

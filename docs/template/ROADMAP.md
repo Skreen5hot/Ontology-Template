@@ -542,6 +542,25 @@ Measured:
 Dependabot is off (decision 16); its open pull requests #2, #6 and #7 are closed unmerged.
 The pins they proposed are checked with the rest before the release.
 
+### The first template release: pins (2026-10-30)
+
+`RELEASING.md` item 1, every pin checked against its upstream (decisions 16, 18).
+
+| Pin | Was | Now |
+|---|---|---|
+| `actions/setup-python` | v7.0.0 | v7.1.0 |
+| `actions/upload-artifact` | v7.0.1 | v7.0.2 |
+| pytest | 9.1.1 | 9.2.0 |
+| pyshacl | 0.40.1 | 0.40.2 |
+| Markdown | 3.11 | 3.11.2 |
+| ROBOT | 1.9.10 | 1.9.11 (decision 18) |
+| CCO | v2.0-2024-11-06 | **kept**: v2.1 and v2.2 exist; the move waits for WP6 (decision 18) |
+
+Current already: the other six actions; PyYAML, rdflib, pyoxigraph; BFO
+(`release-2024-01-29` is still its latest release). OSV listed no advisory against any
+Python pin, before or after. The actions were checked for their latest release, not
+against an advisory database.
+
 ### Carried to WP6
 
 Open items the work packages cannot close themselves, kept here until WP6 closes them
