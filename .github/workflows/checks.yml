@@ -140,6 +140,14 @@ jobs:
         continue-on-error: true
         run: python tools/ontology/normalize.py --check
 
+      # The stages the project declares it runs: a started stage names a
+      # standard that exists, the decision path is done in order, a lane
+      # is done only after the stages it joins (docs/process/METHOD.md).
+      - name: Every started stage has its standard
+        id: stages
+        continue-on-error: true
+        run: python tools/stages.py
+
       - name: The communications record follows its protocol
         id: communications
         continue-on-error: true

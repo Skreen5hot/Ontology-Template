@@ -594,6 +594,13 @@ stays the BPO Testing Team's instrument.
 | What | Why | Tests |
 |---|---|---|
 | `tools/pins.py`: every pin checked against its upstream, in a report naming the commit it ran on. A newer release is reported; an advisory, a commit its tag does not name, or a pin not checked fails it | The team's T19 amendment: "every pin checked" should be evidence, not a claim | `tests/test_pins.py` |
+| P1: `docs/process/METHOD.md`, the ontology method: one decision path, terminology lanes joining it at named gates, a standard per stage, the gates BCO found late, the separations, closure | The BCO team's process account, and its answer (decision 21) | the layout and docs tests |
+| P3: `docs/charter.md`, the scope charter form | The same | -- |
+| P2: `docs/standards/` with the stage-standard skeleton, `config/stages.yaml`, and `tools/stages.py`, a Checks step, refusing a started stage without a standard and a stage done out of order | The same | `tests/test_stages.py` |
+
+Held by decision 21 until WP6 ends or Phase A's results are in: P4 (a source register with
+verification grades), P5 (reviewer kind and capacity), P7 (decision propagation), P8 (a
+rights and provenance record), and P6 (conceptual fidelity) last.
 
 ### Carried to WP6
 

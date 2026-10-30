@@ -4,7 +4,9 @@
 Team. **Date:** 2026-10-30. **Status:** proposed. Sent to the BCO team for its input on
 2026-10-30 (`communications/bco/outgoing/`), since BCO does the work it describes; the
 architect decides after. BCO answered the same day
-(`communications/bco/incoming/2026-10-30-process-proposals-answer.md`).
+(`communications/bco/incoming/2026-10-30-process-proposals-answer.md`). **Decided**
+2026-10-30, decision 21: §3.1's lanes accepted with BCO's join points, P8 added, P1, P3
+and P2 built, P4 to P8 held. Left as written; the decision says what changed.
 
 **Responds to:** [`2026-10-30-bco-process-account.md`](2026-10-30-bco-process-account.md),
 SHA-256 of the text below its rule

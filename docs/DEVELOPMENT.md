@@ -1,7 +1,8 @@
 # Development
 
 How to work in this repository. For *why* it is built this way, read
-`docs/process/PROCESS.md`. For what is actually here and what is not, read
+`docs/process/PROCESS.md`; for how the ontology itself is built, stage by stage,
+`docs/process/METHOD.md`. For what is actually here and what is not, read
 `docs/HANDOFF.md` first.
 
 This file is owned by the ontology template (`config/repository-layout.yaml`), so it
@@ -73,6 +74,7 @@ python tools/ontology/vocabulary.py --check   # the vocabulary module is what th
 python tools/ontology/mappings.py             # every SSSOM crosswalk holds
 python tools/ontology/term_diff.py --base origin/main   # which terms this branch changes
 python tools/ontology/normalize.py --check    # modules declared canonical are canonical
+python tools/stages.py                        # every started stage has its standard
 python tools/communications.py                # the communications record follows its protocol
 python tools/template_status.py               # where this has diverged from the template
 python tools/site/build_site.py && python tools/site/check_site.py   # the public site builds and holds
@@ -97,6 +99,7 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `protege.py --check` | `protege/edit.ttl` or its catalog differing from what the modules and the vendored files generate; a module with no ontology header, or two |
 | `normalize.py --check` | a module declared `format: canonical` that is not in canonical Turtle |
 | `release.py` | a version that is not MAJOR.MINOR.PATCH; a file that does not parse back to the graph it was written from |
+| `stages.py` | in `config/stages.yaml`: a started or finished stage with no standard, or one naming a file that does not exist or is the blank skeleton; a path stage done before an earlier stage the project runs; a lane done before a stage it joins; a stage not run with a status; an unknown status, layout component or joined stage; a stage listed twice. It never reads a standard or judges a gate |
 | `template_status.py --check` | in the template only: a manifest that does not describe the owned files. A project's divergence is reported, never refused |
 
 `validate.py` writes a report with `-o config/validation-report.json`. That file is
@@ -511,6 +514,21 @@ set per target (format in its README), checked by `python tools/ontology/mapping
 term related to BFO or CCO is not a mapping: it is placed under the upstream term, or is
 it. Mappings are never loaded into the ontology graph, so an `exactMatch` to a vocabulary
 that is not BFO-aligned never becomes a claim about this ontology's types.
+
+## The charter, the stages and their standards
+
+How the ontology is built is `docs/process/METHOD.md`. Its three files here:
+
+- `docs/charter.md`, the scope charter, filled in and approved before anything else is
+  drafted;
+- `config/stages.yaml`, the stages of the decision path and the terminology lanes this
+  project runs, each with its status and standard;
+- `docs/standards/`, one standard per stage, copied from `stage-standard.md` and approved
+  before the stage starts.
+
+Mark a stage `in-progress` in the commit that starts it, naming its standard;
+`python tools/stages.py` refuses it otherwise, and refuses a stage marked `done` out of
+order.
 
 ## Naming, deprecation, and what changed
 

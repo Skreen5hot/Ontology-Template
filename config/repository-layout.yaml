@@ -219,6 +219,33 @@ components:
       from BFO-Aligned ValueNet, where the method was worked out, through
       ARO and the BCO.
 
+  - id: docs.method
+    path: docs/process/METHOD.md
+    role: documentation
+    template: owned
+    description: >-
+      How the ontology itself is built: one decision path with
+      terminology lanes beside it, a standard for every stage, the gates,
+      the separations, closure. Written from the BCO team's account of
+      building BCO (template decision 21).
+
+  - id: docs.charter
+    path: docs/charter.md
+    role: documentation
+    description: >-
+      The scope charter: purpose, non-goals, the ontologies depended on,
+      the competency questions, the stages run and who holds each gate.
+      Approved before anything else is drafted. The template ships it as
+      a form.
+
+  - id: docs.standards
+    path: docs/standards
+    role: documentation
+    description: >-
+      One standard per stage the project runs, written from the skeleton
+      here before the stage starts. The project's own; the template
+      ships the skeleton.
+
   - id: docs.porting
     path: docs/PORTING.md
     role: documentation
@@ -490,6 +517,16 @@ components:
       tag, published advisories against the Python pins. Its report
       names the commit it ran on, so it can be cited.
 
+  - id: tool.stages
+    path: tools/stages.py
+    role: tool
+    template: owned
+    description: >-
+      Checks config/stages.yaml: a started stage names a standard that
+      exists and is not the blank skeleton, the path is done in order, a
+      lane is done only after the stages it joins. Never reads a
+      standard or judges a gate.
+
   # ---- Configuration and tooling --------------------------------------
 
   - id: config.project
@@ -499,6 +536,14 @@ components:
       The project's own values: id, code, title, namespace, prefix,
       repository. Written by tools/init_project.py; read by every tool
       through tools/project.py.
+
+  - id: config.stages
+    path: config/stages.yaml
+    role: configuration
+    description: >-
+      The stages the project runs, each one's status, standard and where
+      its work lives; each lane names the path stages it joins. Checked
+      by tools/stages.py.
 
   - id: config.findings-register
     path: config/findings-register.yaml

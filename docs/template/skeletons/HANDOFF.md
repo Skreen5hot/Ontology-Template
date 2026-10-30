@@ -45,6 +45,7 @@ work.
 |---|---|
 | how to run things | `docs/DEVELOPMENT.md` |
 | why it is built this way | `docs/process/PROCESS.md` |
+| how the ontology is built, and the stages it runs | `docs/process/METHOD.md`, `config/stages.yaml` |
 | what was decided, by whom | `docs/decisions/` |
 | what is vendored, and what is not | `config/upstream-extracts.json`, `vendor/NOTICE.md` |
 | how far this has moved from the template | `python tools/template_status.py` |

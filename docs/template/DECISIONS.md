@@ -260,3 +260,28 @@ answers, one per line, in that order:
 - T19's amendment: a pin-check command whose output can be cited is built on `main` and
   stays unreleased until WP6 ends (A7). Phase A records the pins by hand, as the team
   proposed. v0.1.0 stays the instrument.
+
+**21. "I agree with your recomendations proceed"** (2026-10-30)
+
+In answer to what WP6 is and what building the BCO proposals now, and in which order,
+would do. The recommendation, as given: build P1 now, then P3 and P2, in BCO's order; hold
+the checks (P4, P5, P7, P8, and P6 last) until WP6 ends or the BPO Testing Team's Phase A
+results are in. Recorded verbatim (SHA-256
+`48656f70ebee409c686004d931ae9c24433ea35452e5d695c8ffbacf8a7149fc`). It decides on the
+response to the BCO team's process account
+(`docs/template/evaluations/2026-10-30-bco-process-account-response.md`) as BCO's answer
+(`BCO-EXAMPLE-2026-10-30-process-proposals-answer`) amended it. Effect:
+
+- The response's lanes with gates are accepted, with BCO's refinement: the terminology
+  lanes join the decision path at named gates, and a lane finding may raise an open issue
+  on it. BCO withdrew its strict order.
+- P8, a rights and provenance record, is added to the proposals, as BCO asked.
+- Built now, on `main` and unreleased under A7: **P1**, the ontology method
+  (`docs/process/METHOD.md`); **P3**, a scope charter form; **P2**, a stage-standard
+  skeleton and `config/stages.yaml`, with the check that a started stage names a standard.
+  P2's check is part of P2 as proposed; it is the one check built now.
+- Held: P4, P5, P7, P8 and P6, until WP6 ends or Phase A's results are in, so that each is
+  designed with evidence from both teams. BCO's narrowing of P4 and P6 and its additions to
+  P5 are carried with them.
+- Not decided: how BCO corrects CM-01's stakeholder checkbox, which is BCO's own decision;
+  and whether anything is sent to BCO about this decision.

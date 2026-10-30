@@ -157,3 +157,4 @@ written; its first run is on the commit that publishes the repository.
 | what was decided, by whom | `docs/template/DECISIONS.md` |
 | how to run things | `docs/DEVELOPMENT.md` |
 | why it is built this way | `docs/process/PROCESS.md` |
+| how an ontology is built with it | `docs/process/METHOD.md` |

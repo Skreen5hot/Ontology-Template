@@ -30,6 +30,7 @@ project on its first commit:
 | CI with actions pinned to commit SHAs | `.github/workflows/checks.yml` |
 | Every pin checked against its upstream on request, with a report that can be cited; nothing updates a pin by itself | `tools/pins.py` |
 | The method, and the defects each rule exists because of | `docs/process/PROCESS.md` |
+| How the ontology itself is built: one decision path with terminology lanes beside it, a scope charter, a standard for every stage before it starts, the gates and the separations; the stages a project runs declared and checked | `docs/process/METHOD.md`, `docs/charter.md`, `docs/standards/`, `config/stages.yaml`, `tools/stages.py` |
 
 What it does not have yet (an end-to-end proof in CI) is in [`docs/template/ROADMAP.md`](docs/template/ROADMAP.md).
 

@@ -3,7 +3,8 @@
 This is the **ontology template**, not an ontology. Its placeholder project is `example`
 (`https://fandaws.com/ontology/example#`), which exists so every check has something to run
 against. Read `docs/template/ROADMAP.md` for what is built and what is next,
-`docs/DEVELOPMENT.md` for how to run things, `docs/process/PROCESS.md` for the method.
+`docs/DEVELOPMENT.md` for how to run things, `docs/process/PROCESS.md` for the method of
+the checks, `docs/process/METHOD.md` for the method of building an ontology.
 
 ## What is true right now
 
@@ -46,6 +47,7 @@ against. Read `docs/template/ROADMAP.md` for what is built and what is next,
 .venv/Scripts/python tools/ontology/iri_lint.py
 .venv/Scripts/python tools/ontology/competency.py
 .venv/Scripts/python tools/ontology/reason.py        # needs Java; the Reasoning workflow runs it too
+.venv/Scripts/python tools/stages.py
 .venv/Scripts/python tools/communications.py
 .venv/Scripts/python tools/template_status.py --check
 .venv/Scripts/python -m pytest tests/ -q -p no:randomly

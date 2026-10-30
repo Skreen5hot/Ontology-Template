@@ -1,0 +1,82 @@
+# The stages this project runs (docs/process/METHOD.md, section 7).
+#
+# One decision path, in strict order, and terminology lanes beside it. Each
+# entry says whether the project runs the stage, where it stands, the
+# standard it runs under, and the layout components where its work lives.
+# A lane names the path stages whose gates it joins.
+#
+#   runs      true, or false for a stage this project does not have
+#   status    not-started | in-progress | done
+#   standard  docs/standards/<id>.md, written and approved before the stage
+#             starts; null until then
+#   where     layout component ids (config/repository-layout.yaml)
+#   joins     lanes only: the path stages its work waits on
+#
+# tools/stages.py checks it. It refuses a started stage without a standard,
+# a path stage done before the ones before it, and a lane done before the
+# stages it joins. It never reads a standard or judges a gate.
+
+version: 1
+
+path:
+  - id: charter
+    runs: true
+    status: not-started
+    standard: null
+    where: [docs.charter, competency-questions]
+
+  - id: sources
+    runs: true
+    status: not-started
+    standard: null
+    where: [research]
+
+  - id: conceptual-model
+    runs: true
+    status: not-started
+    standard: null
+    where: []
+
+  # A small ontology's design may be its charter and its conceptual model,
+  # ratified together: set runs to false and say so in the charter.
+  - id: specification
+    runs: true
+    status: not-started
+    standard: null
+    where: []
+
+  - id: formalization
+    runs: true
+    status: not-started
+    standard: null
+    where: [ontology.main, vocabulary.intake]
+
+  - id: instances
+    runs: true
+    status: not-started
+    standard: null
+    where: [examples, competency-questions]
+
+lanes:
+  # Metamodel terms may start at once; terms that classify the domain wait
+  # for the conceptual model's admission criteria.
+  - id: vocabulary
+    runs: true
+    status: not-started
+    standard: null
+    where: []
+    joins: [conceptual-model]
+
+  - id: taxonomy
+    runs: true
+    status: not-started
+    standard: null
+    where: []
+    joins: [conceptual-model]
+
+  - id: thesaurus
+    runs: true
+    status: not-started
+    standard: null
+    where: [mappings]
+    joins: [sources, conceptual-model]

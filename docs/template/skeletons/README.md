@@ -9,7 +9,9 @@ and any identifier scheme the project keeps, are in
 
 > **New here?** Read [`docs/HANDOFF.md`](docs/HANDOFF.md) first for what is in this
 > repository and what is not. [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) is how to run
-> things; [`docs/process/PROCESS.md`](docs/process/PROCESS.md) is why it is built this way.
+> things; [`docs/process/PROCESS.md`](docs/process/PROCESS.md) is why it is built this way,
+> and [`docs/process/METHOD.md`](docs/process/METHOD.md) is how the ontology is built, starting
+> from the scope charter, [`docs/charter.md`](docs/charter.md).
 
 ## Organization
 
