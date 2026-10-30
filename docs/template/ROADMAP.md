@@ -30,7 +30,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 10 | WP2 One findings register, every Checks step run | **done** (accepted 2026-10-28, decision 13) |
 | 11 | WP3 One term contract for validation and the site | **done** (accepted 2026-10-28, decision 14) |
 | 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | **done** (accepted 2026-10-29, decision 15); T9's policy awaits Legal |
-| 13 | WP5 Project ergonomics and documentation (alongside) | built (2026-10-29), awaiting acceptance |
+| 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | not started |
 
 ## 1. Extract and generalize the core

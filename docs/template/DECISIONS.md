@@ -200,3 +200,14 @@ updates, or remove it. Recorded verbatim above (SHA-256 of the quoted text
   point to it.
 - T19's remedy changes with it: no Dependabot pull request can open on a new project's
   first day, because nothing opens one.
+
+**17. "Approved. Proceed"** (2026-10-30)
+
+In answer to the location of WP5's report, the ROADMAP's "Phase 13, WP5, as built", at
+`7bb66ab` with decision 16 applied. Recorded verbatim above (SHA-256 of the quoted text
+`ee2f1c16cb76ac05bf5d0dec86237aa816eaf58c59dddb0b3b15f994b6354ecb`). Effect:
+
+- WP5 (T13 to T19, T21) is accepted as built, T19 as decision 16 changed it; phase 13 is
+  done.
+- Next is a tagged template release under `docs/template/RELEASING.md`, its first item
+  every pin checked, then WP6.
