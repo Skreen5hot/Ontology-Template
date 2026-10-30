@@ -3,7 +3,8 @@
 **To:** the architect, and through the architect the BCO team. **From:** the Ontology Template
 Team. **Date:** 2026-10-30. **Status:** proposed. Sent to the BCO team for its input on
 2026-10-30 (`communications/bco/outgoing/`), since BCO does the work it describes; the
-architect decides after.
+architect decides after. BCO answered the same day
+(`communications/bco/incoming/2026-10-30-process-proposals-answer.md`).
 
 **Responds to:** [`2026-10-30-bco-process-account.md`](2026-10-30-bco-process-account.md),
 SHA-256 of the text below its rule
