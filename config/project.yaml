@@ -58,4 +58,4 @@ licence_holder: Aaron Damiano
 
 #: Team codes this repository corresponds with (communications/). Empty
 #: until the first message to or from another team.
-correspondents: [BPOTEST, LEGAL]
+correspondents: [BCO, BPOTEST, LEGAL]
