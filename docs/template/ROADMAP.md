@@ -31,7 +31,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 11 | WP3 One term contract for validation and the site | **done** (accepted 2026-10-28, decision 14) |
 | 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | **done** (accepted 2026-10-29, decision 15); T9's policy awaits Legal |
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
-| 14 | WP6 The final BPO evaluation | Phase A may begin (decision 20); Phase B waits on BPO's and Legal's decisions |
+| 14 | WP6 The final BPO evaluation | Phase A done (results 2026-10-30, P-A1 to P-A7 not yet disposed); Phase B waits on BPO's and Legal's decisions |
 
 Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; see "Release v0.1.0", below. No further release until WP6 ends (decision 20, A7): what lands on main meanwhile stays unreleased.
 

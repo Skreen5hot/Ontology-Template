@@ -285,3 +285,19 @@ response to the BCO team's process account
   P5 are carried with them.
 - Not decided: how BCO corrects CM-01's stakeholder checkbox, which is BCO's own decision;
   and whether anything is sent to BCO about this decision.
+
+**22. "Commit verbatim now"** (2026-10-31)
+
+In answer to how to record the BPO Testing Team's Phase A results
+(`BPOTEST-EXAMPLE-2026-10-30-wp6-phase-a-results`), whose §8 quotes one APQC process-element
+name as an example of a false alarm, while T9 is with Legal. The options shown were: hold
+the record and ask the team whether the phrase may be public; commit verbatim now; hold
+until Legal answers. Recorded verbatim (SHA-256
+`f93439ae42c0728613723caf4a3b977b30b98da47a7132b27646912ed647c0ba`). Effect:
+
+- The results are recorded byte for byte in `communications/bpotest/incoming/`, as decision
+  20 requires, with the one APQC element name they quote.
+- It decides how this message is recorded, nothing more. It is not a finding that APQC text
+  may be published, and it does not anticipate T9 (decision 15).
+- Phase A is done. Its seven template findings, P-A1 to P-A7, are not yet disposed; under
+  A7 none is released before Phase B is measured.
