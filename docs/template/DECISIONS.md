@@ -320,3 +320,34 @@ two records; then draft an acknowledgment to the team. Recorded verbatim (SHA-25
   architect's call.
 - Not decided: the order of the other eight, and whether any is designed with P4 and P5
   (P-A7 touches the same register).
+
+**24. "agree proceed"** (2026-10-31)
+
+In answer to the BPO Testing Team's request for the template's formal decision on protocol
+amendment A9 (`BPOTEST-EXAMPLE-2026-10-31-wp6-a9-four-states`), submitted by the BPO
+architect: a fourth state, S2u, BPO's corrected source ported without the template's
+changes, so that S0 to S2u measures BPO's corrections and S2u to S2 the template's effect on
+the corrected source. The recommendation, as given: accept A9 with three clarifications;
+note P-B1's confirmed requirement and the three detection requirements in the roadmap;
+record the message; draft an answer for the architect's approval. Recorded verbatim (SHA-256
+`a0c0312135cd612ac536665473179b3863037729f41245c7f30beefe363d1610`). Effect:
+
+- A9 is accepted, with the original S0 and S1 evidence kept as it is. It is what decision 14
+  asks of WP6: improvements in the template kept apart from improvements in BPO's content.
+- **The instrument is unchanged.** S2 is ported with template v0.1.0, as S1 was, so S0 to S1
+  and S2u to S2 measure the same template; what has landed on `main` since (decision 21) is
+  not part of it (A7). The comparison tooling A9 updates is the port's, not the template's.
+- **Template-prompted changes count as the template's.** The four changes BPO adopted from
+  the template process are in S2u because they are in BPO's source; the final report counts
+  them with the template's effect, not with BPO's corrections, so S2u to S2 is not reported
+  as the template's whole effect.
+- **The kept `dct:rights` notice is accepted as a declared change to the port's mechanics,
+  not on its legal premise.** That APQC's licence requires the notice is not established
+  here or relied on; T9 is with Legal (decision 15).
+- P-B1, already accepted (decision 23), carries the BPO architect's requirement that each
+  definition is evaluated on its own. The three detection requirements (possible homonyms,
+  duplicate classes, relations that claim more than their axioms) are recorded as
+  requirements after WP6, not as defects with a known fix: a check may flag a candidate, and
+  a person decides identity.
+- An answer to the team is drafted for the architect to approve; sending it is the
+  architect's call.

@@ -609,7 +609,7 @@ None changes before Phase B is measured (A7). P-B1 is first.
 
 | Id | Finding |
 |---|---|
-| P-B1 | The genus check passes a class when any one definition contains the parent's label anywhere, so a contradicting definition, or a label in the differentia, passes |
+| P-B1 | The genus check passes a class when any one definition contains the parent's label anywhere, so a contradicting definition, or a label in the differentia, passes. The fix evaluates each definition on its own (decision 24) |
 | P-A1 | Transitive Python dependencies are unpinned; owlrl, which pyshacl imports, among them |
 | P-A2 | No procedure for upgrading a project to a new template release |
 | P-A3 | `template_status.py --against` does not see changes to shapes, fixtures, or the profile, naming and reasoning config |
@@ -618,6 +618,16 @@ None changes before Phase B is measured (A7). P-B1 is first.
 | P-A6 | `--propose` cannot fill entries class by class |
 | P-A7 | The register has no field for a finding's classification (real, false alarm, unsure) |
 | P-A8 | The site footer has no place for a third-party attribution; `config/third-party-text.yaml` does not reach it |
+
+Detection requirements from BPO's Phase B work (decision 24). No check finds them in
+v0.1.0. They are requirements, not defects with a known fix: a check can flag a candidate,
+and deciding semantic identity needs a person.
+
+| Requirement | What a check could flag |
+|---|---|
+| Possible homonyms: one IRI used for two different kinds | one IRI with conflicting genera across modules |
+| Duplicate classes: two IRIs for what may be one kind | two classes with near-identical definitions |
+| Over-claiming relations: a relation whose name or definition claims more than its axioms support | not yet known |
 
 ### Carried to WP6
 
