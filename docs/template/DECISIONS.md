@@ -301,3 +301,22 @@ until Legal answers. Recorded verbatim (SHA-256
   may be published, and it does not anticipate T9 (decision 15).
 - Phase A is done. Its seven template findings, P-A1 to P-A7, are not yet disposed; under
   A7 none is released before Phase B is measured.
+
+**23. "agree, proceed"** (2026-10-31)
+
+In answer to the proposed handling of the BPO Testing Team's nine template findings from
+Phase A: P-A1 to P-A7 in its results, P-A8 and P-B1 in its supplement
+(`BPOTEST-EXAMPLE-2026-10-31-wp6-phase-a-supplement`), both checked against the template
+and found to hold. The proposal, as given: all nine fixed after WP6, P-B1 first; push the
+two records; then draft an acknowledgment to the team. Recorded verbatim (SHA-256
+`14110570e83ff5b5667f786be10f665c936fadc99fd46722215981b4054eb982`). Effect:
+
+- The nine findings are accepted as template findings, to be fixed after WP6 ends, so the
+  instrument Phase B measures with does not change (A7). P-B1 is first: it is a check that
+  passes what it should report.
+- P-A4 (a scheme rule relating a local name to a literal) is considered then, not
+  committed to: it may be BPO's alone.
+- An acknowledgment to the team is drafted for the architect to approve; sending it is the
+  architect's call.
+- Not decided: the order of the other eight, and whether any is designed with P4 and P5
+  (P-A7 touches the same register).

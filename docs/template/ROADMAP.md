@@ -602,6 +602,23 @@ Held by decision 21 until WP6 ends or Phase A's results are in: P4 (a source reg
 verification grades), P5 (reviewer kind and capacity), P7 (decision propagation), P8 (a
 rights and provenance record), and P6 (conceptual fidelity) last.
 
+### After WP6 (decision 23)
+
+The BPO Testing Team's template findings from Phase A, each checked against the template.
+None changes before Phase B is measured (A7). P-B1 is first.
+
+| Id | Finding |
+|---|---|
+| P-B1 | The genus check passes a class when any one definition contains the parent's label anywhere, so a contradicting definition, or a label in the differentia, passes |
+| P-A1 | Transitive Python dependencies are unpinned; owlrl, which pyshacl imports, among them |
+| P-A2 | No procedure for upgrading a project to a new template release |
+| P-A3 | `template_status.py --against` does not see changes to shapes, fixtures, or the profile, naming and reasoning config |
+| P-A4 | A scheme rule cannot relate a local name to a literal (to be considered: it may be BPO's alone) |
+| P-A5 | The explorer shows no comments, so comment drift is invisible on the site |
+| P-A6 | `--propose` cannot fill entries class by class |
+| P-A7 | The register has no field for a finding's classification (real, false alarm, unsure) |
+| P-A8 | The site footer has no place for a third-party attribution; `config/third-party-text.yaml` does not reach it |
+
 ### Carried to WP6
 
 Open items the work packages cannot close themselves, kept here until WP6 closes them
