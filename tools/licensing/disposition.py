@@ -96,7 +96,8 @@ def project_licence() -> str:
 
 def vendored_sources() -> dict:
     """Pinned upstreams, indexed by every path each produces: its extract
-    and its register, both the upstream's content under its licence.
+    and what is derived from it (its register, hierarchy and
+    disjointness), all the upstream's content under its licence.
 
     Read here rather than restated, so the licence this tool reports for
     a vendored file and the licence the vendoring tool wrote into that
@@ -123,7 +124,7 @@ def vendored_sources() -> dict:
                               % (UPSTREAM_SOURCES, required,
                                  entry["extract"]))
         found[entry["extract"]] = entry
-        for derived in ("register", "disjointness"):
+        for derived in ("register", "hierarchy", "disjointness"):
             if entry.get(derived):
                 found[entry[derived]] = entry
     return found

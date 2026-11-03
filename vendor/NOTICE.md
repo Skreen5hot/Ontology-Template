@@ -10,7 +10,8 @@ The extracts are not the upstream ontologies. Each carries the terms
 this repository names plus their structural ancestry (or, for a
 source pinned `select: all`, every term it describes), and drops
 every axiom whose object is an anonymous class expression. The
-registers list every term each source describes, with its labels.
+registers list every term each source describes, with its labels,
+and the hierarchies every class's named direct superclasses.
 See the header of each extract, and `config/upstream-extracts.json`.
 
 ## Basic Formal Ontology release-2024-01-29
@@ -19,6 +20,7 @@ Basic Formal Ontology (BFO) 2020, ISO/IEC 21838-2. Copyright the BFO contributor
 
 - extract: `vendor/bfo/bfo-core-extract.ttl`
 - register: `vendor/bfo/bfo-register.json`
+- class hierarchy: `vendor/bfo/bfo-hierarchy.json`
 - source: https://raw.githubusercontent.com/BFO-ontology/BFO-2020/044490fc5100ffed6df7d4d15cbc167698b6fdee/src/owl/bfo-core.ttl
 - commit: `044490fc5100ffed6df7d4d15cbc167698b6fdee`
 - licence: CC-BY-4.0 -- https://creativecommons.org/licenses/by/4.0/
@@ -31,6 +33,7 @@ Common Core Ontologies v2.0. Copyright (c) 2017 CUBRC, Inc., licensed BSD-3-Clau
 
 - extract: `vendor/cco/cco-extract.ttl`
 - register: `vendor/cco/cco-register.json`
+- class hierarchy: `vendor/cco/cco-hierarchy.json`
 - source: https://raw.githubusercontent.com/CommonCoreOntology/CommonCoreOntologies/510dad76be0ef710b65a421075af912af25342b7/src/cco-merged/CommonCoreOntologiesMerged.ttl
 - commit: `510dad76be0ef710b65a421075af912af25342b7`
 - licence: BSD-3-Clause -- https://github.com/CommonCoreOntology/CommonCoreOntologies/blob/510dad76be0ef710b65a421075af912af25342b7/LICENSE

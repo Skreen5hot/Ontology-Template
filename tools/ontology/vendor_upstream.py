@@ -10,7 +10,8 @@ Business Capability Ontology, which added three things: the serialiser's
 prefixes come from the pins, a source whose artifact states no licence
 may name a pinned licence file instead, and a specification is read for
 seeds. The template adds: a source may be vendored whole, a source may be
-several files at one commit, and every source gets a register.
+several files at one commit, and every source gets a register and a
+class hierarchy.
 
 WHY THIS EXISTS
 
@@ -63,6 +64,19 @@ and what is it called", which is what the IRI linter needs to tell a
 mistyped opaque id from a readable name and to suggest the right IRI,
 offline. It carries the upstream's own labels, so it is the upstream's
 content under the upstream's licence, like the extract.
+
+THE CLASS HIERARCHY
+
+Beside the register, a JSON record of every class the register lists with
+its named direct superclasses: each rdfs:subClassOf whose object is an
+IRI, from the same pinned files. A `select: named` extract carries
+ancestry only for the terms this repository names, so without it a
+consumer can prove a CCO class exists but not which BFO category it
+falls under. Direct superclasses only; a consumer closes them, and with
+BFO vendored whole every chain can be followed to its top. Superclass
+axioms whose object is an anonymous class expression are dropped and
+counted, as in the extract. Asked for by the Semantic Data Dictionary
+team (template decision 25).
 
 DISJOINTNESS, DERIVED
 
@@ -196,7 +210,7 @@ def sources() -> list[dict]:
         raise Refused(PINS + " declares no sources")
     for entry in declared:
         for required in ("id", "commit", "namespace", "prefix", "extract",
-                         "register", "licence"):
+                         "register", "hierarchy", "licence"):
             if not entry.get(required):
                 raise Refused("a source in %s declares no %r: %r"
                               % (PINS, required, entry.get("id", entry)))
@@ -811,6 +825,7 @@ def build(cache: Path) -> dict:
             "text": text,
             "register_text": register_bytes(register).decode("utf-8"),
             "register_terms": len(register["terms"]),
+            "register": register,
             "counts": counts,
             "stated_licence": stated,
             "seeds": sorted(s for s in seeds if s.startswith(namespace)),
@@ -821,6 +836,24 @@ def build(cache: Path) -> dict:
                 s for s in spec_unresolved if s.startswith(namespace)),
             "triples": len(mine),
         }
+
+    for entry in declared:
+        record = built[entry["id"]]
+        elsewhere = set()
+        for other in declared:
+            if other["id"] != entry["id"]:
+                elsewhere |= set(built[other["id"]]["register"]["terms"])
+        hierarchy = hierarchy_of(entry, per_source[entry["id"]],
+                                 record["stated_licence"],
+                                 record["register"], elsewhere)
+        record["hierarchy_text"] = register_bytes(hierarchy).decode("utf-8")
+        record["hierarchy_classes"] = len(hierarchy["classes"])
+        record["hierarchy_outside_namespace"] = len(
+            hierarchy["outside_namespace"])
+        record["hierarchy_dropped"] = hierarchy[
+            "dropped_anonymous_superclass_axioms"]
+    for entry in declared:
+        del built[entry["id"]]["register"]
 
     built["_totals"] = {"seeds": len(seeds),
                         "seeds_from_corpus_and_shapes": len(strict),
@@ -991,6 +1024,83 @@ def register_of(source: dict, graph, stated: str) -> dict:
     }
 
 
+def hierarchy_of(source: dict, graph, stated: str, register: dict,
+                 elsewhere: set) -> dict:
+    """Every class the register lists, with its named direct superclasses.
+
+    From the same graph as the register, so the two describe the same
+    classes. A superclass may be in another namespace (CCO's classes sit
+    under BFO's); it is recorded as asserted. A class with no named
+    superclass is recorded with none, so its place at the top of a chain
+    is visible rather than a missing key.
+
+    A superclass outside the source's namespace that no other pinned
+    source's register lists (`elsewhere`) would end a chain: nothing here
+    says what it is under. When the source's own files describe it, it is
+    recorded under `outside_namespace`, with its own superclasses, and so
+    on up. Measured against these pins: CCO v2.0 declares BFO 2.0's
+    process profile, obo:BFO_0000144, which BFO 2020 does not have, and
+    puts 12 of its classes under it.
+    """
+    import rdflib
+
+    owl_class = OWL + "Class"
+    dropped = 0
+
+    def parents(iri: str) -> list:
+        nonlocal dropped
+        named = set()
+        for parent in graph.objects(rdflib.URIRef(iri),
+                                    rdflib.RDFS.subClassOf):
+            if isinstance(parent, rdflib.URIRef):
+                named.add(str(parent))
+            else:
+                dropped += 1
+        return sorted(named)
+
+    classes = {iri: {"superclasses": parents(iri)}
+               for iri, record in register["terms"].items()
+               if owl_class in record["types"]}
+    outside = {}
+    waiting = sorted({p for record in classes.values()
+                      for p in record["superclasses"]})
+    while waiting:
+        iri = waiting.pop()
+        if iri in classes or iri in outside or iri in elsewhere:
+            continue
+        if not list(graph.predicate_objects(rdflib.URIRef(iri))):
+            continue
+        outside[iri] = {"superclasses": parents(iri)}
+        waiting.extend(outside[iri]["superclasses"])
+    return {
+        "format_version": FORMAT_VERSION,
+        "generated_by": GENERATOR,
+        "source": source["id"],
+        "project": source["project"],
+        "release": source["release"],
+        "commit": source["commit"],
+        "files": source["files"],
+        "namespace": source["namespace"],
+        "licence": source["licence"]["spdx"],
+        "licence_as_stated_by_source": stated,
+        "attribution": " ".join(source["licence"]["attribution"].split()),
+        "relation": ("rdfs:subClassOf, direct, named objects only; "
+                     "anonymous class expressions dropped and counted"),
+        "note": (
+            "Every class the register lists, with the named superclasses "
+            "the pinned files assert for it. Not closed: a consumer "
+            "follows the chain. Generated -- do not edit."),
+        "classes": classes,
+        "outside_namespace": outside,
+        "outside_namespace_note": (
+            "Superclasses outside this source's namespace that no other "
+            "pinned source lists, as this source's own files describe "
+            "them. Not this source's terms, and not the other source's: "
+            "a term the other source's pinned release does not have."),
+        "dropped_anonymous_superclass_axioms": dropped,
+    }
+
+
 def register_bytes(register: dict) -> bytes:
     """Deterministic: sorted keys, one indentation, LF, trailing newline."""
     return (json.dumps(register, indent=1, sort_keys=True,
@@ -1049,6 +1159,18 @@ def manifest_of(built: dict) -> dict:
             "register_on_disk_matches": (
                 register_path.is_file()
                 and register_path.read_bytes() == register_data),
+            "hierarchy": entry["hierarchy"],
+            "hierarchy_classes": record["hierarchy_classes"],
+            "hierarchy_outside_namespace":
+                record["hierarchy_outside_namespace"],
+            "hierarchy_dropped_anonymous_superclass_axioms":
+                record["hierarchy_dropped"],
+            "hierarchy_sha256": sha256_of(
+                record["hierarchy_text"].encode("utf-8")),
+            "hierarchy_on_disk_matches": (
+                (root / entry["hierarchy"]).is_file()
+                and (root / entry["hierarchy"]).read_bytes()
+                == record["hierarchy_text"].encode("utf-8")),
         }
     return {
         "format_version": FORMAT_VERSION,
@@ -1107,7 +1229,8 @@ def notice_of(built: dict) -> str:
         "this repository names plus their structural ancestry (or, for a",
         "source pinned `select: all`, every term it describes), and drops",
         "every axiom whose object is an anonymous class expression. The",
-        "registers list every term each source describes, with its labels.",
+        "registers list every term each source describes, with its labels,",
+        "and the hierarchies every class's named direct superclasses.",
         "See the header of each extract, and `" + MANIFEST + "`.",
         "",
     ]
@@ -1122,6 +1245,7 @@ def notice_of(built: dict) -> str:
             "",
             "- extract: `" + entry["extract"] + "`",
             "- register: `" + entry["register"] + "`",
+            "- class hierarchy: `" + entry["hierarchy"] + "`",
         ] + ["- source: " + pinned["url"] for pinned in entry["files"]] + [
             "- commit: `" + entry["commit"] + "`",
             "- licence: " + entry["licence"]["spdx"] + " -- "
@@ -1215,6 +1339,26 @@ def verify() -> dict:
                     % (entry["id"], entry["register"], pinned.get("commit"),
                        entry["commit"]))
 
+        hierarchy = root / entry["hierarchy"]
+        want = recorded["extracts"].get(entry["id"], {}).get(
+            "hierarchy_sha256")
+        if not hierarchy.is_file():
+            findings.append("%s: %s is missing" % (entry["id"],
+                                                  entry["hierarchy"]))
+        elif sha256_of(hierarchy.read_bytes()) != want:
+            findings.append(
+                "%s: %s digests to %s but %s records %s"
+                % (entry["id"], entry["hierarchy"],
+                   sha256_of(hierarchy.read_bytes())[:16], MANIFEST,
+                   (want or "nothing")[:16]))
+        else:
+            pinned = json.loads(hierarchy.read_text(encoding="utf-8"))
+            if pinned.get("commit") != entry["commit"]:
+                findings.append(
+                    "%s: %s describes commit %s, and the pin is %s"
+                    % (entry["id"], entry["hierarchy"], pinned.get("commit"),
+                       entry["commit"]))
+
     # Spec terms the last build recorded as unresolvable are excused; any
     # other spec term is held to the same standard as a corpus term. A
     # spec revision that names a new CCO class therefore fails here until
@@ -1304,6 +1448,9 @@ def main(argv=None) -> int:
     differing += [record["disjointness"]
                   for record in manifest["extracts"].values()
                   if not record["disjointness_on_disk_matches"]]
+    differing += [record["hierarchy"]
+                  for record in manifest["extracts"].values()
+                  if not record["hierarchy_on_disk_matches"]]
 
     for key, record in sorted(manifest["extracts"].items()):
         print("    %-4s %-40s %6d triple(s)  %s"
@@ -1312,6 +1459,10 @@ def main(argv=None) -> int:
         print("    %-4s %-40s %6d term(s)    %s"
               % ("", record["register"], record["register_terms"],
                  "same" if record["register_on_disk_matches"]
+                 else "DIFFERS"))
+        print("    %-4s %-40s %6d class(es) %s"
+              % ("", record["hierarchy"], record["hierarchy_classes"],
+                 "same" if record["hierarchy_on_disk_matches"]
                  else "DIFFERS"))
 
     notice = notice_of(built)
@@ -1328,8 +1479,8 @@ def main(argv=None) -> int:
                   "from the pinned sources produces: %s"
                   % (len(differing), ", ".join(sorted(differing))))
             return 1
-        print("  every extract, register and the notice are byte-identical "
-              "to a fresh build from the pinned upstreams")
+        print("  every extract, register, hierarchy and the notice are "
+              "byte-identical to a fresh build from the pinned upstreams")
         return 0
 
     for key, record in sorted(built.items()):
@@ -1351,6 +1502,13 @@ def main(argv=None) -> int:
         register.write_bytes(record["register_text"].encode("utf-8"))
         print("  wrote %s (%d terms)" % (record["source"]["register"],
                                          record["register_terms"]))
+        hierarchy = root / record["source"]["hierarchy"]
+        hierarchy.write_bytes(record["hierarchy_text"].encode("utf-8"))
+        print("  wrote %s (%d classes, %d outside its namespace, %d "
+              "anonymous superclass axioms dropped)"
+              % (record["source"]["hierarchy"], record["hierarchy_classes"],
+                 record["hierarchy_outside_namespace"],
+                 record["hierarchy_dropped"]))
 
     notice_path.parent.mkdir(parents=True, exist_ok=True)
     notice_path.write_bytes(notice.encode("utf-8"))

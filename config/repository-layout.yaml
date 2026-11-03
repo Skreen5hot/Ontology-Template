@@ -391,6 +391,27 @@ components:
       its labels -- all of CCO, not only what is vendored, so a readable
       name like "Organization" can be matched to its opaque IRI offline.
 
+  - id: vendor.bfo-hierarchy
+    path: vendor/bfo/bfo-hierarchy.json
+    role: vendored-register
+    generator: tool.vendor-upstream
+    redistributable: true
+    description: >-
+      Every class BFO 2020 core describes, with its named direct
+      superclasses. Redundant with the whole extract, and kept so that
+      every source has one, by one rule (decision 25).
+
+  - id: vendor.cco-hierarchy
+    path: vendor/cco/cco-hierarchy.json
+    role: vendored-register
+    generator: tool.vendor-upstream
+    redistributable: true
+    description: >-
+      Every class CCO v2.0's register lists, with its named direct
+      superclasses, so a consumer can follow any CCO class to its BFO
+      category offline. Asked for by the Semantic Data Dictionary team
+      (decision 25).
+
   - id: docs.vendor-notice
     path: vendor/NOTICE.md
     role: documentation

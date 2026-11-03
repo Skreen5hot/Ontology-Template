@@ -1,0 +1,203 @@
+{
+ "attribution": "Basic Formal Ontology (BFO) 2020, ISO/IEC 21838-2. Copyright the BFO contributors, licensed CC BY 4.0.",
+ "classes": {
+  "http://purl.obolibrary.org/obo/BFO_0000001": {
+   "superclasses": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000002": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000001"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000003": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000001"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000004": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000002"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000006": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000141"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000008": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000009": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000006"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000011": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000015": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000016": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000017"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000017": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000020"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000018": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000006"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000019": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000020"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000020": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000002"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000023": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000017"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000024": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000040"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000026": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000006"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000027": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000040"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000028": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000006"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000029": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000141"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000030": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000040"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000031": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000002"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000034": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000016"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000035": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000038": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000008"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000040": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000004"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000140": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000141"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000141": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000004"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000142": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000140"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000145": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000019"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000146": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000140"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000147": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000140"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000148": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000008"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000182": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000015"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000202": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000038"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000203": {
+   "superclasses": [
+    "http://purl.obolibrary.org/obo/BFO_0000148"
+   ]
+  }
+ },
+ "commit": "044490fc5100ffed6df7d4d15cbc167698b6fdee",
+ "dropped_anonymous_superclass_axioms": 31,
+ "files": [
+  {
+   "sha256": "6944e2c96a0d8709dc15ae5364792019e208061eda3f32311af4f3b8d8443a3b",
+   "url": "https://raw.githubusercontent.com/BFO-ontology/BFO-2020/044490fc5100ffed6df7d4d15cbc167698b6fdee/src/owl/bfo-core.ttl"
+  }
+ ],
+ "format_version": 1,
+ "generated_by": "tools/ontology/vendor_upstream.py",
+ "licence": "CC-BY-4.0",
+ "licence_as_stated_by_source": "https://creativecommons.org/licenses/by/4.0/",
+ "namespace": "http://purl.obolibrary.org/obo/",
+ "note": "Every class the register lists, with the named superclasses the pinned files assert for it. Not closed: a consumer follows the chain. Generated -- do not edit.",
+ "outside_namespace": {},
+ "outside_namespace_note": "Superclasses outside this source's namespace that no other pinned source lists, as this source's own files describe them. Not this source's terms, and not the other source's: a term the other source's pinned release does not have.",
+ "project": "Basic Formal Ontology",
+ "relation": "rdfs:subClassOf, direct, named objects only; anonymous class expressions dropped and counted",
+ "release": "release-2024-01-29",
+ "source": "bfo"
+}

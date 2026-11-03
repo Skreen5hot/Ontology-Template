@@ -106,7 +106,8 @@ def constructed_upstreams(vendoring, monkeypatch, upstreams, seeds,
             "namespace": namespace, "prefix": key,
             "select": select,
             "extract": "vendor/%s.ttl" % key,
-            "register": "vendor/%s-register.json" % key, "_texts": texts,
+            "register": "vendor/%s-register.json" % key,
+            "hierarchy": "vendor/%s-hierarchy.json" % key, "_texts": texts,
             "disjointness": disjointness.get(key),
             "licence": {"spdx": "MIT", "url": "https://l.invalid/",
                         "licence_statement_contains": "licence-" + key.upper(),
@@ -198,6 +199,7 @@ def test_an_unknown_select_mode_is_refused(vendoring, monkeypatch):
     (lambda e: (e.update(files=[{"url": e.pop("url")}]), e.pop("sha256")),
      "no url or no sha256"),
     (lambda e: e.pop("register"), "declares no 'register'"),
+    (lambda e: e.pop("hierarchy"), "declares no 'hierarchy'"),
 ])
 def test_each_pinning_rule_refuses(vendoring, monkeypatch, change, expect):
     """Several files per source widen what a pin can say, and each new
@@ -224,6 +226,7 @@ def test_the_manifest_records_a_source_digest_for_every_extract(vendoring,
         assert record["commit"] == pinned[key]["commit"], key
         assert record["select"] == pinned[key]["select"], key
         assert record["register"] == pinned[key]["register"], key
+        assert record["hierarchy"] == pinned[key]["hierarchy"], key
 
 
 def test_the_extract_headers_name_this_project(layout, project):
@@ -617,6 +620,149 @@ def test_a_register_is_never_loaded_as_ontology(layout, vendoring):
               for p in layout.vendored_files() + layout.ontology_files()}
     for entry in vendoring.sources():
         assert entry["register"] not in loaded, entry["register"]
+        assert entry["hierarchy"] not in loaded, entry["hierarchy"]
+
+
+# ----------------------------------------------------------- hierarchy
+
+
+HOUSE = "https://www.commoncoreontologies.org/ont00000331"
+PROCESS_PROFILE = OBO + "BFO_0000144"
+
+
+@pytest.fixture(scope="module")
+def hierarchies(vendoring):
+    import json
+
+    root = vendoring.layout.repository_root()
+    return {entry["id"]: json.loads((root / entry["hierarchy"]).read_text(
+        encoding="utf-8")) for entry in vendoring.sources()}
+
+
+def ancestors(hierarchies, iri):
+    """The transitive named superclasses, across every source's hierarchy
+    and what each records outside its namespace."""
+    parents = {}
+    for record in hierarchies.values():
+        for key in ("classes", "outside_namespace"):
+            for cls, entry in record[key].items():
+                parents.setdefault(cls, set()).update(entry["superclasses"])
+    seen, waiting = set(), [iri]
+    while waiting:
+        for parent in parents.get(waiting.pop(), ()):
+            if parent not in seen:
+                seen.add(parent)
+                waiting.append(parent)
+    return seen
+
+
+def test_a_hierarchy_describes_its_pin_and_every_register_class(
+        vendoring, registers, hierarchies):
+    """Decision 25: every class the register lists is in the hierarchy,
+    and nothing else is, so the two files describe one set of classes."""
+    for entry in vendoring.sources():
+        record = hierarchies[entry["id"]]
+        assert record["commit"] == entry["commit"], entry["id"]
+        assert record["files"] == entry["files"], entry["id"]
+        assert record["licence"] == entry["licence"]["spdx"], entry["id"]
+        listed = {iri for iri, term in registers[entry["id"]]["terms"].items()
+                  if OWL + "Class" in term["types"]}
+        assert set(record["classes"]) == listed, entry["id"]
+        assert not set(record["outside_namespace"]) & listed, entry["id"]
+
+
+def test_every_cco_class_reaches_entity(hierarchies):
+    """What the Semantic Data Dictionary asked for: any CCO class followed
+    to its BFO category, offline. A house is a material entity. 1,385
+    classes at v2.0, measured when this was built; a floor."""
+    cco = hierarchies["cco"]["classes"]
+    assert len(cco) >= 1300, len(cco)
+    stranded = sorted(c for c in cco
+                      if ENTITY not in ancestors(hierarchies, c))
+    assert stranded == [], (len(stranded), stranded[:5])
+    assert MATERIAL_ENTITY in ancestors(hierarchies, HOUSE)
+    assert OCCURRENT not in ancestors(hierarchies, HOUSE)
+
+
+def test_a_bfo_2_class_cco_still_uses_closes_its_chain(hierarchies):
+    """CCO v2.0 declares BFO 2.0's process profile, which BFO 2020 does not
+    have, and puts classes under it. Neither register lists it, so without
+    `outside_namespace` those chains stop there. Measured: 12 classes."""
+    outside = hierarchies["cco"]["outside_namespace"]
+    assert outside.get(PROCESS_PROFILE) == {"superclasses": [OCCURRENT]}
+    under = [c for c, r in hierarchies["cco"]["classes"].items()
+             if PROCESS_PROFILE in r["superclasses"]]
+    assert len(under) >= 10, len(under)
+    assert PROCESS_PROFILE not in hierarchies["bfo"]["classes"]
+
+
+def test_a_hierarchy_records_named_direct_superclasses_only(
+        vendoring, monkeypatch, tmp_path):
+    """On constructed sources: a named superclass is kept, in or out of
+    the namespace; an anonymous one is dropped and counted; a property is
+    not a class; a class with none is recorded with none; nothing is
+    closed transitively; and a foreign superclass the source describes
+    is recorded outside its namespace, unless another source lists it."""
+    import json
+
+    a_ns, b_ns = "https://a.invalid/", "https://b.invalid/"
+    typed = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
+    sub = "<%ssubClassOf>" % RDFS
+    cls = "<%sClass>" % OWL
+    constructed_upstreams(vendoring, monkeypatch, [
+        ("a", a_ns, "named",
+         "<{a}top> {t} {c} .\n"
+         "<{a}mid> {t} {c} . <{a}mid> {s} <{a}top> .\n"
+         "<{a}low> {t} {c} . <{a}low> {s} <{a}mid> , <{b}top> .\n"
+         "<{a}low> {s} [ <{o}onProperty> <{a}p> ] .\n"
+         "<{a}odd> {t} {c} . <{a}odd> {s} <{x}foreign> .\n"
+         "<{x}foreign> {t} {c} . <{x}foreign> {s} <{x}higher> .\n"
+         "<{x}higher> {t} {c} .\n"
+         "<{a}twin> {t} {c} . <{a}twin> {s} <{b}listed> .\n"
+         "<{b}listed> {s} <{a}top> .\n"
+         "<{a}p> {t} <{o}ObjectProperty> .\n".format(
+             a=a_ns, b=b_ns, x="https://x.invalid/", t=typed, c=cls,
+             s=sub, o=OWL)),
+        ("b", b_ns, "named",
+         "<{b}top> {t} {c} .\n<{b}listed> {t} {c} .\n".format(
+             b=b_ns, t=typed, c=cls)),
+    ], seeds=set())
+
+    built = vendoring.build(tmp_path)
+    record = json.loads(built["a"]["hierarchy_text"])
+    assert record["classes"] == {
+        a_ns + "top": {"superclasses": []},
+        a_ns + "mid": {"superclasses": [a_ns + "top"]},
+        a_ns + "low": {"superclasses": [a_ns + "mid", b_ns + "top"]},
+        a_ns + "odd": {"superclasses": ["https://x.invalid/foreign"]},
+        a_ns + "twin": {"superclasses": [b_ns + "listed"]},
+    }
+    assert record["dropped_anonymous_superclass_axioms"] == 1
+    assert record["outside_namespace"] == {
+        "https://x.invalid/foreign": {
+            "superclasses": ["https://x.invalid/higher"]},
+        "https://x.invalid/higher": {"superclasses": []},
+    }, "b:listed is b's to describe, and x: terms are a's only record"
+
+
+def test_a_tampered_hierarchy_is_found_offline(vendoring, repo):
+    """Generated and digest-pinned like the register: a superclass edited
+    by hand is a finding, not a quiet change to every consumer's answer."""
+    entry = next(e for e in vendoring.sources() if e["id"] == "cco")
+    path = repo / entry["hierarchy"]
+    original = path.read_bytes()
+    tampered = original.replace(b'"' + OBO.encode() + b'BFO_0000040"',
+                                b'"' + OBO.encode() + b'BFO_0000029"', 1)
+    assert tampered != original
+    try:
+        path.write_bytes(tampered)
+        record = vendoring.verify()
+        assert any(entry["hierarchy"] in f and "digests to" in f
+                   for f in record["findings"]), record["findings"]
+    finally:
+        path.write_bytes(original)
+    assert path.read_bytes() == original
+    assert vendoring.verify()["ok"]
 
 
 # ---------------------------------------------------------- attribution

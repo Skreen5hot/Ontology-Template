@@ -597,6 +597,7 @@ stays the BPO Testing Team's instrument.
 | P1: `docs/process/METHOD.md`, the ontology method: one decision path, terminology lanes joining it at named gates, a standard per stage, the gates BCO found late, the separations, closure | The BCO team's process account, and its answer (decision 21) | the layout and docs tests |
 | P3: `docs/charter.md`, the scope charter form | The same | -- |
 | P2: `docs/standards/` with the stage-standard skeleton, `config/stages.yaml`, and `tools/stages.py`, a Checks step, refusing a started stage without a standard and a stage done out of order | The same | `tests/test_stages.py` |
+| A class hierarchy for every pinned source, `vendor/<id>/<id>-hierarchy.json`: every class its register lists with its named direct superclasses, generated and digest-checked, so a CCO class can be followed to its BFO category offline | The Semantic Data Dictionary team's request (decision 25) | `tests/test_upstream_vendoring.py` |
 
 Held by decision 21 until WP6 ends or Phase A's results are in: P4 (a source register with
 verification grades), P5 (reviewer kind and capacity), P7 (decision propagation), P8 (a

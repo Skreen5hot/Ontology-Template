@@ -66,6 +66,13 @@
 # the opaque IRI for a readable name. Declare it in the layout contract
 # as `vendored-register`.
 #
+# THE CLASS HIERARCHY
+#
+# `hierarchy` is where every class the register lists is written with its
+# named direct superclasses (rdfs:subClassOf to an IRI), so a consumer can
+# tell which BFO category a term falls under even when the extract does
+# not carry it. Declare it in the layout contract as `vendored-register`.
+#
 # DISJOINTNESS
 #
 # `disjointness`, for a source that states owl:AllDisjointClasses, is
@@ -90,6 +97,7 @@ sources:
     select: all
     extract: vendor/bfo/bfo-core-extract.ttl
     register: vendor/bfo/bfo-register.json
+    hierarchy: vendor/bfo/bfo-hierarchy.json
     disjointness: vendor/bfo/bfo-disjointness.ttl
     licence:
       spdx: CC-BY-4.0
@@ -115,6 +123,7 @@ sources:
     select: named
     extract: vendor/cco/cco-extract.ttl
     register: vendor/cco/cco-register.json
+    hierarchy: vendor/cco/cco-hierarchy.json
     licence:
       spdx: BSD-3-Clause
       url: >-
@@ -142,8 +151,9 @@ sources:
   # the LICENSE file at the same commit.
   #
   # To use it, uncomment it, declare vendor/bpo/bpo-ext-extract.ttl
-  # (vendored-ontology) and vendor/bpo/bpo-register.json
-  # (vendored-register) in the layout contract, and rebuild. Check the pin
+  # (vendored-ontology), vendor/bpo/bpo-register.json and
+  # vendor/bpo/bpo-hierarchy.json (vendored-register) in the layout
+  # contract, and rebuild. Check the pin
   # first: BPO has announced a namespace move to
   # https://fandaws.com/ontology/bpo#, after which this commit and this
   # namespace are no longer the ones to pin.
@@ -160,6 +170,7 @@ sources:
   #   select: named
   #   extract: vendor/bpo/bpo-ext-extract.ttl
   #   register: vendor/bpo/bpo-register.json
+  #   hierarchy: vendor/bpo/bpo-hierarchy.json
   #   licence:
   #     spdx: MIT
   #     url: >-

@@ -369,10 +369,10 @@ python tools/ontology/vendor_upstream.py --confirm  # fetch and require byte-ide
 python tools/ontology/vendor_upstream.py --rebuild  # fetch and rewrite
 ```
 
-| id | pin | selected | register |
-|---|---|---|---|
-| `bfo` | release-2024-01-29 | `all`: every term `bfo-core.ttl` describes | `vendor/bfo/bfo-register.json` |
-| `cco` | v2.0-2024-11-06 | `named`: the terms this repository names, plus their ancestry | `vendor/cco/cco-register.json` |
+| id | pin | selected | register | hierarchy |
+|---|---|---|---|---|
+| `bfo` | release-2024-01-29 | `all`: every term `bfo-core.ttl` describes | `vendor/bfo/bfo-register.json` | `vendor/bfo/bfo-hierarchy.json` |
+| `cco` | v2.0-2024-11-06 | `named`: the terms this repository names, plus their ancestry | `vendor/cco/cco-register.json` | `vendor/cco/cco-hierarchy.json` |
 
 **Each source has a register** beside its extract: every term its pinned files describe in its
 namespace — all of CCO, not only what is vendored — with labels, OWL types and deprecation. It
@@ -386,6 +386,17 @@ python -c "import json; t=json.load(open('vendor/cco/cco-register.json',encoding
 The register is the upstream's labels, so it is licensed as the upstream is (role
 `vendored-register`), generated, and digest-checked offline like the extract.
 
+**Each source has a class hierarchy** beside its register (decision 25): every class the
+register lists, with its named direct superclasses (`rdfs:subClassOf` to an IRI). A
+`named` extract carries ancestry only for the terms this repository names, so the register
+alone proves a CCO class exists but not which BFO category it is under; the hierarchy
+answers that, offline. It is not closed: follow the chain through every source's file.
+Superclass axioms whose object is an anonymous class expression are dropped and counted.
+A superclass outside the source's namespace that no other pinned source lists, but the
+source itself describes, is recorded under `outside_namespace`: CCO v2.0 declares BFO 2.0's
+process profile (`obo:BFO_0000144`), which BFO 2020 does not have, and puts 12 classes
+under it. With it, every CCO class at this pin reaches `obo:BFO_0000001`.
+
 **A source may be several files** at one commit: `files:` with a `url` and `sha256` each,
 instead of a single `url` and `sha256`. They are read as one graph. Every url must name the
 commit.
@@ -396,11 +407,11 @@ pinned file describes is recorded in `config/upstream-extracts.json` rather than
 
 **A sister ontology** (one this project builds on, such as the Business Process Ontology) is
 another entry in `config/upstream-sources.yaml`: url(s) at a commit, sha256, namespace,
-prefix, extract and register paths, licence. If its Turtle states no licence, name its LICENSE
+prefix, extract, register and hierarchy paths, licence. If its Turtle states no licence, name its LICENSE
 file at the same commit as `statement_url` with a `statement_sha256`. The end of that file
 carries a worked entry, commented out: the BPO pin the Business Capability Ontology uses.
-Declare the extract as a `vendored-ontology` and the register as a `vendored-register` in the
-layout contract, then `--rebuild`.
+Declare the extract as a `vendored-ontology` and the register and hierarchy as
+`vendored-register` in the layout contract, then `--rebuild`.
 
 **What the extracts leave out:** every axiom whose object is an anonymous class
 expression. That is recorded in each file's header and in `config/upstream-extracts.json`,
