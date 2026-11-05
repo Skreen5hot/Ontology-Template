@@ -436,3 +436,27 @@ hierarchy to BFO's entity. Effect:
   none; an effective domain that is empty is documented as unconstrained.
 - Low priority: built after the WP6 work, on `main`, unreleased until WP6 ends (A7). The
   answer to SDD is sent when it ships.
+
+**29. "BPO Architect — Final WP6 and BPOT Findings Disposition"** (2026-11-05)
+
+In answer to the fourteen changes of `evaluations/2026-11-05-wp6-results-analysis.md` §4 and
+the reading of them given in session. The whole text is recorded verbatim in
+[`evaluations/2026-11-05-wp6-disposition.md`](evaluations/2026-11-05-wp6-disposition.md)
+(SHA-256 of the text below its rule `af3baa58404ae6b7a68286a64bc2f4c5801d942c24b7d18d3c4efbceece780a5`). Effect:
+
+- Approved: items 1 to 4 for the first release after WP6; item 5, with separate fields for
+  a finding's validity, origin and resolution, designed with P5; item 6; items 7 to 9, as
+  controlled, lower-priority enhancements; item 10, as documentation of definition
+  provenance, without treating the project's authorship as an external source; item 11,
+  after dependency locking; item 12, raised to the next governance cycle, with P5.
+  Rejected: items 13 and 14.
+- Decision 28's low-priority disposition for SDD's domain and range file stands.
+- WP6 closeout is authorized once the evaluation artefacts, comparison evidence, finding
+  dispositions and reproducibility record are confirmed, including that no unavailable
+  validation rung was represented as zero findings. The confirmation is
+  `evaluations/2026-11-05-wp6-closeout.md`. Every condition holds except two, which it names
+  for the architect: BPO's K20 and K21 are still proposed, and the explorer's browser run
+  was less than committed.
+- None of the twelve approved improvements is built before WP6 closes. They are the
+  prioritized backlog in `ROADMAP.md`, "After WP6".
+- The next phase is template improvement informed by WP6, not more WP6 experimentation.

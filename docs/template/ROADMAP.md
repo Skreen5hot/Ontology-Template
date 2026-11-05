@@ -603,10 +603,33 @@ Held by decision 21 until WP6 ends or Phase A's results are in: P4 (a source reg
 verification grades), P5 (reviewer kind and capacity), P7 (decision propagation), P8 (a
 rights and provenance record), and P6 (conceptual fidelity) last.
 
-### After WP6 (decision 23)
+### After WP6: the prioritized backlog (decision 29)
+
+From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
+architect decided it. Nothing here is built before WP6 closes
+(`evaluations/2026-11-05-wp6-closeout.md`). Items 1 to 4 are the first release after WP6.
+
+| Priority | # | Change | Decided |
+|---|---|---|---|
+| First release | 1 | **P-B2**: a rung that is not evaluable exits with its own code, is named in the summary and `--json`, and is never counted as zero findings | approved |
+| First release | 2 | **P-B1**: each definition judged alone; the parent's label in genus position | approved (also decision 23) |
+| First release | 3 | A deprecated class keeps its definition and parent: a constraint and its negative example | approved |
+| First release | 4 | A warning for a realizable class with an existential `has realization` restriction (`obo:BFO_0000054` on a class under `obo:BFO_0000017`) | approved |
+| Next | 5 | **P-A7**: separate fields for a finding's validity, its origin and its resolution, designed with P5 | approved |
+| Next | 6 | **P-A1** transitive dependency locking; **P-A3** drift report sees shapes and config | approved |
+| Next | -- | P4, P5, P7, P8, then P6 (decision 21); P-A2, P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
+| Governance cycle | 12 | Domain review as a named gate in METHOD, with WP6's misses as the worked example, with P5 | approved, raised |
+| Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | approved, controlled |
+| Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
+| Lower | 9 | Declared third-party label text exempt from the qualifier check; several comments in one module where a project says so | approved, controlled |
+| Lower | 10 | Definition provenance for a project's own definitions, documented; the project's authorship is not an external source | approved |
+| After item 6 | 11 | A state manifest and a findings-by-identity comparison that refuses states whose evaluable rungs differ | approved |
+| -- | 13 | An automatic homonym or over-claiming verdict in the gate | **rejected** |
+| -- | 14 | Loosening a check to remove false alarms | **rejected** |
+
+### The findings behind it (decision 23)
 
 The BPO Testing Team's template findings from Phase A, each checked against the template.
-None changes before Phase B is measured (A7). P-B1 is first.
 
 | Id | Finding |
 |---|---|
