@@ -477,3 +477,21 @@ checklist or a planted conflict, is accepted as done with those limits. Recorded
 - Every condition of the closeout holds, so **WP6 is closed** under decision 29's
   authorization. A7 is lifted: the template may be released again.
 - The first release after WP6 is begun, with items 1 to 4 of the backlog, item 1 first.
+
+**31. "1. yes push 2. Update the massage and is the message stail does anyone need to
+respond? IF NO then we do not need an alert. IF yes ALERT 3. Yes prepare it as v0.2 with
+label and release notes"** (2026-11-05)
+
+In answer to three questions: whether to push backlog items 2 to 4; what to do with the
+drafted closing message to the BPO Testing Team, which said P-B1 was "next" when items 1 to
+4 were built; and whether items 1 to 4 make a release. Recorded verbatim (SHA-256
+`51ebbb18a6312ebcffa331eccdee51fbf30d75903bee43997a20d755641bad15`). Effect:
+
+- Items 2 to 4 are pushed. The unsent draft, never pushed, was dropped and written again
+  with items 1 to 4 as built: `communications/bpotest/outgoing/2026-11-05-wp6-closed.md`.
+- The message asks nothing of the team (`requires_act: false`; its updating
+  `classification.md` and tagging `2628fc1` are left to the team, without a reply asked),
+  so **no alert is posted** for it.
+- The second template release is **v0.2.0**, prepared under `RELEASING.md`: the manifest
+  recorded with the label `v0.2.0` in its own commit, and the release notes in `ROADMAP.md`,
+  "Release v0.2.0". Tagging and pushing the tag wait for the architect (item 6).

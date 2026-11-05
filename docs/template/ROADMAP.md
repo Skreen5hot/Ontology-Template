@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; see "Release v0.1.0", below. WP6 ended on 2026-11-05 (decision 30), which lifted A7. The next release carries what is on main, below, with items 1 to 4 of the backlog.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog. See "Release v0.1.0" and "Release v0.2.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -586,13 +586,30 @@ Current already: the other six actions; PyYAML, rdflib, pyoxigraph; BFO
 Python pin, before or after. The actions were checked for their latest release, not
 against an advisory database.
 
-### On main, unreleased (decision 20)
+### Release v0.2.0 (2026-11-05)
 
-What has landed since v0.1.0. It was held under A7 while WP6 measured v0.1.0; WP6 closed
-on 2026-11-05 (decision 30), and it goes into the next release.
+The second template release (decision 31), the first after WP6, made under `RELEASING.md`.
+Everything that landed since v0.1.0 is in it. It was held under A7 while WP6 measured
+v0.1.0, and WP6 closed on 2026-11-05 (decision 30). Its scope is the first release of the
+prioritized backlog (decision 29): items 1 to 4, which make the instrument honest about a
+rung it cannot run and close the three detection gaps WP6 showed in the template's checks.
+
+**What changes for a project made from v0.1.0.** Four changes alter what the gate reports:
+
+- `validate.py` exits 2, not 1, when a rung cannot be evaluated. A CI step fails either
+  way; a script that reads the exit code should treat 2 as "no result".
+- The genus warning's message now quotes the definition, so each register entry for the
+  old message goes stale. Re-propose with `validate.py --propose`. A definition written
+  "An X is a G that ...", or a class with a second, co-asserted parent, gets a warning for
+  each definition that does not begin with that parent's label (item 8 will let a project
+  declare the co-parent convention once).
+- A deprecated class without its definition or its parent is now a violation of its own,
+  beside the general findings for the same loss.
+- A realizable class restricted existentially on has realization is a new warning.
 
 | What | Why | Tests |
 |---|---|---|
+
 | `tools/pins.py`: every pin checked against its upstream, in a report naming the commit it ran on. A newer release is reported; an advisory, a commit its tag does not name, or a pin not checked fails it | The team's T19 amendment: "every pin checked" should be evidence, not a claim | `tests/test_pins.py` |
 | P1: `docs/process/METHOD.md`, the ontology method: one decision path, terminology lanes joining it at named gates, a standard per stage, the gates BCO found late, the separations, closure | The BCO team's process account, and its answer (decision 21) | the layout and docs tests |
 | P3: `docs/charter.md`, the scope charter form | The same | -- |
@@ -601,11 +618,39 @@ on 2026-11-05 (decision 30), and it goes into the next release.
 | P-B1, backlog item 2: the genus check judges each untagged or English definition alone, and asks that it begin, after an article, with the parent's label as a whole word; the warning quotes the definition it is about | Decisions 23, 24 and 29: an agreeing definition hid a contradicting one, and a parent's label in the differentia passed as the genus | `tests/test_detection_gaps.py`, `tests/test_ontology_checks.py` |
 | Backlog item 3: a deprecated class keeps its definition and its named parent, two violations of the realist deprecated-term shape that name the cause | Decision 29: in WP6 a deprecation removed both from a BPO class; the general rules caught it, BPO's gates did not, and neither message said why | `tests/test_ontology_checks.py`, `tests/test_detection_gaps.py` |
 | Backlog item 4: a warning for a realizable class (under `obo:BFO_0000017`) with an existential restriction on has realization (`obo:BFO_0000054`) or a subproperty of it, which says every instance is realized | Decision 29: WP6's largest change in meaning was a possible realization read as a necessary one, and no entailment-based check could see it | `tests/test_ontology_checks.py`, `tests/test_detection_gaps.py` |
+| The shared communications protocol, version 1.1: `tools/communications.py` follows renames (a byte-identical move passes, an edited one is refused), refuses a deleted message, checks the version statement and `communications/** -text`; `--alert` prints a pushed message's alert and `--inbox` lists the board's alerts this record does not hold | Decision 26: the protocol moved to `Skreen5hot/communications` | `tests/test_communications.py` |
 | A class hierarchy for every pinned source, `vendor/<id>/<id>-hierarchy.json`: every class its register lists with its named direct superclasses, generated and digest-checked, so a CCO class can be followed to its BFO category offline | The Semantic Data Dictionary team's request (decision 25) | `tests/test_upstream_vendoring.py` |
 
-Held by decision 21 until WP6 ends or Phase A's results are in: P4 (a source register with
-verification grades), P5 (reviewer kind and capacity), P7 (decision propagation), P8 (a
-rights and provenance record), and P6 (conceptual fidelity) last.
+Not in it, and still open: the rest of the backlog, below, in its order, including P4 (a
+source register with verification grades), P5 (reviewer kind and capacity), P7 (decision
+propagation), P8 (a rights and provenance record) and P6 (conceptual fidelity) last
+(decision 21), and SDD's domain and range file (decision 28); T9's licensing policy,
+awaiting Legal (decision 15); the move to CCO v2.2, which decision 18 held until after WP6
+and which is now the architect's to take; and the Release workflow publishing an
+ontology, which still runs only on a project's tag.
+
+Pins: item 1, every pin checked against its upstream at `d89902d` (2026-11-05). 15 of 17
+current, none failed. Two with a newer release, both kept:
+
+| Pin | Kept | Newer | Why kept |
+|---|---|---|---|
+| `actions/setup-java` | v6.1.0 | v6.2.0 | Published 2026-11-04, a day before; its changes are Liberica and Corretto version resolution and Maven mirrors, and the template uses Temurin and no Maven. Taken in the next release, after it has been out for a while |
+| CCO | v2.0-2024-11-06 | v2.2 | A move is a decision (decision 18), and a release that changes the checks should not also change the ontology they read |
+
+Current already: the other seven actions; pytest, PyYAML, rdflib, pyshacl, pyoxigraph,
+Markdown; BFO (`release-2024-01-29`); ROBOT v1.9.11. No advisory against any Python pin.
+
+The rest of the checklist:
+
+- Item 2: at `d89902d`, the last commit with code in it, Checks (1.8 min), Reasoning
+  (0.6 min), Scale (1 min) and Pages are green; the suite passes locally (444, and the 6
+  reasoning tests). The commits after it change only this record, the outgoing message and
+  the manifest, and the workflows are confirmed green on the tagged commit before the tag
+  is pushed. The weekly rebuild job last ran green on 2026-11-02.
+- Item 3: a fresh clone of `d89902d`, initialized as a project with the network rebuild
+  (`init_project.py`, not `--offline`): init exit 0; in the project, every reference
+  resolves, the gate passes, and the suite passes (428, 3 deselected).
+- Item 4: the manifest recorded with the label `v0.2.0` in its own commit.
 
 ### After WP6: the prioritized backlog (decision 29)
 
