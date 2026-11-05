@@ -460,3 +460,20 @@ the reading of them given in session. The whole text is recorded verbatim in
 - None of the twelve approved improvements is built before WP6 closes. They are the
   prioritized backlog in `ROADMAP.md`, "After WP6".
 - The next phase is template improvement informed by WP6, not more WP6 experimentation.
+
+**30. "1. Approve 2. Accept as done"** (2026-11-05)
+
+In answer to the two conditions `evaluations/2026-11-05-wp6-closeout.md` §2 left open:
+(1) whether the architect, as BPO's architect, approves BPO's classes K20 and K21 for the
+deprecation regression, still marked proposed in the team's classification; (2) whether the
+explorer's browser run, a local v0.1.0 build of S1 inspected without screenshots, a per-term
+checklist or a planted conflict, is accepted as done with those limits. Recorded verbatim
+(SHA-256 `2901570702833e1132425007beb95ec21f0839ec78290f5feaaaaae882f000df`). Effect:
+
+- K20 and K21 are approved. The team's own record still says proposed; correcting it is the
+  team's.
+- The explorer's browser run is accepted as done, with its stated limits. No planted-conflict
+  browser check is added to the backlog.
+- Every condition of the closeout holds, so **WP6 is closed** under decision 29's
+  authorization. A7 is lifted: the template may be released again.
+- The first release after WP6 is begun, with items 1 to 4 of the backlog, item 1 first.

@@ -1,8 +1,8 @@
 # WP6 closeout
 
 **To:** the architect. **From:** the Ontology Template Team. **Date:** 2026-11-05.
-**Status:** confirmed, except two conditions (§2, items 4 and 5). WP6 closes when the
-architect records them met. Until then A7 stands and nothing on the backlog is built.
+**Status:** confirmed. **WP6 closed** 2026-11-05 (decision 30): the architect approved
+K20 and K21 and accepted the explorer's browser run as done. A7 is lifted.
 
 **Under:** decision 29, the architect's final disposition, which authorizes the closeout
 once the final evaluation artefacts, the comparison evidence, the finding dispositions and
@@ -68,8 +68,11 @@ item 1 of the backlog.
    "PROPOSED, pending the BPO architect" in `classification.md` at `2628fc1` and on the
    port's `wp6` branch. They are BPO's to approve under A6, not the template's. Decision 29
    does not mention them.
+   **Met** 2026-11-05: the architect, as BPO's architect, approved them (decision 30). The
+   team's `classification.md` still reads PROPOSED; updating it is the team's.
 5. **For the architect: the explorer's browser run** (§1.1). Accept it as done, with its
    stated limits, or carry a browser check of a planted conflict into the backlog.
+   **Met** 2026-11-05: accepted as done, with its stated limits (decision 30).
 
 ## 3. To preserve the results
 

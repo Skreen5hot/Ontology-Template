@@ -31,9 +31,9 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 11 | WP3 One term contract for validation and the site | **done** (accepted 2026-10-28, decision 14) |
 | 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | **done** (accepted 2026-10-29, decision 15); T9's policy awaits Legal |
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
-| 14 | WP6 The final BPO evaluation | Phase A done (results 2026-10-30, P-A1 to P-A7 not yet disposed); Phase B waits on BPO's and Legal's decisions |
+| 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; see "Release v0.1.0", below. No further release until WP6 ends (decision 20, A7): what lands on main meanwhile stays unreleased.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; see "Release v0.1.0", below. WP6 ended on 2026-11-05 (decision 30), which lifted A7. The next release carries what is on main, below, with items 1 to 4 of the backlog.
 
 ## 1. Extract and generalize the core
 
@@ -588,8 +588,8 @@ against an advisory database.
 
 ### On main, unreleased (decision 20)
 
-What has landed since v0.1.0. Under A7 none of it is released until WP6 ends, so v0.1.0
-stays the BPO Testing Team's instrument.
+What has landed since v0.1.0. It was held under A7 while WP6 measured v0.1.0; WP6 closed
+on 2026-11-05 (decision 30), and it goes into the next release.
 
 | What | Why | Tests |
 |---|---|---|
@@ -606,8 +606,8 @@ rights and provenance record), and P6 (conceptual fidelity) last.
 ### After WP6: the prioritized backlog (decision 29)
 
 From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
-architect decided it. Nothing here is built before WP6 closes
-(`evaluations/2026-11-05-wp6-closeout.md`). Items 1 to 4 are the first release after WP6.
+architect decided it. WP6 closed on 2026-11-05 (decision 30,
+`evaluations/2026-11-05-wp6-closeout.md`). Items 1 to 4 are the first release after WP6.
 
 | Priority | # | Change | Decided |
 |---|---|---|---|
