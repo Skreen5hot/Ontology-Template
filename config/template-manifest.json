@@ -115,8 +115,8 @@
   },
   "format_version": 1,
   "generated_by": "tools/template_status.py",
-  "label": "unreleased",
+  "label": "v0.2.0",
   "note": "The digest of every template-owned file as the template shipped it. A project keeps this as it arrived: it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
-  "template_commit": "d89902d9a40e7dacbc2b1828293d04c6becccd96",
+  "template_commit": "956e389497fd16ac4c0384a57bf57eab02c943c2",
   "template_repository": "Skreen5hot/Ontology-Template"
 }
