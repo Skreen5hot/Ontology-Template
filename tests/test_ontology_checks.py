@@ -377,6 +377,19 @@ def test_every_realist_constraint_fires_on_its_case(validation):
             message, case, {v["severity"] for v in hits})
 
 
+def test_the_genus_fixture_holds_both_p_b1_cases(validation):
+    """P-B1: the contradicting second definition is reported by its own
+    text, and a parent named only in the differentia is not a genus."""
+    says = "does not name its parent"
+    [twice] = [v for v in results_for(validation, "validation.realist",
+                                      "RealistGenusContradicted")
+               if says in v["message"]]
+    assert "a second slice" in twice["message"]
+    assert [v for v in results_for(validation, "validation.realist",
+                                   "RealistGenusInDifferentia")
+            if says in v["message"]]
+
+
 def test_the_realist_positive_controls_are_not_reported(validation):
     for case in REALIST_CONTROLS:
         for rung in ("validation.realist", "validation.annotation-profile",

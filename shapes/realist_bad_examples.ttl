@@ -108,6 +108,24 @@ example:VagueDefinition a owl:Class ;
     skos:definition "Something the fixture needs." ;
     cco:ont00001754 "constructed for the realist fixture" .
 
+# -- R4, P-B1: each definition judged alone, the label as the genus ----
+# One definition names the parent and the other contradicts it: the
+# second is reported. The other class names its parent only in the
+# differentia: reported. Before P-B1 both passed.
+
+example:RealistGenusContradicted a owl:Class ;
+    rdfs:label "realist genus contradicted" ;
+    rdfs:subClassOf obo:BFO_0000015 ;
+    skos:definition "A process the fixture defines twice." ,
+        "A material entity the fixture defines in a second slice." ;
+    cco:ont00001754 "constructed for the realist fixture" .
+
+example:RealistGenusInDifferentia a owl:Class ;
+    rdfs:label "realist genus in differentia" ;
+    rdfs:subClassOf obo:BFO_0000015 ;
+    skos:definition "A material entity that participates in a process." ;
+    cco:ont00001754 "constructed for the realist fixture" .
+
 # -- R5 range: filler disjoint with the range --------------------------
 # the property relates processes to continuants; the filler is a process.
 

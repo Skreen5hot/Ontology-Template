@@ -295,7 +295,7 @@ shapes or pins, together with the `corpus` tests. Locally:
 | a restriction's filler not disjoint with the property's range, the restricted class not disjoint with its domain | violation |
 | the filler, or the class, not known to fall under that range or domain | warning |
 | one asserted named parent | warning |
-| the definition names the parent's label (genus–differentia), ignoring a trailing `(…)` in that label | warning |
+| each untagged or English definition begins, after "a", "an" or "the", with the parent's label as a whole word (genus–differentia), ignoring a trailing `(…)` in that label; each failing definition is its own warning, quoting it | warning |
 | a label does not end in a parenthetical qualifier — a note about the term belongs in `skos:altLabel`, `rdfs:comment` or the definition | warning |
 | no object property asserted from one class to another (punning: OWL reads both as individuals) | violation |
 | no restriction on an annotation property | violation |

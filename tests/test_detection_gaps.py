@@ -17,6 +17,8 @@ so a correction is held rather than hoped for.
        under a category
   T23  third-party text in a module whose header does not name the
        source's release
+  P-B1 the genus: each definition judged alone, the parent's label in
+       genus position
 """
 
 from __future__ import annotations
@@ -514,3 +516,64 @@ def test_scheme_findings_reach_the_register(validator, findings_tool):
                                      "message": "m"}]}}
     [finding] = validator.register_findings(record)
     assert (finding["where"], finding["rule"]) == ("naming", "scheme:r")
+
+
+# ------------------------------------------------------------- P-B1
+
+
+GENUS = """
+:Agreeing a owl:Class ; rdfs:label "agreeing" ;
+    skos:definition "A process that the planted case defines once." ;
+    rdfs:subClassOf obo:BFO_0000015 .
+:Twice a owl:Class ; rdfs:label "twice" ;
+    skos:definition "A process that one slice defines." ,
+        "A material entity that another slice defines." ;
+    rdfs:subClassOf obo:BFO_0000015 .
+:Differentia a owl:Class ; rdfs:label "differentia" ;
+    skos:definition "A machine that takes part in a process." ;
+    rdfs:subClassOf obo:BFO_0000015 .
+:Prefix a owl:Class ; rdfs:label "prefix" ;
+    skos:definition "A processing step the planted case defines." ;
+    rdfs:subClassOf obo:BFO_0000015 .
+:Bare a owl:Class ; rdfs:label "bare" ;
+    skos:definition "Process, as the planted case writes it without an article." ;
+    rdfs:subClassOf obo:BFO_0000015 .
+:Other a owl:Class ; rdfs:label "other" ;
+    skos:definition "Un processus que le cas plante."@fr ;
+    skos:definition "A process the planted case also defines in French." ;
+    rdfs:subClassOf obo:BFO_0000015 .
+"""
+
+
+def test_each_definition_is_judged_alone_with_the_genus_first(
+        validator, findings_tool, vendored, layout, project):
+    """P-B1, both of the team's cases: an agreeing definition no longer
+    hides a contradicting one, which is reported by its own text; and the
+    parent's label in the differentia is not a genus ("machine" is as
+    long as "process", so a check reading the label anywhere and the
+    boundary at the genus position would pass it). The label must be a
+    whole word: "processing" is not "process". A definition in another
+    language is not judged against an English label."""
+    results = run(validator, vendored, layout, GENUS, project,
+                  "validation.realist")
+    says = "does not name its parent"
+    for name in ("Agreeing", "Bare", "Other"):
+        assert not on(results, project, name, says), name
+    [twice] = on(results, project, "Twice", says)
+    assert "another slice" in twice["message"]
+    assert twice["severity"] == "Warning"
+    for name in ("Differentia", "Prefix"):
+        assert on(results, project, name, says), name
+
+    fixed = GENUS.replace('"A material entity that another slice defines."',
+                          '"A process that another slice defines."')
+    fixed = fixed.replace('"A machine that takes part in a process."',
+                          '"A process in which a machine takes part."')
+    fixed = fixed.replace('"A processing step the planted case defines."',
+                          '"A process the planted case calls a step."')
+    after = run(validator, vendored, layout, fixed, project,
+                "validation.realist")
+    assert not [r for r in after if says in r["message"]]
+    before = [r for r in results if says in r["message"]]
+    accepted_then_fixed(findings_tool, as_findings(
+        validator, findings_tool, "validation.realist", before), [])

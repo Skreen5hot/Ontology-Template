@@ -1,5 +1,5 @@
 {
-  "digest": "0d255c00cbc4e44e383a06fd545ccd21ad6c520fdac374a9c0624e5f4eac9292",
+  "digest": "ff1eaa05f72c82117fb245d238546e24a094c031b376d7b703788e583bdd7128",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -15,7 +15,7 @@
     ".github/workflows/scale.yml": "fcf91624125b2c502f6a9fbb6e941a8bb82602bc40ddf31af5538ce270dbf7ac",
     ".github/workflows/term-diff.yml": "5c2be401357a6a39138c77a0294c7aad506216d19edf23cb745d51033329b4fa",
     ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
-    "docs/DEVELOPMENT.md": "7d2dbdf2ba6a510c5305b680a83a32280b4f862afd34b98856e51579cdabe680",
+    "docs/DEVELOPMENT.md": "d25c171e5eca1f650b94e2bd6cd5d774c01a77423668e61ae90736487689ccbe",
     "docs/PORTING.md": "f58802103aa3ee37dbfb939dc56a0c96297b2f2d1ede8d64497eed751ae164f7",
     "docs/porting/port-report.md": "9cd44e61b1ca19f2723283648cf8220ae53ecfa67d57a0535cd0404458d0bf4d",
     "docs/process/METHOD.md": "1e21ae6ed10fa8ea01d8f9c6d61b26c50359e88e94634c6a9a1d5d48b0e96d30",
@@ -63,13 +63,13 @@
     "tests/test_authoring.py": "0e1332c4828ab3ddd980627c71878d7d6fbc99c03247f9999d73a5988b209819",
     "tests/test_communications.py": "bb1d3369db8785f4a6a331bbdb2142f48823dcd43caec3c3a1ff5d5a573d4bab",
     "tests/test_competency.py": "f8dd5c32fec0dd54150dee8231bf7a42e9c80096b7a35a13eefb478bfc7b9dda",
-    "tests/test_detection_gaps.py": "ee4de7119a6bb4afe4498a63d9dc07e11557280023e44d1899ed68c75e954d2d",
+    "tests/test_detection_gaps.py": "db1eb62930108614974a5a4cf47ad454262f452cf364a1c67112dea1d3de306d",
     "tests/test_findings.py": "508f5e5635e718e98b2073ad24b115140b1ff4ace48416be9ddc5bb7f1a90d59",
     "tests/test_iri_lint.py": "428f002559c84da2c2929b2f9a1c964e8dfdf7bb8d1ef0b64deff755f87a8aa7",
     "tests/test_licensing.py": "605724138e7143e496ff86f9631f24e83ed62587e265b3f218e1e2ac946fe2c1",
     "tests/test_mappings.py": "8dbef7883d22bbff4f212abe34ecde717dfcb940bea9faf19ecf010d9fb6f56e",
     "tests/test_namespace.py": "299ce2961fe69a29b8db16cff69b4dafb5a2a22c4a57a377fd02d367d2a425d6",
-    "tests/test_ontology_checks.py": "198f3ea1358fdf35168e976cb1d10d326607ef77655be2c45d2dd05a3563d45e",
+    "tests/test_ontology_checks.py": "1f4bfc5e4a933cd554c9ee32dfa14ef8033edd44da6d97ef0bc4d0d612e658e9",
     "tests/test_pins.py": "e9937210030a80dbf635e772b8fcb25b1efd250208831487c8a4544ac89d29ae",
     "tests/test_porting.py": "0caf67137d69793d19446209bf2b2a66ca3fe18fdd482b647b270f3d640c90de",
     "tests/test_project.py": "64b6d4e7f80d268d962c3f0a936007a967d966b3cbcb3f6f3a3cd5965d97208e",
@@ -117,6 +117,6 @@
   "generated_by": "tools/template_status.py",
   "label": "unreleased",
   "note": "The digest of every template-owned file as the template shipped it. A project keeps this as it arrived: it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
-  "template_commit": "06d5eed04186cd597bb2fb16e980782b252d4083",
+  "template_commit": "46ccb58f0007484af05c52d6977ff4e8eaf5d2e5",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

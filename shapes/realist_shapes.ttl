@@ -205,24 +205,38 @@ rs:AuthoredClassReviewShape
           FILTER(isIRI(?p1) && isIRI(?p2) && STR(?p1) < STR(?p2))
         }""" ] ;
 
-    # Genus. "An X is a G that D": the definition names the parent it is
-    # placed under. Compared case-insensitively against the parent's
-    # untagged or English label.
+    # Genus. "A G that D": the definition names the parent it is placed
+    # under, as its genus. Each untagged or English definition is judged
+    # alone against the parent's untagged or English label, without a
+    # trailing "(...)" (T11), case-insensitively: after a leading "a",
+    # "an" or "the", the definition must begin with the label, followed
+    # by something other than a letter or digit. P-B1: this once passed a
+    # class when any one definition contained the label anywhere, so an
+    # agreeing definition hid a contradicting one, and "an agent that ...
+    # an organization's ..." passed under Organization.
+    # The prefix is compared with SUBSTR: in these shapes the
+    # starts-with function is the namespace filter, which
+    # tests/test_namespace.py holds to the project's namespace.
     sh:sparql [
         a sh:SPARQLConstraint ;
-        sh:message "The definition of {$this} does not name its parent, \"{?label}\". A genus-differentia definition reads: a(n) <parent> that ..." ;
+        sh:message "The definition of {$this} does not name its parent, \"{?label}\", as its genus: \"{?definition}\". A genus-differentia definition reads: a(n) <parent> that ..." ;
         sh:prefixes rs:prefixes ;
-        sh:select """SELECT $this ?label WHERE {
+        sh:select """SELECT $this ?label ?definition WHERE {
           $this rdfs:subClassOf ?parent .
           FILTER(isIRI(?parent))
           ?parent rdfs:label ?label .
           FILTER(LANG(?label) = "" || LANGMATCHES(LANG(?label), "en"))
-          FILTER EXISTS { $this skos:definition ?any }
-          FILTER NOT EXISTS {
-            $this skos:definition ?definition .
-            FILTER(CONTAINS(LCASE(STR(?definition)),
-                   LCASE(REPLACE(STR(?label), "[ ]*[(][^()]*[)][ ]*$", ""))))
-          }
+          $this skos:definition ?definition .
+          FILTER(LANG(?definition) = ""
+                 || LANGMATCHES(LANG(?definition), "en"))
+          BIND(LCASE(REPLACE(STR(?label), "[ ]*[(][^()]*[)][ ]*$", ""))
+               AS ?genus)
+          BIND(REPLACE(LCASE(STR(?definition)), "^[ ]*((a|an|the)[ ]+)?", "")
+               AS ?body)
+          FILTER(!(SUBSTR(?body, 1, STRLEN(?genus)) = ?genus
+                   && (STRLEN(?body) = STRLEN(?genus)
+                       || !REGEX(SUBSTR(?body, STRLEN(?genus) + 1, 1),
+                                 "[a-z0-9]"))))
         }""" ] ;
 
     # A qualifier in a label. "Act of Planning (shared anchor)" is an
