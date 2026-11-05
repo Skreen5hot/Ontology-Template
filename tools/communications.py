@@ -3,14 +3,27 @@
 
     python tools/communications.py          # findings, then open threads
     python tools/communications.py --json   # the same, as one JSON object
+    python tools/communications.py --alert communications/<team>/outgoing/<file>.md
+    python tools/communications.py --inbox [--code OT]   # needs `gh`
 
-The protocol is communications/README.md. This is the part of it a tool
-can hold: the header has every field and each is well formed; the id,
-date, team and direction agree with where the file sits; a reply names a
-message that exists and is not later than itself; every ref names a
-commit and a digest, and a ref into this repository still matches; an
-incoming copy's body is the original's bytes; and no committed message
-has been edited since.
+The protocol is the shared one, Skreen5hot/communications PROTOCOL.md,
+at the version communications/README.md names. This is the part of it a
+tool can hold: the README names the version it follows by commit and
+digest, and .gitattributes keeps the record's bytes; the header has every
+field and each is well formed; the id, date, team and direction agree
+with where the file sits; a reply names a message that exists and is not
+later than itself; every ref names a commit and a digest, and a ref into
+this repository still matches; an incoming copy's body is the original's
+bytes; no committed message has had its bytes set by more than one
+commit, following renames, so a move is allowed and a move that edits is
+not; and no message has been deleted.
+
+`--alert` prints the alert the board takes for a committed message: the
+title, whether it opens a Discussion or comments on its thread's, and
+the YAML block, bound to the commit that set the file and its digest.
+It posts nothing. `--inbox` reads the board's Alerts with `gh` and lists
+each one addressed to this record (its code, or any `--code` it is also
+known by) whose digest no incoming copy's `source.sha256` holds.
 
 Status is derived here, never stored: a request or finding is open until
 some later message answers it. A status field would be one more thing to
@@ -61,6 +74,15 @@ REF_FIELDS = ("repo", "commit", "path", "sha256")
 DIRECTIONS = ("incoming", "outgoing")
 
 FILENAME = re.compile(r"^(\d{4}-\d{2}-\d{2})-([a-z0-9]+(?:-[a-z0-9]+)*)\.md$")
+#: The README's adoption statement (PROTOCOL.md, "Adopting"), and the
+#: attribute line that keeps the record's bytes as committed (Rule 7).
+ADOPTION = re.compile(
+    r"follows the communications protocol, version (\d+\.\d+):\s*"
+    r"Skreen5hot/communications, PROTOCOL\.md at ([0-9a-f]{40}), "
+    r"sha256 ([0-9a-f]{64})")
+ATTRIBUTE = "communications/** -text"
+#: Where the board is, and the link an alert gives.
+BOARD = ("Skreen5hot", "communications")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 COMMIT = re.compile(r"^[0-9a-f]{40}$")
 
@@ -219,8 +241,77 @@ def check_local_ref(root: Path, ref: dict) -> list[str]:
 
 
 def edits(root: Path, relative: str) -> int:
-    code, out = git(root, "log", "--format=%H", "--", relative)
-    return len(out.split()) if code == 0 else 0
+    """How many commits set the file's bytes, following renames.
+
+    Read from `git log --raw`: a commit counts when the blob it leaves
+    differs from the one it found, so adding the file counts, a rename
+    that keeps the bytes does not, and a rename that also edits does
+    (PROTOCOL.md, Rule 1)."""
+    code, out = git(root, "log", "--follow", "-M", "--raw", "--no-abbrev",
+                    "--format=%x01%H", "--", relative)
+    if code:
+        return 0
+    count = 0
+    for chunk in out.decode("utf-8", "replace").split("\x01")[1:]:
+        for line in chunk.splitlines()[1:]:
+            if not line.startswith(":"):
+                continue
+            old, new = line.split()[2:4]
+            if old != new:
+                count += 1
+                break
+    return count
+
+
+def deleted_messages(root: Path) -> list[str]:
+    """Message files history has deleted (Rule 1). A rename is not a
+    deletion (`-M`), and a file that never had a header was never a
+    message, so removing it is allowed."""
+    code, out = git(root, "log", "-M", "--diff-filter=D", "--name-only",
+                    "--format=%x01%H", "--", ROOT_DIR)
+    if code:
+        return []
+    found = []
+    for chunk in out.decode("utf-8", "replace").split("\x01")[1:]:
+        lines = [line for line in chunk.splitlines() if line.strip()]
+        commit, paths = lines[0], lines[1:]
+        for relative in paths:
+            parts = relative.split("/")
+            if len(parts) != 4 or parts[2] not in DIRECTIONS:
+                continue
+            code, data = git(root, "show", "%s^:%s" % (commit, relative))
+            if code == 0 and split(data)[0] is not None:
+                found.append("%s: deleted by %s. A message is never "
+                             "deleted." % (relative, commit[:12]))
+    return found
+
+
+def adoption(root: Path) -> tuple[dict | None, list[str]]:
+    """The protocol version the README says it follows, and what is wrong
+    with how the record adopts it."""
+    problems = []
+    path = root / ROOT_DIR / "README.md"
+    readme = path.read_bytes().decode("utf-8") if path.is_file() else ""
+    match = ADOPTION.search(" ".join(readme.split()))
+    adopted = None
+    if not match:
+        problems.append(
+            "%s/README.md does not name the protocol version it follows, "
+            "as 'This record follows the communications protocol, version "
+            "<n.n>: Skreen5hot/communications, PROTOCOL.md at <commit>, "
+            "sha256 <digest>.'" % ROOT_DIR)
+    else:
+        adopted = {"version": match.group(1), "commit": match.group(2),
+                   "sha256": match.group(3)}
+    attributes = root / ".gitattributes"
+    lines = (attributes.read_bytes().decode("utf-8").splitlines()
+             if attributes.is_file() else [])
+    if ATTRIBUTE not in (line.strip() for line in lines):
+        problems.append(
+            ".gitattributes lacks '%s', so git may rewrite the record's "
+            "line endings and its digests stop being of committed bytes "
+            "(Rule 7)" % ATTRIBUTE)
+    return adopted, problems
 
 
 def collect(root: Path) -> tuple[list[dict], list[str]]:
@@ -229,6 +320,7 @@ def collect(root: Path) -> tuple[list[dict], list[str]]:
     if not (base / "README.md").is_file():
         problems.append("%s/README.md, the protocol, is missing" % ROOT_DIR)
         return messages, problems
+    problems.extend(adoption(root)[1])
     for team_dir in sorted(p for p in base.iterdir() if p.is_dir()):
         team = team_dir.name.upper()
         name = team_dir.relative_to(root).as_posix()
@@ -295,6 +387,8 @@ def check(root: Path | None = None) -> dict:
                 "edited; send a correction that replies to it."
                 % (path, edits(root, path)))
 
+    problems.extend(deleted_messages(root))
+
     closed = {m["header"].get("in_reply_to") for m in messages
               if m["header"].get("type") in CLOSING}
     open_threads = sorted(
@@ -308,15 +402,146 @@ def check(root: Path | None = None) -> dict:
         "awaiting_act": sorted(m["header"]["id"] for m in messages
                                if m["header"].get("requires_act") is True
                                and m["header"].get("id") in open_threads),
+        "protocol": adoption(root)[0],
         "findings": problems,
         "ok": not problems,
     }
 
 
+# --------------------------------------------------------------- alerts
+
+
+#: The header fields an alert carries, in the protocol's order.
+ALERT_FIELDS = ("id", "from", "to", "type", "subject", "in_reply_to",
+                "requires_act", "author")
+
+
+def alert(relative: str, root: Path | None = None) -> dict:
+    """The alert for one committed message (PROTOCOL.md, "Alerts").
+
+    Bound to the latest commit that has the file at this path, read with
+    `git show`, so the digest is of committed bytes (Rule 7). A message
+    that opens a thread opens a Discussion; a reply comments on its
+    root's, unless the root was never announced, which the caller knows
+    and this does not."""
+    import yaml
+
+    root = root or repository_root()
+    code, out = git(root, "log", "-1", "--format=%H", "--", relative)
+    commit = out.decode("utf-8").strip()
+    if code or not commit:
+        raise SystemExit("%s is not committed; an alert names the commit "
+                         "that holds the message" % relative)
+    code, data = git(root, "show", "%s:%s" % (commit, relative))
+    header, _body, problem = split(data)
+    if problem:
+        raise SystemExit("%s %s" % (relative, problem))
+    by_id = {m["header"].get("id"): m["header"] for m in collect(root)[0]}
+    top = header
+    while top.get("in_reply_to") in by_id:
+        top = by_id[top["in_reply_to"]]
+    block = {field: header.get(field) for field in ALERT_FIELDS}
+    block["record"] = {"repo": THIS_REPO, "commit": commit, "path": relative,
+                       "sha256": hashlib.sha256(data).hexdigest()}
+    block["link"] = "https://github.com/%s/blob/%s/%s" % (THIS_REPO, commit,
+                                                          relative)
+    return {
+        "title": "[%s\u2192%s] %s \u2014 %s" % (top["from"], top["to"],
+                                                 top["id"], top["subject"]),
+        "root": top["id"],
+        "opens_discussion": top is header,
+        "yaml": yaml.safe_dump(block, sort_keys=False, allow_unicode=True,
+                               width=1000),
+    }
+
+
+def alerts_in(text: str) -> list[dict]:
+    """The YAML alert blocks in a Discussion's or comment's text: each
+    fenced block that parses to a mapping with an id and a record."""
+    import yaml
+
+    found = []
+    for block in re.findall(r"```(?:ya?ml)?\s*\n(.*?)```", text or "", re.S):
+        try:
+            parsed = yaml.safe_load(block)
+        except Exception:  # yaml raises several types
+            continue
+        if (isinstance(parsed, dict) and parsed.get("id")
+                and isinstance(parsed.get("record"), dict)):
+            found.append(parsed)
+    return found
+
+
+def board_posts() -> list[dict]:
+    """Every Discussion in the board's Alerts category and its comments,
+    as [{url, text}], read with `gh`."""
+    query = ("query($o:String!,$n:String!){repository(owner:$o,name:$n){"
+             "discussions(first:100,orderBy:{field:CREATED_AT,direction:DESC})"
+             "{nodes{url body category{name} comments(first:100)"
+             "{nodes{url body}}}}}}")
+    result = subprocess.run(
+        ["gh", "api", "graphql", "-f", "query=" + query,
+         "-F", "o=" + BOARD[0], "-F", "n=" + BOARD[1]],
+        capture_output=True)
+    if result.returncode:
+        raise SystemExit("could not read the board with gh: %s"
+                         % result.stderr.decode("utf-8", "replace").strip())
+    nodes = json.loads(result.stdout)["data"]["repository"]["discussions"][
+        "nodes"]
+    posts = []
+    for node in nodes:
+        if node["category"]["name"] != "Alerts":
+            continue
+        posts.append({"url": node["url"], "text": node["body"]})
+        posts.extend({"url": c["url"], "text": c["body"]}
+                     for c in node["comments"]["nodes"])
+    return posts
+
+
+def inbox(posts: list[dict], codes: set[str],
+          root: Path | None = None) -> list[dict]:
+    """Alerts addressed to one of `codes` whose message the record does
+    not hold: no incoming copy's source.sha256 is the alert's digest."""
+    held = {(m["header"].get("source") or {}).get("sha256")
+            for m in collect(root or repository_root())[0]}
+    waiting = []
+    for post in posts:
+        for found in alerts_in(post["text"]):
+            if (found.get("to") in codes
+                    and found["record"].get("sha256") not in held):
+                waiting.append(dict(found, url=post["url"]))
+    return waiting
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--json", action="store_true")
+    ap.add_argument("--alert", metavar="MESSAGE",
+                    help="print the alert for a committed message")
+    ap.add_argument("--inbox", action="store_true",
+                    help="list the board's alerts this record does not hold")
+    ap.add_argument("--code", action="append", default=[],
+                    help="another code this record is known by on the board")
     args = ap.parse_args(argv)
+    if args.alert:
+        found = alert(args.alert)
+        if found["opens_discussion"]:
+            print("  a new Discussion in Alerts, titled:")
+        else:
+            print("  a comment on the Discussion for %s, titled:"
+                  % found["root"])
+        print("  " + found["title"])
+        print()
+        print("```yaml\n" + found["yaml"] + "```")
+        return 0
+    if args.inbox:
+        waiting = inbox(board_posts(), {SELF, *args.code})
+        for found in waiting:
+            print("  waiting  %s  (%s, %s)\n           %s"
+                  % (found["id"], found.get("type"), found["record"].get(
+                      "sha256", "")[:16], found["url"]))
+        print("  %d alert(s) waiting" % len(waiting))
+        return 0
     record = check()
     if args.json:
         print(json.dumps(record, indent=2, sort_keys=True))

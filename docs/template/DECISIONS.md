@@ -376,3 +376,26 @@ WP6 ends (A7); and register SDD as a correspondent. Recorded verbatim (SHA-256
   SDD is drafted for the architect to approve; sending it is the architect's call.
 - Not decided: whether the IRI linter should report a reference to a term the pinned BFO
   release does not have, such as `obo:BFO_0000144`.
+
+**26. "Please note we have a new communications repo and policy communicating through
+discussions. Align our repos communicaiton to the new policy and then I believe you have a
+message."** (2026-11-05)
+
+With the link `https://github.com/Skreen5hot/communications`. Recorded verbatim (SHA-256
+of the two lines as given `387dfa6370f153e3534eddcecc6bc44f27f67a147389be97bc599ce47ce3c5d6`). Effect:
+
+- The record follows the shared protocol, version 1.1 (`PROTOCOL.md` at `05068d8`, the
+  `protocol-v1.1` tag, sha256 `fb3a0630…`), and `communications/README.md` now says so and
+  no longer holds a copy of the rules, which were its version 1.0. What this record adds
+  (codes it keeps as aliases, where decisions go, the check, alerts and the inbox) is
+  stated there.
+- `.gitattributes` keeps `communications/**` byte for byte (Rule 7).
+- `tools/communications.py` follows renames: a byte-identical move is allowed, a move that
+  edits and a deleted message are refused (Rule 1, as 1.1 states it). It checks the version
+  statement and the attribute; `--alert` prints a pushed message's alert, bound to the
+  committed bytes; `--inbox` lists the board's alerts this record does not hold. It posts
+  nothing, and the board repository's own tools are not run here.
+- Codes: this record keeps `EXAMPLE` for itself and `BPOTEST` for the BPO Testing Team,
+  aliases the shared list records for `OT` and `BPOT`.
+- Not decided: posting alerts for the messages already sent before the board existed,
+  which the protocol does not require.

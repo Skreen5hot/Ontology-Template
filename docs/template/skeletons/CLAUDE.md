@@ -33,7 +33,12 @@ charter (`docs/charter.md`), the stages it runs (`config/stages.yaml`), and thei
 - **Line endings are LF** (`.gitattributes`). On Windows, write files as bytes
   (`write_bytes`), not `write_text`, which writes CRLF.
 - **Communications with other teams** go in `communications/<team>/{incoming,outgoing}/`
-  under `communications/README.md`. A committed message is never edited.
+  under the shared protocol (`Skreen5hot/communications`, `PROTOCOL.md`) at the version
+  `communications/README.md` names. A committed message is never edited, moved with new
+  bytes, or deleted. Messages are announced on that repository's Discussions board:
+  `tools/communications.py --alert <file>` prints the alert, and posting it is the
+  architect's call. At the start of a session, run `tools/communications.py --inbox` to
+  list the alerts waiting for this record.
 
 ## Before committing
 

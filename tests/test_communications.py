@@ -194,6 +194,7 @@ def tree(tmp_path, repo):
     (root / "communications/xyz").mkdir(parents=True)
     shutil.copy(repo / "communications/README.md",
                 root / "communications/README.md")
+    (root / ".gitattributes").write_bytes(b"communications/** -text\n")
     (root / "communications/xyz/README.md").write_bytes(
         b"# XYZ\n\nA constructed team, for the tests.\n")
     message(root / "communications/xyz/outgoing" / FILENAME, GOOD)
@@ -250,3 +251,164 @@ def test_a_committed_message_that_is_edited_is_refused(comms, tree):
                    check=True, capture_output=True)
     findings = comms.check(tree)["findings"]
     assert any("never edited" in f for f in findings), findings
+
+
+def git_in(tree, *args):
+    return subprocess.run(["git", *args], cwd=str(tree), check=True,
+                          capture_output=True).stdout.decode("utf-8").strip()
+
+
+# ------------------------------------------------- protocol v1.1 rules
+
+
+def test_the_record_names_the_version_it_follows(tool, repo):
+    """PROTOCOL.md, "Adopting": the README names the version by commit
+    and digest. The live record's statement parses."""
+    adopted, problems = tool.adoption(repo)
+    assert problems == [], problems
+    assert adopted["version"] == "1.1"
+    assert len(adopted["commit"]) == 40 and len(adopted["sha256"]) == 64
+
+
+def test_a_record_without_its_version_statement_is_refused(comms, tree):
+    path = tree / "communications/README.md"
+    path.write_bytes(b"# Communications\n\nNo version named.\n")
+    findings = comms.check(tree)["findings"]
+    assert any("does not name the protocol version" in f
+               for f in findings), findings
+
+
+def test_a_record_git_may_rewrite_is_refused(comms, tree):
+    """Rule 7: without the attribute, digests are of whatever a checkout
+    made of the bytes."""
+    (tree / ".gitattributes").write_bytes(b"* text=auto eol=lf\n")
+    findings = comms.check(tree)["findings"]
+    assert any("communications/** -text" in f for f in findings), findings
+
+
+def test_a_message_may_move_with_its_bytes(comms, tree):
+    """Rule 1 follows renames. A byte-identical move is one commit setting
+    the bytes, as before the move."""
+    old = "communications/xyz/outgoing/" + FILENAME
+    new = "communications/xyz/outgoing/2026-10-23-vendoring-pin-moved.md"
+    data = (tree / old).read_bytes()
+    git_in(tree, "mv", old, new)
+    git_in(tree, "commit", "-qm", "move")
+    assert (tree / new).read_bytes() == data
+    assert comms.edits(tree, new) == 1
+
+
+def test_a_move_that_edits_is_refused(comms, tree):
+    """Before 1.1, counting commits by path gave a moved file a fresh
+    history, so a move that also edited went unnoticed."""
+    old = tree / "communications/xyz/outgoing" / FILENAME
+    new = "communications/xyz/outgoing/2026-10-23-vendoring-pin-moved.md"
+    data = old.read_bytes().replace(b"Body.", b"Body, quietly revised.")
+    git_in(tree, "rm", "-q", old.relative_to(tree).as_posix())
+    (tree / new).parent.mkdir(parents=True, exist_ok=True)
+    (tree / new).write_bytes(data)
+    git_in(tree, "add", "-A")
+    git_in(tree, "commit", "-qm", "move and edit")
+    assert "R" in git_in(tree, "show", "-M", "--name-status", "--format=")
+    findings = comms.check(tree)["findings"]
+    assert any(new in f and "never edited" in f for f in findings), findings
+    assert comms.edits(tree, new) == 2
+
+
+def test_a_deleted_message_is_refused(comms, tree):
+    relative = "communications/xyz/outgoing/" + FILENAME
+    git_in(tree, "rm", "-q", relative)
+    git_in(tree, "commit", "-qm", "delete")
+    findings = comms.check(tree)["findings"]
+    assert any(relative in f and "never deleted" in f
+               for f in findings), findings
+
+
+def test_a_file_that_was_never_a_message_may_be_removed(comms, tree):
+    stray = "communications/xyz/outgoing/notes.txt"
+    (tree / stray).write_bytes(b"scratch, no header\n")
+    git_in(tree, "add", "-A")
+    git_in(tree, "commit", "-qm", "stray")
+    git_in(tree, "rm", "-q", stray)
+    git_in(tree, "commit", "-qm", "remove the stray file")
+    assert comms.deleted_messages(tree) == []
+
+
+# --------------------------------------------------------------- alerts
+
+
+def reply_in(tree):
+    """XYZ's answer to the good message, recorded and committed."""
+    reply = header(**{"from": "XYZ", "to": "ABC",
+                      "id": "XYZ-ABC-2026-10-24-ack", "date": "2026-10-24",
+                      "type": "answer", "in_reply_to": GOOD["id"],
+                      "subject": "The answer"})
+    reply["source"] = {"repo": "owner/xyz-ontology", "commit": "c" * 40,
+                       "path": "x.md", "sha256": hashlib.sha256(
+                           b"\nBody.\n").hexdigest()}
+    message(tree / "communications/xyz/incoming/2026-10-24-ack.md", reply)
+    git_in(tree, "add", "-A")
+    git_in(tree, "commit", "-qm", "reply")
+    return reply
+
+
+def test_an_alert_is_bound_to_the_committed_bytes(comms, tree):
+    """PROTOCOL.md, Alerts 2 and 3: the title carries the ids; the block
+    names the commit that holds the file and its digest by git show; the
+    link names that commit, never a branch."""
+    import yaml
+
+    relative = "communications/xyz/outgoing/" + FILENAME
+    found = comms.alert(relative, tree)
+    commit = git_in(tree, "log", "-1", "--format=%H", "--", relative)
+    data = subprocess.run(["git", "show", "%s:%s" % (commit, relative)],
+                          cwd=str(tree), check=True,
+                          capture_output=True).stdout
+    block = yaml.safe_load(found["yaml"])
+    assert found["opens_discussion"] is True
+    assert found["title"] == ("[ABC\u2192XYZ] %s \u2014 %s"
+                              % (GOOD["id"], GOOD["subject"]))
+    assert block["record"] == {"repo": THIS_REPO, "commit": commit,
+                               "path": relative,
+                               "sha256": hashlib.sha256(data).hexdigest()}
+    assert block["link"].endswith("/blob/%s/%s" % (commit, relative))
+    assert [k for k in block] == list(comms.ALERT_FIELDS) + ["record",
+                                                            "link"]
+
+
+def test_a_reply_alert_comments_on_its_root(comms, tree):
+    reply_in(tree)
+    found = comms.alert("communications/xyz/incoming/2026-10-24-ack.md",
+                        tree)
+    assert found["opens_discussion"] is False
+    assert found["root"] == GOOD["id"]
+    assert GOOD["id"] in found["title"]
+
+
+def test_an_uncommitted_message_has_no_alert(comms, tree):
+    draft = "communications/xyz/outgoing/2026-10-25-draft.md"
+    message(tree / draft, header(id="ABC-XYZ-2026-10-25-draft",
+                                 date="2026-10-25"))
+    with pytest.raises(SystemExit):
+        comms.alert(draft, tree)
+
+
+def test_the_inbox_lists_what_the_record_does_not_hold(comms, tree):
+    """Addressed to this record, by its code or an alias it is given, and
+    not yet copied into incoming/ (matched by source.sha256)."""
+    held = reply_in(tree)["source"]["sha256"]
+
+    def post(to, sha, mid):
+        return {"url": "u/" + mid, "text": (
+            "Alert.\n\n```yaml\nid: %s\nfrom: XYZ\nto: %s\ntype: request"
+            "\nrecord:\n  sha256: %s\n```\n" % (mid, to, sha))}
+
+    posts = [post("ABC", held, "XYZ-ABC-held"),
+             post("ABC", "1" * 64, "XYZ-ABC-new"),
+             post("OLD", "2" * 64, "XYZ-OLD-alias"),
+             post("QQQ", "3" * 64, "XYZ-QQQ-elsewhere"),
+             {"url": "u/talk", "text": "Just talk, no alert."}]
+    waiting = comms.inbox(posts, {"ABC"}, tree)
+    assert [w["id"] for w in waiting] == ["XYZ-ABC-new"]
+    waiting = comms.inbox(posts, {"ABC", "OLD"}, tree)
+    assert [w["id"] for w in waiting] == ["XYZ-ABC-new", "XYZ-OLD-alias"]

@@ -26,6 +26,11 @@
 *.ttl text eol=lf
 *.tsv text eol=lf
 
+# The communications record is kept byte for byte, so an incoming copy is
+# committed exactly as received and every digest in it is of committed
+# bytes (the communications protocol, Rule 7).
+communications/** -text
+
 # Declared binary so content detection is not what stands between these
 # and a corrupting newline translation.
 *.pdf -text

@@ -515,10 +515,11 @@ components:
     role: communication
     description: >-
       What this repository has said to, and heard from, other teams: one
-      folder per team with incoming/ and outgoing/. The protocol is
-      communications/README.md; tools/communications.py checks every
-      header, refuses an edited message, and derives which threads are
-      open.
+      folder per team with incoming/ and outgoing/. The protocol is the
+      shared one, Skreen5hot/communications PROTOCOL.md, at the version
+      communications/README.md names; tools/communications.py checks
+      every header, refuses an edited, moved-and-edited or deleted
+      message, and derives which threads are open.
 
   - id: tool.communications
     path: tools/communications.py

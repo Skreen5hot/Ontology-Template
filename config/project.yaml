@@ -28,7 +28,9 @@ template: true
 id: example
 
 #: Uppercase. The short name other teams know this repository by; it is
-#: the sender code in communications ids (communications/README.md).
+#: the sender code in communications ids (communications/README.md). A new
+#: project uses the code the shared list gives it (Skreen5hot/communications,
+#: correspondents.yaml).
 code: EXAMPLE
 
 title: Example Ontology

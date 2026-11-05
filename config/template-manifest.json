@@ -1,8 +1,8 @@
 {
-  "digest": "1929723cdc2fcd3fb8309e53baaf5658e5354b576b1f1b674a57d1befe91bda1",
+  "digest": "0af827b0549610901b20b8ba0efaa68d8baa397daf888fd91476be1500cd4ea8",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
-    ".gitattributes": "494d0543a0fe1858fee58b5beefec708fdd1bbbc972f39e4fe183ffa3d24d39f",
+    ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
     ".githooks/pre-commit": "e39d41b2b6c3a892468a61de9fd62c8fc0c1c69cb5cfba4bcfd5e141bdddd679",
     ".github/ISSUE_TEMPLATE/config.yml": "13064e7bea658e01e718b414fbb7b3b244f36411fe25ee2055c151f7b534547a",
     ".github/ISSUE_TEMPLATE/defect.yml": "e11ea8b87a6e680957feee05cc4cd9d73145f4f8e635274d14066edc5170c593",
@@ -15,7 +15,7 @@
     ".github/workflows/scale.yml": "fcf91624125b2c502f6a9fbb6e941a8bb82602bc40ddf31af5538ce270dbf7ac",
     ".github/workflows/term-diff.yml": "5c2be401357a6a39138c77a0294c7aad506216d19edf23cb745d51033329b4fa",
     ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
-    "docs/DEVELOPMENT.md": "4c3a908df5b15e1f8683dbf24bb2ae01458830f9437c8552578cbb48cb6dad6a",
+    "docs/DEVELOPMENT.md": "d7aeb0e02308590106e02688ba9901b732ae171f6154a0a80439636de05554a1",
     "docs/PORTING.md": "f58802103aa3ee37dbfb939dc56a0c96297b2f2d1ede8d64497eed751ae164f7",
     "docs/porting/port-report.md": "9cd44e61b1ca19f2723283648cf8220ae53ecfa67d57a0535cd0404458d0bf4d",
     "docs/process/METHOD.md": "1e21ae6ed10fa8ea01d8f9c6d61b26c50359e88e94634c6a9a1d5d48b0e96d30",
@@ -61,7 +61,7 @@
     "tests/fixtures/reasoning/inconsistent-example.ttl": "8495583ac4788e65d99b2c8c9801c57a65f1f3cc6c2f713d64364d24058d10f9",
     "tests/fixtures/reasoning/unsatisfiable.ttl": "d521a5e5552e48b8e68cd2de34c72742d50557045e4ff17372c23375ef8bb636",
     "tests/test_authoring.py": "0e1332c4828ab3ddd980627c71878d7d6fbc99c03247f9999d73a5988b209819",
-    "tests/test_communications.py": "ca36f5fda61c9348e6e5e28fa1bacd14486c43618bedc524f0377156e2631135",
+    "tests/test_communications.py": "bb1d3369db8785f4a6a331bbdb2142f48823dcd43caec3c3a1ff5d5a573d4bab",
     "tests/test_competency.py": "f8dd5c32fec0dd54150dee8231bf7a42e9c80096b7a35a13eefb478bfc7b9dda",
     "tests/test_detection_gaps.py": "ee4de7119a6bb4afe4498a63d9dc07e11557280023e44d1899ed68c75e954d2d",
     "tests/test_findings.py": "6dfdaa76b992b02b84d21cf80c847f728303f577dc35ba72ed8fdedb1f8f2f28",
@@ -83,7 +83,7 @@
     "tests/test_term_contract.py": "4c6394e578c0fce724c18acdb80651fc24751aad003388d817c3fbf63dbc8563",
     "tests/test_upstream_vendoring.py": "d69e1511158b51761b11e1395259ff59429b25763e0d888155ce2d09c07043c4",
     "tests/test_vocabulary.py": "a0b53c5d5a70a1b9f9d4d28194c93e215394c4f38714289fd3040f752e841ad7",
-    "tools/communications.py": "eb3cc330fb481d008fac6ea593a2540cc01b1979cc338ae9f6faa248600b0938",
+    "tools/communications.py": "601ad83160ebc69289f78030c62b14d537837f394d9e9e5e1236ae96e8958778",
     "tools/findings.py": "7f5935a5803da1ab2f696f0cfa434457dd5732ca012aa383f641cc05493134a5",
     "tools/hooks/claude_ttl_lint.py": "0e4351ddb4ec278857030434b505a97931fcefa49637b2c340b36129063c9258",
     "tools/init_project.py": "d8d2d46e8b92cabcb666ba4e50925b3be1f0abdc1c65b5990980c566fb76e6b9",
@@ -117,6 +117,6 @@
   "generated_by": "tools/template_status.py",
   "label": "unreleased",
   "note": "The digest of every template-owned file as the template shipped it. A project keeps this as it arrived: it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
-  "template_commit": "48f4b1df2e359b3d00e4f9b42e7f185ebd65496f",
+  "template_commit": "d7f22c0d56b5468e28fe95b6e6053c0ae70721d5",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

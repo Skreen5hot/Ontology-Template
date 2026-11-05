@@ -35,6 +35,12 @@ the checks, `docs/process/METHOD.md` for the method of building an ontology.
 - **Verify before asserting an upstream IRI.** Grep the vendored extract or the cached
   upstream; never write a `cco:`/`obo:` IRI from memory.
 - **Line endings are LF.** On Windows, write files as bytes (`write_bytes`).
+- **Communications follow the shared protocol** (`Skreen5hot/communications`,
+  `PROTOCOL.md`) at the version `communications/README.md` names. At the start of a
+  session, run `.venv/Scripts/python tools/communications.py --inbox --code OT`: the
+  board is where other teams announce messages, and an agent gets no notifications.
+  `--alert <file>` prints the alert for a pushed message; posting it is the architect's
+  call. Never run the board repository's own tools here.
 
 ## Before committing
 

@@ -76,6 +76,7 @@ python tools/ontology/term_diff.py --base origin/main   # which terms this branc
 python tools/ontology/normalize.py --check    # modules declared canonical are canonical
 python tools/stages.py                        # every started stage has its standard
 python tools/communications.py                # the communications record follows its protocol
+python tools/communications.py --inbox        # alerts on the board this record does not hold (gh)
 python tools/template_status.py               # where this has diverged from the template
 python tools/site/build_site.py && python tools/site/check_site.py   # the public site builds and holds
 python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsifications
