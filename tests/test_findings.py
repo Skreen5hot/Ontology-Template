@@ -233,6 +233,74 @@ def test_a_rung_that_cannot_fail_fails_the_gate_whatever_the_register(
     assert problems and "cannot be evaluated" in problems[0]
 
 
+def test_a_blocked_rung_exits_2_whatever_else_it_found(validator):
+    """P-B2: a run that could not evaluate a rung exited 1, as a run with
+    findings does, and so could not be told from one. 2 wins over 1,
+    because a count that misses a rung is not the ontology's."""
+    def record(evaluable, blocked):
+        return {"evaluable_rungs": evaluable, "blocked_rungs": blocked}
+
+    assert validator.exit_code(record(["a"], []), failed=False) == 0
+    assert validator.exit_code(record(["a"], []), failed=True) == 1
+    assert validator.exit_code(record(["a"], ["b"]), failed=True) == 2
+    assert validator.exit_code(record(["a"], ["b"]), failed=False) == 2
+    assert validator.exit_code(record([], []), failed=False) == 2
+
+
+def test_a_blocked_rung_is_never_counted_as_zero_findings(validator):
+    """The blocked rung's results stay out of the count, and the total is
+    null rather than the evaluable rungs' count passed off as the whole."""
+    def rung(evaluable, focus):
+        return {"evaluable": evaluable, "can_still_fail": True,
+                "blocked_by_missing_vocabulary": [] if evaluable else ["CCO"],
+                "corpus": {"detail": [{"focus": focus, "shape": "urn:s",
+                                       "message": "m",
+                                       "severity": "Violation"}],
+                           "warning_detail": [], "vendored_detail": []}}
+
+    record = {"rungs": {"a": rung(True, "urn:a"), "b": rung(False, "urn:b")},
+              "evaluable_rungs": ["a"], "blocked_rungs": ["b"]}
+    assert validator.finding_count(record) == {
+        "total": None, "from_evaluable_rungs": 1, "not_counted_from": ["b"]}
+    record["rungs"]["b"] = rung(True, "urn:b")
+    record.update(evaluable_rungs=["a", "b"], blocked_rungs=[])
+    assert validator.finding_count(record) == {
+        "total": 2, "from_evaluable_rungs": 2, "not_counted_from": []}
+
+
+def test_a_run_without_its_vocabulary_says_so_and_exits_2(
+        validator, tmp_path, monkeypatch, capsys):
+    """The WP6 case, reproduced: a corpus naming CCO, measured with no
+    extract in scope. The gate, the report and --propose all exit 2, the
+    summary names the blocked rungs, and the JSON's total is null."""
+    import json
+
+    corpus = tmp_path / "corpus.ttl"
+    corpus.write_bytes((DIRTY % "https://example.org/blocked#").encode())
+    monkeypatch.setattr(validator.layout, "ontology_files", lambda: [corpus])
+    monkeypatch.setattr(validator.layout, "vendored_files", lambda: [])
+
+    assert validator.main(["--gate"]) == 2
+    out = capsys.readouterr().out
+    out_json = tmp_path / "report.json"
+    assert validator.main(["-o", str(out_json)]) == 2
+    report_out = capsys.readouterr().out
+    record = json.loads(out_json.read_text(encoding="utf-8"))
+
+    blocked = record["blocked_rungs"]
+    assert blocked, "nothing was blocked without the extracts"
+    for text in (out, report_out):
+        line = next(l for l in text.splitlines() if "INCOMPLETE" in l)
+        for name in blocked:
+            assert name in line, (name, line)
+    assert record["findings"]["total"] is None
+    assert record["findings"]["not_counted_from"] == blocked
+
+    # Proposed entries would miss the blocked rung's findings too.
+    assert validator.main(["--propose"]) == 2
+    assert "INCOMPLETE" in capsys.readouterr().err
+
+
 def test_the_report_holds_every_finding(validator, benchmark_module,
                                         tmp_path, monkeypatch):
     """T20: the JSON once kept 20 warnings of BPO's hundreds. On a

@@ -10,6 +10,12 @@
     python tools/ontology/validate.py --propose  # register entries for the
                                                  # new findings
 
+Exit 0 when the ladder passed, 1 on findings or a shape set that cannot
+fail, and 2 when a rung could not be evaluated -- whatever else it found.
+A blocked rung's findings are not counted, so any count beside it is
+smaller than the ontology's; 2 says the measurement is incomplete rather
+than letting it pass as a result with fewer findings (P-B2).
+
 Two rungs, and the second is the one that makes the first mean anything.
 
   conformance   the authored ontology validated against every shape set.
@@ -354,6 +360,46 @@ def passed_of(rungs: dict) -> bool:
                     for r in rungs.values() if r["evaluable"]))
 
 
+NOT_EVALUABLE = 2
+
+
+def exit_code(record: dict, failed: bool) -> int:
+    """2 when any rung could not be evaluated, or none was; otherwise 1
+    if `failed`, else 0.
+
+    2 wins over 1. A run with a blocked rung under-counts its findings,
+    and a measurement that cannot see part of the ontology is first of all
+    not a measurement. In WP6 one such run reported 493 findings for a
+    corpus that had 1,829, exited 1 as a run with findings does, and was
+    caught only because the count fell further than the content explained.
+    """
+    if record.get("blocked_rungs") or not record.get("evaluable_rungs"):
+        return NOT_EVALUABLE
+    return 1 if failed else 0
+
+
+def finding_count(record: dict) -> dict:
+    """The register's findings, counted, and whether the count is the
+    ontology's. `total` is null while a rung is blocked: a partial count
+    reported as the total is the wrong number that looks right."""
+    blocked = record.get("blocked_rungs") or []
+    counted = len(register_findings(record))
+    return {"total": None if blocked else counted,
+            "from_evaluable_rungs": counted,
+            "not_counted_from": list(blocked)}
+
+
+def incomplete(record: dict) -> str:
+    """The summary line for a run whose count is not the ontology's."""
+    blocked = record.get("blocked_rungs") or []
+    if blocked:
+        return ("  INCOMPLETE: %s could not be evaluated, so the findings "
+                "above are not the ontology's count -- exit %d"
+                % (", ".join(blocked), NOT_EVALUABLE))
+    return ("  INCOMPLETE: no rung could be evaluated, so this is not a "
+            "result -- exit %d" % NOT_EVALUABLE)
+
+
 def partition(results: list) -> tuple[list, list, list]:
     """(authored violations, authored warnings, against vendored terms).
 
@@ -457,7 +503,7 @@ def measure() -> dict:
 
     module_results = module_findings(modules, root)
     naming_results = scheme_findings(data, scheme_rules(root))
-    return {
+    record = {
         "format_version": FORMAT_VERSION,
         "generated_by": GENERATOR,
         "scope": {
@@ -492,6 +538,8 @@ def measure() -> dict:
             r["severity"] == "Violation"
             for r in module_results + naming_results),
     }
+    record["findings"] = finding_count(record)
+    return record
 
 
 # ------------------------------------------------------------ modules
@@ -739,6 +787,12 @@ def main(argv=None) -> int:
         print(findings.propose(verdict["new"], args.reason, args.owner,
                                args.review)
               or "# no new findings: nothing to propose")
+        if record.get("blocked_rungs"):
+            # The entries are right but not all of them: a blocked rung's
+            # findings are missing, and a register built from them would
+            # go stale the day the rung can run.
+            print(incomplete(record), file=sys.stderr)
+            return NOT_EVALUABLE
         return 0
     print("  %d data file(s) + %d vendored extract(s), %d shape set(s)"
           % (record["scope"]["data_files"],
@@ -799,6 +853,8 @@ def main(argv=None) -> int:
         print("  passed: %s  (%d of %d rung(s) evaluable)"
               % (record["passed"], len(record["evaluable_rungs"]),
                  len(record["rungs"])))
+        if record["blocked_rungs"]:
+            print(incomplete(record))
 
     if args.gate:
         problems, verdict = gate(record, findings.load())
@@ -809,12 +865,14 @@ def main(argv=None) -> int:
         print()
         for problem in problems:
             print("  GATE: %s" % problem)
-        if problems or not verdict["passed"]:
-            return 1
-        print("  gate:   every finding is accepted by an entry in %s, and "
-              "every entry for this check matches one."
-              % findings.REGISTER)
-        return 0
+        code = exit_code(record, bool(problems) or not verdict["passed"])
+        if code == NOT_EVALUABLE:
+            print(incomplete(record))
+        elif code == 0:
+            print("  gate:   every finding is accepted by an entry in %s, "
+                  "and every entry for this check matches one."
+                  % findings.REGISTER)
+        return code
 
     if args.out:
         target = Path(args.out)
@@ -825,7 +883,7 @@ def main(argv=None) -> int:
                                       ensure_ascii=False).encode("utf-8")
                            + b"\n")
         print("  wrote %s" % args.out)
-    return 0 if record["passed"] else 1
+    return exit_code(record, not record["passed"])
 
 
 if __name__ == "__main__":

@@ -597,6 +597,7 @@ on 2026-11-05 (decision 30), and it goes into the next release.
 | P1: `docs/process/METHOD.md`, the ontology method: one decision path, terminology lanes joining it at named gates, a standard per stage, the gates BCO found late, the separations, closure | The BCO team's process account, and its answer (decision 21) | the layout and docs tests |
 | P3: `docs/charter.md`, the scope charter form | The same | -- |
 | P2: `docs/standards/` with the stage-standard skeleton, `config/stages.yaml`, and `tools/stages.py`, a Checks step, refusing a started stage without a standard and a stage done out of order | The same | `tests/test_stages.py` |
+| P-B2, backlog item 1: a rung that cannot be evaluated makes `validate.py` exit 2 in every mode, is named on an `INCOMPLETE` summary line, and is left out of the count, whose `findings.total` in the report is then null | Decision 29: in WP6 a run with a blocked rung reported 493 findings for 1,829 and exited 1, like a run with findings | `tests/test_findings.py` |
 | A class hierarchy for every pinned source, `vendor/<id>/<id>-hierarchy.json`: every class its register lists with its named direct superclasses, generated and digest-checked, so a CCO class can be followed to its BFO category offline | The Semantic Data Dictionary team's request (decision 25) | `tests/test_upstream_vendoring.py` |
 
 Held by decision 21 until WP6 ends or Phase A's results are in: P4 (a source register with

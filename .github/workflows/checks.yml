@@ -100,7 +100,8 @@ jobs:
 
       # The SHACL ladder, gated through config/findings-register.yaml: a
       # violation or warning no entry accepts fails, and so does an entry
-      # that matches nothing.
+      # that matches nothing. A rung that cannot be evaluated is exit 2,
+      # never a run with fewer findings.
       - name: No new ontology findings
         id: validate
         continue-on-error: true
