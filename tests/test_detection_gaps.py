@@ -19,6 +19,8 @@ so a correction is held rather than hoped for.
        source's release
   P-B1 the genus: each definition judged alone, the parent's label in
        genus position
+  WP6  a deprecated class keeps its definition and its parent
+  WP6  a realizable class restricted existentially on has realization
 """
 
 from __future__ import annotations
@@ -577,3 +579,100 @@ def test_each_definition_is_judged_alone_with_the_genus_first(
     before = [r for r in results if says in r["message"]]
     accepted_then_fixed(findings_tool, as_findings(
         validator, findings_tool, "validation.realist", before), [])
+
+
+# ------------------------------------------------------------- WP6
+
+
+RETIRED = """
+:Replacement a owl:Class ; rdfs:label "replacement" ;
+    skos:definition "A material entity the planted case keeps." ;
+    rdfs:subClassOf obo:BFO_0000040 .
+:Retired a owl:Class ; rdfs:label "retired" ;
+    skos:definition "A material entity the planted case retires." ;
+    rdfs:subClassOf obo:BFO_0000040 ;
+    owl:deprecated true ; dcterms:isReplacedBy :Replacement .
+"""
+
+LOST = ('    skos:definition "A material entity the planted case retires." ;\n'
+        '    rdfs:subClassOf obo:BFO_0000040 ;\n')
+
+
+def test_a_deprecation_keeps_the_definition_and_the_parent(
+        validator, findings_tool, vendored, layout, project):
+    """The WP6 regression: deprecating a class removed its definition and
+    its parent. Each loss is a violation that says it is the deprecation's;
+    a deprecation that keeps both is not reported."""
+    deprecation = ("has no skos:definition. A deprecated class",
+                   "has no named parent. A deprecated class")
+    kept = run(validator, vendored, layout, RETIRED, project,
+               "validation.realist")
+    for says in deprecation:
+        assert not on(kept, project, "Retired", says), says
+
+    assert RETIRED.count(LOST) == 1
+    results = run(validator, vendored, layout, RETIRED.replace(LOST, "    "),
+                  project, "validation.realist")
+    hits = [hit for says in deprecation
+            for hit in on(results, project, "Retired", says)]
+    assert len(hits) == 2, [r["message"] for r in results]
+    assert {hit["severity"] for hit in hits} == {"Violation"}
+    accepted_then_fixed(findings_tool, as_findings(
+        validator, findings_tool, "validation.realist", hits), [])
+
+
+# ---------------------------------------------- WP6, over-claiming
+
+
+REALIZED = """
+:fxHasRealization a owl:ObjectProperty ;
+    rdfs:subPropertyOf obo:BFO_0000054 .
+:Necessary a owl:Class ; rdfs:label "necessary" ;
+    skos:definition "A disposition the planted case says is always realized." ;
+    rdfs:subClassOf obo:BFO_0000016 ,
+        [ a owl:Restriction ; owl:onProperty obo:BFO_0000054 ;
+          owl:someValuesFrom obo:BFO_0000015 ] .
+:Deeper a owl:Class ; rdfs:label "deeper" ;
+    skos:definition "A necessary that the planted case places one level down." ;
+    rdfs:subClassOf :Necessary ,
+        [ a owl:Restriction ; owl:onProperty :fxHasRealization ;
+          owl:someValuesFrom obo:BFO_0000015 ] .
+:Occurrent a owl:Class ; rdfs:label "occurrent" ;
+    skos:definition "A process the planted case wrongly restricts the same way." ;
+    rdfs:subClassOf obo:BFO_0000015 ,
+        [ a owl:Restriction ; owl:onProperty obo:BFO_0000054 ;
+          owl:someValuesFrom obo:BFO_0000015 ] .
+:Possible a owl:Class ; rdfs:label "possible" ;
+    skos:definition "A disposition realized, if at all, only in processes." ;
+    rdfs:subClassOf obo:BFO_0000016 ,
+        [ a owl:Restriction ; owl:onProperty obo:BFO_0000054 ;
+          owl:allValuesFrom obo:BFO_0000015 ] .
+"""
+
+
+def test_a_realizable_that_must_be_realized_is_a_warning(
+        validator, findings_tool, vendored, layout, project):
+    """WP6's over-claiming relation, the one pattern grounded in BFO: a
+    realizable class with an existential has-realization restriction,
+    found through the hierarchy and through a subproperty. A universal
+    restriction claims no realization and is not reported, nor is a class
+    that is not a realizable (the domain rules are about that one)."""
+    says = "is a realizable entity restricted existentially"
+    results = run(validator, vendored, layout, REALIZED, project,
+                  "validation.realist")
+    [necessary] = on(results, project, "Necessary", says)
+    assert necessary["severity"] == "Warning"
+    assert "BFO_0000054" in necessary["message"]
+    [deeper] = on(results, project, "Deeper", says)
+    assert project.namespace() + "fxHasRealization" in deeper["message"]
+    for name in ("Possible", "Occurrent"):
+        assert not on(results, project, name, says), name
+
+    fixed = REALIZED.replace("owl:someValuesFrom obo:BFO_0000015",
+                             "owl:allValuesFrom obo:BFO_0000015")
+    after = run(validator, vendored, layout, fixed, project,
+                "validation.realist")
+    assert not [r for r in after if says in r["message"]]
+    accepted_then_fixed(findings_tool, as_findings(
+        validator, findings_tool, "validation.realist",
+        [necessary, deeper]), [])

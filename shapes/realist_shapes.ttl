@@ -254,6 +254,25 @@ rs:AuthoredClassReviewShape
           FILTER(REGEX(STR(?label), "[ ][(][^()]*[)][ ]*$"))
         }""" ] ;
 
+    # A realizable that must be realized (WP6). A realizable entity can
+    # exist unrealized: a disposition never triggered, a role never
+    # played. "C rdfs:subClassOf [ owl:onProperty has-realization ;
+    # owl:someValuesFrom P ]" says every instance of C *is* realized in
+    # some P, which a realist reading rarely means. In BPO a possible
+    # realization written so was read as a necessary requirement. A
+    # warning: a person decides whether the necessity is meant.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Class {$this} is a realizable entity restricted existentially on {?property}, so every instance of it is realized in some {?filler}. A realizable can exist unrealized; if the realization is possible rather than necessary, the restriction claims more than is meant. Use owl:allValuesFrom, or say it in the definition." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT DISTINCT $this ?property ?filler WHERE {
+          $this rdfs:subClassOf+ obo:BFO_0000017 .
+          $this rdfs:subClassOf|owl:equivalentClass ?r .
+          ?r owl:onProperty ?property ;
+             owl:someValuesFrom ?filler .
+          ?property rdfs:subPropertyOf* obo:BFO_0000054 .
+        }""" ] ;
+
     # Range: the filler not known to fall under it, and not known not to.
     sh:sparql [
         a sh:SPARQLConstraint ;
@@ -318,6 +337,33 @@ rs:DeprecatedTermShape
           $this owl:deprecated ?flag .
           FILTER NOT EXISTS { $this dcterms:isReplacedBy ?replacement }
           FILTER NOT EXISTS { $this skos:historyNote ?reason }
+        }""" ] ;
+
+    # A deprecated class keeps what it meant and where it sat. Data
+    # typed under it outlives the deprecation, and without its definition
+    # and parent nobody can read that data or map it to the replacement.
+    # The general rules report the loss too, as a missing definition and
+    # a class reaching no BFO category; these name the cause. In WP6 a
+    # deprecation removed both from one of BPO's classes, and BPO's own
+    # gates passed it.
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Deprecated class {$this} has no skos:definition. A deprecated class keeps its definition: data typed under it still has to be read, and mapped to whatever replaces it." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT $this WHERE {
+          $this a owl:Class .
+          FILTER NOT EXISTS { $this skos:definition ?definition }
+        }""" ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Deprecated class {$this} has no named parent. A deprecated class keeps its rdfs:subClassOf: deprecation retires a term, it does not take it out of the hierarchy its data was classified in." ;
+        sh:prefixes rs:prefixes ;
+        sh:select """SELECT $this WHERE {
+          $this a owl:Class .
+          FILTER NOT EXISTS {
+            $this rdfs:subClassOf ?parent .
+            FILTER(isIRI(?parent))
+          }
         }""" ] .
 
 

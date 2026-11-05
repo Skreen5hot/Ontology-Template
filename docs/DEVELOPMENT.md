@@ -300,6 +300,8 @@ shapes or pins, together with the `corpus` tests. Locally:
 | no object property asserted from one class to another (punning: OWL reads both as individuals) | violation |
 | no restriction on an annotation property | violation |
 | a deprecated term names `dcterms:isReplacedBy` or a `skos:historyNote` | violation |
+| a deprecated class keeps its `skos:definition` and a named `rdfs:subClassOf` | violation |
+| a class under realizable entity (`obo:BFO_0000017`) restricted with `owl:someValuesFrom` on has realization (`obo:BFO_0000054`) or a subproperty: every instance would be realized | warning |
 | every ontology header under the IRI base has a title, licence, creator, version IRI and version info | violation |
 
 The disjointness the hardest check leans on — independent, specifically dependent and
@@ -555,7 +557,8 @@ follow `config/naming.yaml` (the linter's `naming_convention`). An IRI scheme th
 local-name pattern a meaning — `P<number>` for a process type — is a **scheme rule** there:
 a pattern that must, or must not, sit under a category through `rdfs:subClassOf`, gated by
 the validator under `where: naming`. None ships enabled. A deprecated term names a
-replacement or a reason (the realist deprecated-term shape).
+replacement or a reason, and a deprecated class keeps its definition and its parent (the
+realist deprecated-term shape).
 `tools/ontology/term_diff.py` reports the terms added, removed, deprecated or changed
 between two commits — the Term diff workflow comments it on every pull request, and the
 Release workflow ships it as `CHANGES.md`, inside the checksums.

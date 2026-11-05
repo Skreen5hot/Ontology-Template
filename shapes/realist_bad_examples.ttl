@@ -177,6 +177,26 @@ example:DomainUnknown a owl:Class ;
 <https://fandaws.com/ontology/example/fixtures/realist-incomplete-header> a owl:Ontology ;
     dcterms:title "A header with only a title" .
 
+# -- WP6 a realizable that must be realized (warning) ----------------
+
+example:RealistAlwaysRealized a owl:Class ;
+    rdfs:label "realist always realized" ;
+    rdfs:subClassOf obo:BFO_0000016 ,
+        [ a owl:Restriction ;
+          owl:onProperty obo:BFO_0000054 ;
+          owl:someValuesFrom obo:BFO_0000015 ] ;
+    skos:definition "A disposition the fixture says every bearer realizes." ;
+    cco:ont00001754 "constructed for the realist fixture" .
+
+example:RealistRealizedOnlyIn a owl:Class ;
+    rdfs:label "realist realized only in" ;
+    rdfs:subClassOf obo:BFO_0000016 ,
+        [ a owl:Restriction ;
+          owl:onProperty obo:BFO_0000054 ;
+          owl:allValuesFrom obo:BFO_0000015 ] ;
+    skos:definition "A disposition realized, if ever, only in processes." ;
+    cco:ont00001754 "constructed for the realist fixture" .
+
 # -- R7 deprecated with no way forward ----------------------------------
 
 example:DeprecatedNoWayForward a owl:Class ;
@@ -185,6 +205,24 @@ example:DeprecatedNoWayForward a owl:Class ;
     skos:definition "A material entity retired without a replacement or a reason." ;
     cco:ont00001754 "constructed for the realist fixture" ;
     owl:deprecated true .
+
+# -- R7 deprecated, and its definition and parent removed --------------
+# The WP6 regression, one loss each. Both name a replacement, so only the
+# loss is reported by the deprecation rules.
+
+example:DeprecatedLostDefinition a owl:Class ;
+    rdfs:label "deprecated lost definition" ;
+    rdfs:subClassOf obo:BFO_0000040 ;
+    cco:ont00001754 "constructed for the realist fixture" ;
+    owl:deprecated true ;
+    dcterms:isReplacedBy example:RealistGood .
+
+example:DeprecatedLostParent a owl:Class ;
+    rdfs:label "deprecated lost parent" ;
+    skos:definition "A material entity whose deprecation removed its parent." ;
+    cco:ont00001754 "constructed for the realist fixture" ;
+    owl:deprecated true ;
+    dcterms:isReplacedBy example:RealistGood .
 
 # -- P1 annotation profile: no definition source (warning) ------------
 

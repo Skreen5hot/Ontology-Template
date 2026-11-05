@@ -336,6 +336,10 @@ REALIST_CASES = {
     "it is not known to fall under": ("DomainUnknown", "Warning"),
     "Deprecated term names neither": ("DeprecatedNoWayForward",
                                       "Violation"),
+    "has no skos:definition. A deprecated class": (
+        "DeprecatedLostDefinition", "Violation"),
+    "has no named parent. A deprecated class": ("DeprecatedLostParent",
+                                                "Violation"),
     "Ontology header has no dcterms:license": (
         "realist-incomplete-header", "Violation"),
     "Ontology header has no dcterms:creator": (
@@ -348,12 +352,15 @@ REALIST_CASES = {
     "which is an annotation property": ("RealistAnnotationRestricted",
                                         "Violation"),
     "ends in a parenthetical qualifier": ("RealistQualified", "Warning"),
+    "is a realizable entity restricted existentially": (
+        "RealistAlwaysRealized", "Warning"),
 }
 
 REALIST_CONTROLS = ("RealistGood", "RealistGoodChild",
                     "RealistGoodRestriction",
                     "RealistDeprecatedWithReplacement",
-                    "realist-complete-header", "RealistQualifiedChild")
+                    "realist-complete-header", "RealistQualifiedChild",
+                    "RealistRealizedOnlyIn")
 
 
 def results_for(validation, rung, focus_name):
