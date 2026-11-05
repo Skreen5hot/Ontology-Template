@@ -399,3 +399,40 @@ of the two lines as given `387dfa6370f153e3534eddcecc6bc44f27f67a147389be97bc599
   aliases the shared list records for `OT` and `BPOT`.
 - Not decided: posting alerts for the messages already sent before the board existed,
   which the protocol does not require.
+
+**27. "I accept the verdict"** (2026-11-05)
+
+In answer to `evaluations/2026-11-05-wp6-results-analysis.md` (SHA-256 of the proposed text
+`9bb2160215da2c25362321c475c86af5ac8d9deaf3918894b5b5e78e49dda053`; the file differs only in
+its status line), which analyses the BPO Testing Team's Phase B results. Recorded verbatim
+(SHA-256 `45cf989ffd4c8efc04e3a3a63a36a98e1bd36a415606d2510093cbe10bfd3abe`). Effect:
+
+- The template's own reading of WP6 is §1 of the analysis: an effective detector of
+  structural defects and an effective reproducibility frame, not a substitute for
+  referent-level review.
+- Not decided: the fourteen changes of §4, the order of §5 and when WP6 ends, which the
+  architect gives after reviewing them.
+
+**28. "Yes, lets add the domain and ranges However, CCO has some domains and ranges NOT
+specified so it means "anything" should we make the value owl:thing? What are the
+consiquences of this? Low priority after BPOT"** -- then, after the consequences were
+given: **"Regarding SDD domain and range: I like the derived domain and ranges."**
+(2026-11-05)
+
+In answer to the Semantic Data Dictionary team's request
+(`SDD-EXAMPLE-2026-11-04-domain-range-register`). Recorded verbatim (SHA-256 of each
+`79700b548440816ce093d19e030391309506cab412649e342c83f377eaa4377c` and
+`cca679ad89bc81ded3a209f8d0746cf709b936b0b5261dfc4e2449945dffd998`). The consequences
+given: at these pins, 110 of CCO's 225 object properties state no domain, and 95 of those
+inherit one from a superproperty and 1 through an inverse, leaving 14 unconstrained (ranges:
+109, 105, 0, 4). Writing `owl:Thing` would be wrong for most of them, would invent an
+assertion the source does not make, and would break a check that follows the named
+hierarchy to BFO's entity. Effect:
+
+- Accepted. Each source gets a file of every object property its register lists: its named
+  domains and ranges as asserted, a count of the anonymous ones, and its superproperties and
+  inverses. Beside those, a derived effective domain and range, computed through
+  inheritance and labelled as derived. No `owl:Thing` is written where the source states
+  none; an effective domain that is empty is documented as unconstrained.
+- Low priority: built after the WP6 work, on `main`, unreleased until WP6 ends (A7). The
+  answer to SDD is sent when it ships.
