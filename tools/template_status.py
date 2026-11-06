@@ -77,6 +77,7 @@ FORMAT_VERSION = 2
 GENERATOR = "tools/template_status.py"
 MANIFEST = "config/template-manifest.json"
 UPSTREAMS = "config/upstream-sources.yaml"
+PROJECT = "config/project.yaml"
 NOT_COMPARED = 2
 
 
@@ -255,10 +256,16 @@ def against(other_root: Path) -> dict:
     where that meets a change made here."""
     mine = recorded()["files"]
     theirs = recorded(other_root)["files"]
+    now = measure()["files"]
     upstream = compare(mine, theirs)
-    local = compare(mine, measure()["files"])
+    local = compare(mine, now)
+    both = touched(local) & touched(upstream)
+    # Changed on both sides, but to the same bytes: the project already
+    # has the template's version, and there is nothing to merge.
+    taken = {name for name in both
+             if name in theirs and now.get(name) == theirs[name]}
     return {"template_changed": upstream, "changed_here": local,
-            "both": sorted(touched(local) & touched(upstream))}
+            "both": sorted(both - taken), "taken": sorted(taken)}
 
 
 # --------------------------------------------------------- seeded files
@@ -292,6 +299,11 @@ def base_commit(template: Path, record: dict) -> tuple[str | None, str]:
             continue
     return None, ("no commit from %s on in %s carries this project's "
                   "manifest" % (start[:12], template))
+
+
+def read_file(where: Path, name: str) -> bytes | None:
+    path = where / name
+    return path.read_bytes() if path.is_file() else None
 
 
 def yaml_of(data: bytes | None) -> dict:
@@ -350,7 +362,7 @@ def seeded_report(root: Path, template: Path | None = None) -> dict:
     record = recorded(root)
     current = digests(root, seeded_files(root))
     out = {"template_changed": None, "configured_here": None, "both": [],
-           "not_compared": [], "dependencies": []}
+           "taken": [], "not_compared": [], "dependencies": []}
     initialized = record.get("initialized")
 
     base = record.get("seeded")           # template-form digests
@@ -390,8 +402,20 @@ def seeded_report(root: Path, template: Path | None = None) -> dict:
         return out
     out["template_changed"] = compare(base, theirs)
     if out["configured_here"] is not None:
-        out["both"] = sorted(touched(out["configured_here"])
-                             & touched(out["template_changed"]))
+        both = sorted(touched(out["configured_here"])
+                      & touched(out["template_changed"]))
+        # Already the template's version, through init's rewrite: taken.
+        values = {key: yaml_of(read_file(template, PROJECT)).get(key)
+                  for key in project.IDENTITY}
+        mine = identity()
+        for name in both:
+            theirs = read_file(template, name)
+            here = read_file(root, name)
+            if (theirs is not None and here is not None and here ==
+                    as_received(name, theirs, values, mine)):
+                out["taken"].append(name)
+            else:
+                out["both"].append(name)
 
     def read(where: Path) -> bytes | None:
         path = where / UPSTREAMS
@@ -421,6 +445,10 @@ def print_seeded(report: dict) -> None:
         print("  changed both here and in the template -- merge by hand:")
         for name in report["both"]:
             print("    %s" % name)
+    if report["taken"]:
+        print("  changed both here and in the template, to the same file -- "
+              "already taken, nothing to merge: %s"
+              % ", ".join(report["taken"]))
     if report["dependencies"]:
         print("  DEPENDENCY CHANGE, for review: the template pins an "
               "upstream differently from this project. This project's pin "
@@ -478,6 +506,11 @@ def main(argv=None) -> int:
             print("  changed both here and in the template -- merge by "
                   "hand:")
             for name in report["both"]:
+                print("    %s" % name)
+        if report["taken"]:
+            print("  changed both here and in the template, to the same "
+                  "bytes -- already taken, nothing to merge:")
+            for name in report["taken"]:
                 print("    %s" % name)
         seeded = seeded_report(root, other)
         print_seeded(seeded)

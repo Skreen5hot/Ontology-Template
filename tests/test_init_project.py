@@ -519,8 +519,8 @@ def test_template_change_configuration_and_both_are_told_apart(
     project = clone(made, tmp_path / "p")
     template = clone(template_copy, tmp_path / "t")
     append(project, NAMING)
-    append(project, REALIST)
-    append(template, REALIST)
+    append(project, REALIST, "# here\n")
+    append(template, REALIST, "# there\n")
     append(template, SKOS)
     code, out = run(template, "tools/template_status.py", "--record")
     assert code == 0, out
@@ -589,3 +589,38 @@ def test_without_the_history_nothing_is_reported_unchanged(
     assert code == 2, out
     assert "NOT COMPARED" in out and "not a git checkout" in out
     assert "every seeded file is as" not in out
+
+
+def test_a_change_already_taken_is_not_a_merge(made, template_copy,
+                                               tmp_path):
+    """A file the template changed, and the project changed to the same
+    bytes -- by taking the template's version -- is already taken, not a
+    conflict: owned files byte for byte, seeded ones through init's
+    rewrite. A file the two changed differently is still a merge."""
+    project = clone(made, tmp_path / "p")
+    template = clone(template_copy, tmp_path / "t")
+    owned = "tools/findings.py"
+    for root in (project, template):
+        append(root, owned)
+        append(root, REALIST)
+    append(project, SKOS, "# here\n")
+    append(template, SKOS, "# there\n")
+    code, out = run(template, "tools/template_status.py", "--record")
+    assert code == 0, out
+    code, out = run(project, "tools/template_status.py", "--against",
+                    str(template))
+    assert code == 0, out
+    taken, merge, section = [], [], None
+    for line in out.splitlines():
+        if "already taken" in line:
+            section = taken
+            taken.extend(n.strip() for n in line.split(
+                "nothing to merge:", 1)[1].split(",") if n.strip())
+        elif "merge by hand" in line:
+            section = merge
+        elif line.startswith("    ") and section is not None:
+            section.append(line.strip())
+        else:
+            section = None
+    assert owned in taken and REALIST in taken, out
+    assert merge == [SKOS], out

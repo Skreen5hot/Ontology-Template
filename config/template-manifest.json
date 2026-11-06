@@ -1,5 +1,5 @@
 {
-  "digest": "d34297f5737e8b341e1ebae04a3143db3c7ded30397df7efc9ec3235be6ee4f9",
+  "digest": "e9bb9f8d26236672a091c828e33f3a4827e91df2d7fc1429cef6308cf37e3961",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -124,7 +124,7 @@
     "tools/site/build_site.py": "18e96006e244abc6cb4848ab49e31880c38010b5f686f0bd1029ef2195b9407b",
     "tools/site/check_site.py": "c11a8be77c70ad969160b818911390411bd9df12c42565cc7a806c17bb9ddc25",
     "tools/stages.py": "da9c7b982bd00095f6fa087c60743d7e3192397b893255c02273d194945fe46c",
-    "tools/template_status.py": "321742707b3acfedb751c03428c7dad5e086f04f4cdd1eafb72b40a7b7867e79"
+    "tools/template_status.py": "f75b7a66079e1b0e81d74ea4ed27d1b38c045d101ff0dde7532b5ea7a8357e0d"
   },
   "format_version": 2,
   "generated_by": "tools/template_status.py",
@@ -151,6 +151,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "0be69cb48f8af4f67dde257fd219435070cda8741446c3da20a58792c68c571f",
-  "template_commit": "540eda679fdcd5916720607db8d052ff5c4b620a",
+  "template_commit": "86fb6e8d387950694be50d1e975b489c5f2c622a",
   "template_repository": "Skreen5hot/Ontology-Template"
 }
