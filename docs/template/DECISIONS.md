@@ -556,3 +556,38 @@ correspondent exists to answer, set beside what the tools already do. Recorded v
 - Decision 15's open dependency is closed: T9 is done. The request is answered by
   `communications/legal/outgoing/2026-11-06-t9-policy-adopted.md`, which closes its thread;
   LEGAL has no repository, so no alert is posted.
+
+**34. "1. stages.py 2. domain practioner or proxy, yes name 3. Accept format and example 4.
+Yes test 5. fold 7 into 12 6. Agree with order"** (2026-11-06)
+
+In answer to the six questions of the item 12 design
+(`evaluations/2026-11-06-item-12-design.md`, section 8). The whole text is recorded
+verbatim in
+[`evaluations/2026-11-06-item-12-disposition.md`](evaluations/2026-11-06-item-12-disposition.md)
+(SHA-256 of the text below its rule `55a6a3efb65f1e740aa65734fb1898ebab9cb8d55385f2327ddfc3146bf009af`). Effect:
+
+- The design is approved, as amended by the answers; where they differ, the answers hold.
+- 1: the review gate is in `tools/stages.py`: it refuses a stage marked done while a
+  candidate in its scope has no disposition from a kind the stage requires, and never
+  fails because a candidate exists.
+- 2: a domain question is answered by a domain practitioner **or a proxy**, and the charter
+  names them. Read as: a new kind, `domain-proxy`, for a person the charter names as
+  standing in for domain practitioners; the domain rules (`genus-differs`,
+  `near-duplicate`, `category-in-differentia`) accept `domain-practitioner` or
+  `domain-proxy`, and a disposition says which, so a proxy's answer is never recorded as a
+  practitioner's. The charter must name both, or say none has been found; `stages.py`
+  checks that a stage with a review gate has them named. The ontologist rules
+  (`necessity-without-axiom`, `inverse-necessity`) are as proposed, the answer not having
+  changed them.
+- 3: candidates from a model or any other source come in through the import format with
+  its provenance header, and the template ships an example prompt as text; no runner, and
+  nothing model-based in CI.
+- 4: the generators are run locally against the BPO corpus WP6 evaluated; only counts and
+  whether each known WP6 defect is raised are recorded, and no BPO text enters the
+  template or its CI.
+- 5: item 7 is folded into item 12, as the `genus-differs` and `near-duplicate`
+  generators.
+- 6: item 12, with P5, is the next release, **v0.4.0**, with the "merge by hand" defect
+  fixed alongside; the rest of the backlog keeps its order after it.
+- "update and push": the record, the design's status and the ROADMAP are updated and
+  pushed. Nothing is built yet.
