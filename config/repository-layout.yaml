@@ -69,6 +69,14 @@ components:
       reasoning before a decision. Notes, tables and bibliographies only;
       the sources themselves go in docs/Reference, never tracked.
 
+  - id: review.candidates-readme
+    path: review/candidates/README.md
+    role: documentation
+    template: owned
+    description: >-
+      The format for candidates from elsewhere, with an example prompt;
+      the template's, so an upgrade carries it.
+
   - id: review.candidates
     path: review/candidates
     role: research
@@ -626,6 +634,7 @@ components:
   - id: config.review-register
     path: config/review-register.yaml
     role: configuration
+    template: seeded
     description: >-
       A person's answer to each review candidate: whether it is a defect,
       what is done about it, and who answered in which role. Read by

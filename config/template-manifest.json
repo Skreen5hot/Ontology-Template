@@ -1,5 +1,5 @@
 {
-  "digest": "e9bb9f8d26236672a091c828e33f3a4827e91df2d7fc1429cef6308cf37e3961",
+  "digest": "7d4bfa4b3e06ccbcf9543c716c7369db06eb5f734394bb07b8dad512bca77d4f",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -27,6 +27,7 @@
     "requirements-dev.txt": "76d1e8152c719743b6601c2cf2400b925c0b49766ca5ccfcb9e86291a69b9ddc",
     "requirements-lock.txt": "e6d9cbbd4563738772c039a7e9f12a6b3b839e6c392b1437f0827df7a48f9862",
     "requirements-pip.txt": "d4adda5f4d9391b2f5c4b7a6e912df7f2b524d233ae8ab728d80082a33a00dea",
+    "review/candidates/README.md": "9d89f285049b1acf9c7a1c5d4aa3c9f60cf7ee118665664db5c3ba42d38b3ce7",
     "site/pages/competency.html": "aca4de31a9d3db5873f48f82c4d6545ee63e8118379c66a3edf12efe64140fe1",
     "site/pages/crosswalks.html": "ecb37fa38cf308e54840bbf6b8b370b19c7ca1c33c7fea45e55dd1e417b14b2b",
     "site/pages/downloads.html": "3254b2e5462dc2f41f419f72fa7f6c83eee78bb73c39122b2ed35cd64d0343ae",
@@ -89,7 +90,7 @@
     "tests/test_scale.py": "0f70716251c9078aa3b7b1a6bbccef808cd0e385072dd5ea85d792a86a5fad50",
     "tests/test_site.py": "b09f5a5044b793924b11a523dba1057b1661a68d2a5edcdbaec8f454943c5931",
     "tests/test_stages.py": "698bb9cb00911739f6dcb2678bfeaff611a3d1be4735bd9ffb414d4679b1b987",
-    "tests/test_template.py": "5f742d0762768fa2cbc8c05c50ce5a7ead58e9e64ca0cb82b785338449791c1e",
+    "tests/test_template.py": "9fb08718998aaf0f58b05cdc1a02d6aad7181da88eb978967f304463d2752050",
     "tests/test_term_contract.py": "4c6394e578c0fce724c18acdb80651fc24751aad003388d817c3fbf63dbc8563",
     "tests/test_upstream_vendoring.py": "d69e1511158b51761b11e1395259ff59429b25763e0d888155ce2d09c07043c4",
     "tests/test_vocabulary.py": "a0b53c5d5a70a1b9f9d4d28194c93e215394c4f38714289fd3040f752e841ad7",
@@ -124,7 +125,7 @@
     "tools/site/build_site.py": "18e96006e244abc6cb4848ab49e31880c38010b5f686f0bd1029ef2195b9407b",
     "tools/site/check_site.py": "c11a8be77c70ad969160b818911390411bd9df12c42565cc7a806c17bb9ddc25",
     "tools/stages.py": "da9c7b982bd00095f6fa087c60743d7e3192397b893255c02273d194945fe46c",
-    "tools/template_status.py": "f75b7a66079e1b0e81d74ea4ed27d1b38c045d101ff0dde7532b5ea7a8357e0d"
+    "tools/template_status.py": "2a8b0b9e162c2d9a5024f41a260e5d3c9f9c546f7af5ccdc4886204bf775e0b2"
   },
   "format_version": 2,
   "generated_by": "tools/template_status.py",
@@ -142,6 +143,7 @@
     "config/candidates.yaml": "8f04c720fbb8c8f74780de995a1fb25999c4042accaa8f06c2896713dcab7a85",
     "config/naming.yaml": "1c167c6d55c3f7caa565f4a76601ea2b2ad580fc5162da1accccd742b42d8eed",
     "config/reasoning.yaml": "3ef465495bad8c946d7e598a9d08c2bac763f577fb6a3833fd77ef0ff75a99e1",
+    "config/review-register.yaml": "50b5a28a3d3961092a9c5b4696dac85693dd901848224a5c40840ace4dabeacd",
     "config/upstream-sources.yaml": "9598fc10e84a85ec8e9bfae128146a8f912ee2215358062532ae4f2b77346112",
     "shapes/realist_bad_examples.ttl": "565b72b68cb9f7bea1735afc025c15d0ed8c78e9fbe82f6a3ebf6d4db4c9df47",
     "shapes/realist_shapes.ttl": "3194f69b01ab65ae0d945a6c6cb16399542f8d151eb5e3db4db9ecb111606815",
@@ -150,7 +152,7 @@
     "shapes/wellformedness_bad_examples.ttl": "313974a3fae0c318d4b75349eebff7f7b9d0db9ecad57cc4b7733652cc43c25d",
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
-  "seeded_digest": "0be69cb48f8af4f67dde257fd219435070cda8741446c3da20a58792c68c571f",
-  "template_commit": "86fb6e8d387950694be50d1e975b489c5f2c622a",
+  "seeded_digest": "ef4f4866acb8978d782eb35063af173dbd2c35390fd83c3f42b8645768c7e887",
+  "template_commit": "6856d53b719c490321af48e7ff31907f56c1a56b",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

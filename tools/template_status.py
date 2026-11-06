@@ -445,7 +445,7 @@ def print_seeded(report: dict) -> None:
         print("  changed both here and in the template -- merge by hand:")
         for name in report["both"]:
             print("    %s" % name)
-    if report["taken"]:
+    if report.get("taken"):
         print("  changed both here and in the template, to the same file -- "
               "already taken, nothing to merge: %s"
               % ", ".join(report["taken"]))

@@ -234,14 +234,16 @@ def test_against_names_what_both_sides_changed(status, monkeypatch,
 
 # ------------------------------------------------- seeded (P-A3, d. 32)
 
-#: Decision 32's list, by component id, and item 12's tuning (v0.4.0,
-#: under decision 34): how candidates are looked for is a project's to
-#: change, so it is seeded, not owned.
+#: Decision 32's list, by component id, and item 12's (v0.4.0, under
+#: decision 34): how candidates are looked for, and the answers to them,
+#: start as the template's and are the project's to change -- seeded, so
+#: a project made earlier is told they exist.
 SEEDED = {"validation.wellformedness", "validation.realist",
           "validation.skos", "fixture.wellformedness-bad-examples",
           "fixture.realist-bad-examples", "fixture.skos-bad-examples",
           "config.annotation-profile", "config.naming", "config.reasoning",
-          "config.upstream-sources", "config.candidates"}
+          "config.upstream-sources", "config.candidates",
+          "config.review-register"}
 
 
 def test_the_seeded_set_is_the_one_decided(layout):
