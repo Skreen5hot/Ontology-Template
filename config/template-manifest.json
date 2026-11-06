@@ -1,5 +1,5 @@
 {
-  "digest": "fda1b52bac0d5c428aca36a81b4f098d12aac458f1e1fc52d71d37e23392352c",
+  "digest": "c08f14e4cd94d170c05f7643bad70b230bde676d0892fc25734fd4e0840aeea9",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -11,8 +11,8 @@
     ".github/workflows/checks.yml": "a24bcf04ae308d75438374fc6fdce2d12b276f1080d44c26cfc7d3ad52b43e4a",
     ".github/workflows/install.yml": "6eb33c900d2375b8015ee61717c3b906a66e5cc5e598c10df107c48769dbb466",
     ".github/workflows/pages.yml": "99d9c78f3dc720faf0ce47586b1f1cf4efd6dba7aad8584bc1b0091760a4ac35",
-    ".github/workflows/reasoning.yml": "f9e96b64fd028544a4c057c3fe0611d0c05fb047ae95c496c1b5e3582973549d",
-    ".github/workflows/release.yml": "1fdc06a22151df9db02438c5ce82618f36fd7a154731d745cbd084a8cb1ad2ba",
+    ".github/workflows/reasoning.yml": "9d7b6b2604a76d950bcbdc9295db1d95d4425f714b28e9f66d9aef15e1dc5158",
+    ".github/workflows/release.yml": "e83f44864b4551dfd01625aba0b4fcb09bb3ae5af5f70799f804f5ef2fff2cba",
     ".github/workflows/scale.yml": "f8d5047521d2921d07838b889adbbf0ea7fec14aea1b69c881db1b7b009dcebf",
     ".github/workflows/term-diff.yml": "9947342113d04f1a9bbf91f3e5d8e05b59ebac55e84bcc644017e10fe1e11827",
     ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
@@ -145,6 +145,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "c16e22ed2547b37fdb7ac7767f3c670ddfd80302c3ad764029ffc0d21c84845a",
-  "template_commit": "4da04262878a2af7796b4e6178cc84cff1485926",
+  "template_commit": "6d5c04a81bbdf543058a2f4e0b5540a62cb5ee4e",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

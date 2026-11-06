@@ -12,8 +12,8 @@
 # digests require.
 #
 # Actions are pinned to commit SHAs, resolved from the GitHub API: cache
-# v6.1.0 (2026-10-23), setup-java v6.1.0 (Dependabot's #3, checked and
-# merged 2026-10-24), and the checkout and setup-python the Checks
+# v6.1.0 (2026-10-23), setup-java v6.2.0 (2026-11-04, taken at the
+# v0.3.0 pin review), and the checkout and setup-python the Checks
 # workflow uses.
 
 name: Reasoning
@@ -58,7 +58,7 @@ jobs:
           PY
 
       - name: Set up Java
-        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           distribution: temurin
           java-version: ${{ steps.pins.outputs.java }}
