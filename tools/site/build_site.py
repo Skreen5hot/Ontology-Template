@@ -155,7 +155,8 @@ CATEGORY_ROOTS = {
 
 #: What a term's record carries of each register entry about it.
 ACCEPTED_FIELDS = ("check", "where", "rule", "severity", "text", "reason",
-                   "owner", "review", "upstream")
+                   "owner", "review", "upstream", "validity", "origin",
+                   "resolution", "classified_by", "reference")
 
 esc = html.escape
 
@@ -960,6 +961,18 @@ def register_section(entries: list) -> str:
                    "It has %d: %s." % (len(entries), ", ".join(
                        "%d %s %s" % (n, esc(check), esc(severity.lower()))
                        for (check, severity), n in sorted(counts.items())))))
+    if entries:
+        # What a person concluded, beside what the check found (P-A7):
+        # the table the BPO Testing Team built by hand in WP6.
+        tally = register.counts(entries)
+        summary += "\n<p>Classified by a person: %s. %s</p>" % (
+            "; ".join("%s %s" % (esc(key), esc(register.shown(tally[key])))
+                      for key in register.VALUES),
+            "%d entr%s unclassified: no judgement is recorded for %s." % (
+                tally["unclassified"],
+                "y is" if tally["unclassified"] == 1 else "ies are",
+                "it" if tally["unclassified"] == 1 else "them")
+            if tally["unclassified"] else "Every entry is classified.")
     upstream = sorted((e for e in entries if e.get("upstream")),
                       key=lambda e: (e["upstream"], e["rule"], e["focus"]))
     if upstream:

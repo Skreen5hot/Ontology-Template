@@ -273,7 +273,13 @@
           "Accepted because: " + entry.reason + " Owner: " + entry.owner
           + ". Review by " + entry.review + "."
           + (entry.upstream ? " The defect is upstream: " + entry.upstream
-             + "." : "")));
+             + "." : "")
+          + (entry.validity
+             ? " Classified " + entry.validity + ", origin " + entry.origin
+               + ", " + entry.resolution
+               + (entry.reference ? " (" + entry.reference + ")" : "")
+               + ", by " + entry.classified_by + "."
+             : " Not classified by a person.")));
         accepted.appendChild(li);
       });
       body.appendChild(accepted);

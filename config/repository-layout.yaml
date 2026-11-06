@@ -586,6 +586,16 @@ components:
       identity, with a reason, an owner and a review date. Written by a
       person; read by the validator, the IRI linter and the site.
 
+  - id: config.review
+    path: config/review.yaml
+    role: configuration
+    template: owned
+    description: >-
+      The kinds of reviewer -- ontologist, domain practitioner, architect,
+      rights reviewer -- and what each means; a project may add kinds, not
+      remove these. The findings register's classified_by names one (P5's
+      shared half, template decision 32).
+
   - id: config.annotation-profile
     path: config/annotation-profile.yaml
     role: configuration

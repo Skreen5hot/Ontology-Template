@@ -5,6 +5,11 @@
 # reason, an owner and a review date; an entry that matches nothing
 # fails until it is removed. Entries are written by a person: each
 # check's --propose prints them for its new findings.
+#
+# Format 2: every entry also records what a person concluded -- its
+# validity, its origin, its resolution, and who classified it in what
+# capacity (config/review.yaml). The classification never changes what
+# the gate passes (template decision 32).
 
-format_version: 1
+format_version: 2
 entries: []

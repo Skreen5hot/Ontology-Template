@@ -30,6 +30,48 @@ and, for a person to read and answer for:
             being an Agent, for one)
   text      optional, the message, for the reader; not matched
 
+and what a person concluded about it (P-A7, template decision 32), three
+separate questions and who answered them:
+
+  validity       is the finding true of the ontology?
+                 real | false-alarm | unsure
+  origin         where is its cause?
+                 project | upstream | template | unknown
+  resolution     why is it in the register rather than fixed?
+                 accepted | deferred | reported | not-a-defect
+  classified_by  "<name> (<kind>)": who judged it, in what capacity, the
+                 kind one of config/review.yaml's
+  reference      where it was reported (a URL or a message id); required
+                 with `reported`
+
+RULES BETWEEN THEM
+
+  accepted       requires real: a modelling choice the check disagrees with
+  not-a-defect   requires false-alarm
+  false-alarm    is not-a-defect, or reported (a defect in the checker)
+  unsure         is deferred, to the review date
+  unknown        origin requires unsure and deferred: a cause still being
+                 looked for, not a way to leave responsibility unassigned
+  upstream       origin requires the `upstream` field. Not the reverse: an
+                 upstream IRI in the finding does not make the upstream its
+                 cause
+  reported       requires a reference
+
+The BPO Testing Team classified 4,323 findings this way, by hand, in a
+document beside the register (WP6). This is the register holding it.
+
+A register says `format_version: 1` or `2`. Version 1 is as before: the
+classification may be absent, and is then counted as unclassified, never
+guessed. Version 2 requires all four on every entry. Present fields are
+checked by the rules in both. No tool writes a judgement: `--classify`
+prints each unclassified entry with placeholders, for a person to answer,
+and a placeholder is refused.
+
+None of this changes what a check finds or what the gate passes. A
+finding is accepted by its identity, whatever it is classified as: a
+person's conclusion is recorded beside the check's verdict, never counted
+as one.
+
 POLICY (decision 11)
 
   A new Violation fails.
@@ -64,12 +106,23 @@ import layout  # noqa: E402
 
 REGISTER = "config/findings-register.yaml"
 PINS = "config/upstream-sources.yaml"
+REVIEW = "config/review.yaml"
+FORMATS = (1, 2)
 CHECKS = ("validate", "iri_lint")
 SEVERITIES = ("Violation", "Warning", "Info")
 GATING = ("Violation", "Warning")
 IDENTITY = ("check", "where", "focus", "rule", "digest", "severity")
 REQUIRED = ("reason", "owner", "review")
-OPTIONAL = ("upstream", "text")
+CLASSIFICATION = ("validity", "origin", "resolution", "classified_by")
+OPTIONAL = ("upstream", "text", "reference") + CLASSIFICATION
+VALUES = {
+    "validity": ("real", "false-alarm", "unsure"),
+    "origin": ("project", "upstream", "template", "unknown"),
+    "resolution": ("accepted", "deferred", "reported", "not-a-defect"),
+}
+#: The kinds config/review.yaml must keep: a project may add, not remove.
+KINDS = ("ontologist", "domain-practitioner", "architect", "rights-reviewer")
+CLASSIFIED_BY = re.compile(r"^(?P<name>\S.*\S|\S) \((?P<kind>[a-z][a-z-]*)\)$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
 
@@ -103,8 +156,96 @@ def upstream_ids(root: Path | None = None) -> dict:
             for entry in raw.get("sources") or []}
 
 
+def review_kinds(root: Path | None = None) -> tuple:
+    """The reviewer kinds config/review.yaml declares, refused without the
+    template's four."""
+    import yaml
+
+    root = root or layout.repository_root()
+    path = root / REVIEW
+    if not path.is_file():
+        raise RegisterError(REVIEW + " is missing, so no classification "
+                            "can name the capacity it was made in")
+    kinds = (yaml.safe_load(path.read_text(encoding="utf-8")) or {}).get(
+        "kinds") or {}
+    missing = [kind for kind in KINDS if kind not in kinds]
+    if missing:
+        raise RegisterError("%s lacks the kind(s) %s; a project may add "
+                            "kinds, not remove the template's"
+                            % (REVIEW, ", ".join(missing)))
+    return tuple(kinds)
+
+
+def classified(entry: dict) -> bool:
+    return all(str(entry.get(key) or "").strip() for key in CLASSIFICATION)
+
+
+def classification_problems(name: str, entry: dict, version: int,
+                            kinds: tuple) -> list[str]:
+    """The classification's own rules (decision 32). Version 2 requires
+    every field; in either version, a field given is checked."""
+    out = []
+    given = {key: str(entry.get(key) or "").strip()
+             for key in CLASSIFICATION + ("reference",)}
+    for key in CLASSIFICATION:
+        if version >= 2 and not given[key]:
+            out.append("%s has no %s (format_version 2 requires the "
+                       "classification)" % (name, key))
+    for key in CLASSIFICATION + ("reference",):
+        if "TODO" in given[key]:
+            out.append("%s: %s is still a placeholder; a classification is "
+                       "a person's, or absent" % (name, key))
+            given[key] = ""
+    for key, allowed in VALUES.items():
+        if given[key] and given[key] not in allowed:
+            out.append("%s: %s %r is not one of %s"
+                       % (name, key, given[key], ", ".join(allowed)))
+            given[key] = ""
+    validity, origin = given["validity"], given["origin"]
+    resolution = given["resolution"]
+
+    def rule(holds, text):
+        if not holds:
+            out.append("%s: %s" % (name, text))
+    if resolution == "accepted" and validity:
+        rule(validity == "real", "accepted requires validity real; a "
+             "finding kept as it is is a real one (it is %s)" % validity)
+    if resolution == "not-a-defect" and validity:
+        rule(validity == "false-alarm", "not-a-defect requires validity "
+             "false-alarm (it is %s)" % validity)
+    if validity == "false-alarm" and resolution:
+        rule(resolution in ("not-a-defect", "reported"), "a false-alarm is "
+             "not-a-defect, or reported as a checker defect (it is %s)"
+             % resolution)
+    if validity == "unsure" and resolution:
+        rule(resolution == "deferred", "unsure requires resolution "
+             "deferred, to the review date (it is %s)" % resolution)
+    if origin == "unknown":
+        rule(validity == "unsure" and resolution == "deferred",
+             "origin unknown requires validity unsure and resolution "
+             "deferred: a cause still being looked for, by the review date")
+    if origin == "upstream":
+        rule(bool(str(entry.get("upstream") or "").strip()),
+             "origin upstream requires the upstream field "
+             "(upstream: <SOURCE> <IRI>)")
+    if resolution == "reported":
+        rule(bool(given["reference"]), "reported requires a reference: "
+             "where it was reported, a URL or a message id")
+    if given["classified_by"]:
+        match = CLASSIFIED_BY.match(given["classified_by"])
+        if not match:
+            out.append("%s: classified_by %r is not '<name> (<kind>)'"
+                       % (name, given["classified_by"]))
+        elif match.group("kind") not in kinds:
+            out.append("%s: classified_by names the kind %r, which %s does "
+                       "not declare (%s)" % (name, match.group("kind"),
+                                             REVIEW, ", ".join(kinds)))
+    return out
+
+
 def problems_of(entries: list, today: datetime.date | None = None,
-                sources: dict | None = None) -> list[str]:
+                sources: dict | None = None, version: int = 1,
+                kinds: tuple = KINDS) -> list[str]:
     """Every way an entry can be unusable. Each is a reason to refuse the
     register, not one entry: a check that skipped a bad entry would fail
     on the finding it was meant to accept, for a reason it did not say."""
@@ -154,6 +295,7 @@ def problems_of(entries: list, today: datetime.date | None = None,
                 tuple(sources.values())):
             out.append("%s: its focus is an upstream term, so it must name "
                        "the upstream (upstream: <SOURCE> <IRI>)" % name)
+        out.extend(classification_problems(name, entry, version, kinds))
         key = identity(entry)
         if key in seen:
             out.append("%s repeats entry %d" % (name, seen[key] + 1))
@@ -180,7 +322,12 @@ def load(root: Path | None = None) -> list[dict]:
     entries = raw.get("entries") or []
     if not isinstance(entries, list):
         raise RegisterError(REGISTER + ": entries is not a list")
-    problems = problems_of(entries, sources=upstream_ids(root))
+    version = raw.get("format_version", 1)
+    if version not in FORMATS:
+        raise RegisterError("%s: format_version %r is not one of %s"
+                            % (REGISTER, version, FORMATS))
+    problems = problems_of(entries, sources=upstream_ids(root),
+                           version=version, kinds=review_kinds(root))
     if problems:
         raise RegisterError(
             REGISTER + " cannot be used:\n" + "\n".join(
@@ -262,15 +409,79 @@ def propose(records: list, reason: str | None = None,
         entry["reason"] = reason or "TODO why this is accepted, not fixed"
         entry["owner"] = owner or "TODO who answers for it"
         entry["review"] = review or "TODO YYYY-MM-DD"
+        entry.update(placeholders())
         out.append(entry)
     return yaml.safe_dump(out, sort_keys=False, allow_unicode=True,
                           width=100) if out else ""
 
 
+def placeholders() -> dict:
+    """The classification left for a person: each field names its choices,
+    and a register refuses an entry that still has one."""
+    out = {key: "TODO %s" % " | ".join(allowed)
+           for key, allowed in VALUES.items()}
+    out["classified_by"] = "TODO <name> (<kind>)"
+    return out
+
+
+def counts(entries: list) -> dict:
+    """How many entries hold each value of each field, and how many are
+    unclassified -- the table WP6 built by hand."""
+    out = {key: {} for key in VALUES}
+    out["unclassified"] = 0
+    for entry in entries:
+        if not classified(entry):
+            out["unclassified"] += 1
+        for key in VALUES:
+            value = str(entry.get(key) or "") or "unclassified"
+            out[key][value] = out[key].get(value, 0) + 1
+    return out
+
+
+def validity_by(entries: list, *fields: str) -> dict:
+    """{(field values): {validity: n}}, for a check, rung or rule."""
+    out: dict = {}
+    for entry in entries:
+        key = tuple(entry.get(f) or "" for f in fields)
+        value = str(entry.get("validity") or "") or "unclassified"
+        out.setdefault(key, {})
+        out[key][value] = out[key].get(value, 0) + 1
+    return out
+
+
+def classify(entries: list) -> str:
+    """The unclassified entries, by identity, with placeholders for a
+    person to answer; nothing here is a judgement."""
+    import yaml
+
+    out = []
+    for entry in entries:
+        if classified(entry):
+            continue
+        row = {key: entry[key] for key in IDENTITY}
+        row.update({key: entry[key] for key in CLASSIFICATION
+                    if str(entry.get(key) or "").strip()})
+        for key, value in placeholders().items():
+            row.setdefault(key, value)
+        out.append(row)
+    return yaml.safe_dump(out, sort_keys=False, allow_unicode=True,
+                          width=100) if out else ""
+
+
+def shown(tally: dict) -> str:
+    return ", ".join("%s %d" % item for item in sorted(tally.items()))
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.parse_args(argv)
+    ap.add_argument("--classify", action="store_true",
+                    help="print the unclassified entries with placeholders, "
+                         "for a person to answer")
+    args = ap.parse_args(argv)
     entries = load()
+    if args.classify:
+        sys.stdout.write(classify(entries))
+        return 0
     today = datetime.date.today()
     by_check = {c: sum(1 for e in entries if e["check"] == c)
                 for c in CHECKS}
@@ -280,6 +491,20 @@ def main(argv=None) -> int:
     upstream = [e for e in entries if e.get("upstream")]
     if upstream:
         print("  %d about upstream terms" % len(upstream))
+    if entries:
+        tally = counts(entries)
+        for key in VALUES:
+            print("  %-10s %s" % (key, shown(tally[key])))
+        if tally["unclassified"]:
+            print("  %d unclassified: no judgement is recorded for them. "
+                  "--classify lists them for a person to answer"
+                  % tally["unclassified"])
+        for (check, where), tally in sorted(
+                validity_by(entries, "check", "where").items()):
+            print("  validity  %s %s: %s" % (check, where, shown(tally)))
+        for (check, rule), tally in sorted(
+                validity_by(entries, "check", "rule").items()):
+            print("  validity  %s rule %s: %s" % (check, rule, shown(tally)))
     for entry in entries:
         if datetime.date.fromisoformat(entry["review"]) < today:
             print("  REVIEW DUE %s: %s %s %s, owner %s" % (

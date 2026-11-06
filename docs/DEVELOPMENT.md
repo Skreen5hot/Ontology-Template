@@ -785,6 +785,34 @@ An entry still carrying the proposal's `TODO` is refused. `--reason`, `--owner` 
 `--review` fill every proposed entry at once, for a port that arrives with many findings
 of one kind; that is a decision about all of them, and the commit should say whose.
 
+**Classifying a finding** (template decision 32). An entry also records what a person
+concluded, as three separate answers and who gave them:
+
+| Field | Question | Values |
+|---|---|---|
+| `validity` | Is the finding true of the ontology? | `real`, `false-alarm`, `unsure` |
+| `origin` | Where is its cause? | `project`, `upstream`, `template`, `unknown` |
+| `resolution` | Why is it here rather than fixed? | `accepted`, `deferred`, `reported`, `not-a-defect` |
+| `classified_by` | Who judged it, in what capacity | `Jane Doe (domain-practitioner)`, a kind from `config/review.yaml` |
+
+`accepted` requires `real`, and `not-a-defect` requires `false-alarm`. A false alarm is
+`not-a-defect`, or `reported` as a defect in the checker. `unsure` is `deferred` to the
+review date. Origin `unknown` is for a cause still being looked for: it requires `unsure`
+and `deferred`. Origin `upstream` requires the `upstream` field, but an upstream IRI in a
+finding does not make the upstream its cause. `reported` requires a `reference`, a URL or
+a message id.
+
+A register at `format_version: 2` requires all four on every entry. At version 1 they may
+be absent, and are counted as unclassified, never guessed. `python tools/findings.py`
+prints the counts by field, and by validity for each check, shape set and rule.
+`--classify` lists the unclassified entries with placeholders for a person to answer.
+**The classification never changes what the gate passes**: a finding is accepted by its
+identity, whatever a person concluded about it.
+
+`config/review.yaml` holds the reviewer kinds: `ontologist`, `domain-practitioner`,
+`architect` and `rights-reviewer`. A project may add kinds, but may not remove these four.
+A rights reviewer records that a rights review was made, and implies no legal approval.
+
 `validate.py -o report.json` writes every finding, not a sample, and the validator says
 which shape set it is on, on stderr.
 

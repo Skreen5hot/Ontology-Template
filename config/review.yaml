@@ -1,0 +1,32 @@
+# The kinds of reviewer, and the capacity a judgement is made in (P5's
+# shared half, template decision 32).
+#
+# A review records who made it and in what capacity: when one person
+# holds two roles, the record says which one they acted in. The BCO's
+# conceptual model ticked "domain stakeholders have reviewed the model"
+# on reviews no practitioner had made, because nothing recorded the kind.
+#
+# Read now by the findings register: `classified_by` on an entry is
+# "<name> (<kind>)", the kind one of these. P5's other half -- a gate that
+# names the kinds it needs, and is not passed by another -- is not built:
+# it waits for item 12, where the domain review it would hold is defined.
+#
+# A project may add kinds, with what each means for it. It may not remove
+# one of these four: tools/findings.py refuses a file without them.
+
+version: 1
+
+kinds:
+  ontologist: >-
+    An ontology engineer, judging the formal modelling: placement,
+    definitions, axioms, alignment with BFO and CCO.
+  domain-practitioner: >-
+    Someone who does the work the ontology describes, judging whether it
+    says what that work is. The project says, in its charter, who counts.
+  architect: >-
+    The project's decision holder, judging for the project.
+  rights-reviewer: >-
+    Whoever records a review of rights and provenance. It records that a
+    rights review was made; it implies no legal approval and no legal
+    qualification, unless that authority has been separately established
+    and is recorded where it is.

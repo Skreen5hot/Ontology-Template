@@ -103,10 +103,20 @@ def test_a_proposal_is_refused_until_a_person_fills_it(register):
     entries = yaml.safe_load(register.propose(records))
     assert len(entries) == 1, "a repeated finding was proposed twice"
     got = register.problems_of(entries)
-    assert sum("placeholder" in p for p in got) == 3, got
+    assert sum("placeholder" in p for p in got) == 7, got
+    for key in ("reason", "owner", "review") + register.CLASSIFICATION:
+        assert any(key in p for p in got if "placeholder" in p
+                   or "not a date" in p), key
     filled = yaml.safe_load(register.propose(records, "r", "o",
                                              "2027-01-01"))
-    assert register.problems_of(filled) == []
+    left = register.problems_of(filled)
+    assert sorted(p.split(":")[1].split()[0] for p in left) == sorted(
+        register.CLASSIFICATION), "only the judgement is left to a person"
+    for entry in filled:
+        for key in register.CLASSIFICATION:
+            del entry[key]
+    assert register.problems_of(filled) == [], (
+        "a version 1 entry may leave the classification out")
 
 
 # ------------------------------------------------------- the policy
