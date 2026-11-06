@@ -1,5 +1,5 @@
 {
-  "digest": "9f47c0f310af2771e6b03c5bc0c5271fd067cb31eb44388871e2affe6855930b",
+  "digest": "f1a64a7d2913aea04301250f58eab10ddaeda6383dd58696cd46262650aeb1a3",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -70,7 +70,7 @@
     "tests/test_authoring.py": "9e4fdb46dfca59a8f58905cb8e087a7af4c7d04e71f72fc874dc8b2030b85a41",
     "tests/test_candidates.py": "80c7bc4485c3e360454ba821d5abd4fd83b2c63a45e37e7d0087518ca729c34c",
     "tests/test_classification.py": "fd9a51a01ba12372aacb5111fc95124336c8f8993f73985ff038ff7713df2bd1",
-    "tests/test_communications.py": "bb1d3369db8785f4a6a331bbdb2142f48823dcd43caec3c3a1ff5d5a573d4bab",
+    "tests/test_communications.py": "eef489aa7cf11253a11c33dab5318c752ebb812958351e2ca7dbff208dd82560",
     "tests/test_competency.py": "f8dd5c32fec0dd54150dee8231bf7a42e9c80096b7a35a13eefb478bfc7b9dda",
     "tests/test_detection_gaps.py": "dcbd60ee6f8ed9c9a42893335382f0239f17ac1c21905e09313111f8005abe42",
     "tests/test_findings.py": "706ddd8913fb3d0f7bc6c8e96588503973a0e9892907dfa6125fe0ac63e8f2d5",
@@ -95,7 +95,7 @@
     "tests/test_term_contract.py": "4c6394e578c0fce724c18acdb80651fc24751aad003388d817c3fbf63dbc8563",
     "tests/test_upstream_vendoring.py": "d69e1511158b51761b11e1395259ff59429b25763e0d888155ce2d09c07043c4",
     "tests/test_vocabulary.py": "a0b53c5d5a70a1b9f9d4d28194c93e215394c4f38714289fd3040f752e841ad7",
-    "tools/communications.py": "601ad83160ebc69289f78030c62b14d537837f394d9e9e5e1236ae96e8958778",
+    "tools/communications.py": "2926e783d788b79c53ff159cc128a751e3800db37cad0e8c5f550838ea2bebc3",
     "tools/findings.py": "bf4ab14e46cf06726636c9e271a9350b818bdc2f185705691767c851e52d6882",
     "tools/hooks/claude_ttl_lint.py": "0e4351ddb4ec278857030434b505a97931fcefa49637b2c340b36129063c9258",
     "tools/init_project.py": "ecfd6410b88be90e07d5266133ffc37869010ac4b34606448fde2c26244d3ca9",
@@ -138,7 +138,7 @@
     "prefix": "example",
     "title": "Example Ontology"
   },
-  "label": "v0.5.0",
+  "label": "unreleased",
   "note": "The digest of every template-owned and template-seeded file as the template shipped it, and the values init rewrites Turtle from (identity). A project keeps this as it arrived, with the block init adds (initialized): it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
   "seeded": {
     "config/annotation-profile.yaml": "22162f289468ef41edd97c3cd4c689215fc39177c5eba362a66da890440677dd",
@@ -157,6 +157,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "2f580d50ce49b133b4892f69d7aa565eefab1611734a494e15af426708d06bd6",
-  "template_commit": "b2de33441e54df9fcd3a6caad00e94d048f5fd84",
+  "template_commit": "307be0b506e8759b48411667bea708127e62b4ef",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

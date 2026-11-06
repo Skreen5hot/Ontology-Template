@@ -18,6 +18,7 @@ import copy
 import hashlib
 import shutil
 import subprocess
+import sys
 
 import pytest
 
@@ -412,3 +413,21 @@ def test_the_inbox_lists_what_the_record_does_not_hold(comms, tree):
     assert [w["id"] for w in waiting] == ["XYZ-ABC-new"]
     waiting = comms.inbox(posts, {"ABC", "OLD"}, tree)
     assert [w["id"] for w in waiting] == ["XYZ-ABC-new", "XYZ-OLD-alias"]
+
+
+def test_an_alert_prints_on_a_console_that_cannot_encode_its_arrow(repo):
+    """An alert's title is "[A→B] ...". On a Windows console (cp1252)
+    printing it raised UnicodeEncodeError before anything was posted; the
+    tool writes UTF-8 whatever the console. Run on a committed message of
+    this record, as a person would."""
+    import os
+
+    message = sorted((repo / "communications/sdd/outgoing").glob("*.md"))[-1]
+    env = dict(os.environ, PYTHONIOENCODING="cp1252")
+    result = subprocess.run(
+        [sys.executable, "tools/communications.py", "--alert",
+         message.relative_to(repo).as_posix()],
+        cwd=str(repo), capture_output=True, env=env)
+    assert result.returncode == 0, result.stderr.decode("utf-8", "replace")
+    assert "→" in result.stdout.decode("utf-8")
+

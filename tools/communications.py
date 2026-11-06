@@ -523,6 +523,12 @@ def main(argv=None) -> int:
     ap.add_argument("--code", action="append", default=[],
                     help="another code this record is known by on the board")
     args = ap.parse_args(argv)
+    # An alert's title carries an arrow, and a Windows console's code page
+    # cannot print it: write UTF-8 whatever the console, as the shared
+    # protocol's tools/alert.py does.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
     if args.alert:
         found = alert(args.alert)
         if found["opens_discussion"]:
