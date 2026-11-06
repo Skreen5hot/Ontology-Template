@@ -87,13 +87,17 @@ class Component:
         #: The component's relation to the template this repository was
         #: made from. `owned`: the template maintains it, and a project
         #: that changes it has diverged (tools/template_status.py says
-        #: where). `only`: it describes the template itself and
+        #: where). `seeded`: the template ships it and keeps improving
+        #: it, and a project is expected to change it -- the shapes, their
+        #: fixtures, the defaults in config; template_status.py reports a
+        #: change on either side, a local one as configuration (template
+        #: decision 32). `only`: it describes the template itself and
         #: tools/init_project.py removes it. Absent: the project's own.
         self.template = raw.get("template")
-        if self.template not in (None, "owned", "only"):
+        if self.template not in (None, "owned", "seeded", "only"):
             raise LayoutError(
-                "%s declares template %r; the values are 'owned' and "
-                "'only'" % (self.id, self.template))
+                "%s declares template %r; the values are 'owned', "
+                "'seeded' and 'only'" % (self.id, self.template))
         #: `canonical`: the module is kept in canonical Turtle by
         #: tools/ontology/normalize.py -- for a module edited in Protégé,
         #: which rewrites it on save. Absent: written by hand, comments

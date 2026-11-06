@@ -45,7 +45,11 @@ there before init runs. What is in research/ is left unstaged.
 
 Files declared `template: owned` are not touched. They are what
 tools/template_status.py compares against the template, and editing
-them here would make every project look diverged on day one.
+them here would make every project look diverged on day one. Files
+declared `template: seeded` -- the shapes and fixtures among them -- are
+rewritten like any Turtle, and init records each one as it left it in
+the manifest's `initialized` block, so a later change to one is reported
+as the project's own configuration.
 
 WHY A SCRIPT RATHER THAN SEARCH AND REPLACE
 
@@ -70,6 +74,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import layout  # noqa: E402
 import project  # noqa: E402
+import template_status  # noqa: E402
 
 IRI_PATTERN = "https://fandaws.com/ontology/%s"
 SKELETONS = "docs/template/skeletons"
@@ -244,19 +249,10 @@ def project_file(text: str, new: dict) -> str:
     return "\n".join(out)
 
 
-def turtle(text: str, old: dict, new: dict) -> str:
-    """The namespace, the prefix, and the module's title and comment."""
-    text = text.replace(old["iri_base"], new["iri_base"])
-    text = re.sub(r"(?<![A-Za-z0-9_/#.\-])" + re.escape(old["prefix"]) + ":",
-                  new["prefix"] + ":", text)
-    text = text.replace('"%s"' % old["title"], '"%s"' % new["title"])
-    text = text.replace("# %s --" % old["title"], "# %s --" % new["title"])
-    text = text.replace('"%s"' % old["description"],
-                        '"%s"' % new["description"].replace('"', "'"))
-    text = text.replace('dcterms:creator "%s"' % old["licence_holder"],
-                        'dcterms:creator "%s"'
-                        % new["licence_holder"].replace('"', "'"))
-    return text
+#: The namespace, the prefix, and the module's title and comment. In
+#: tools/project.py, because tools/template_status.py makes the same
+#: change to compare a seeded shape (template decision 32).
+turtle = project.rewrite_turtle
 
 
 def render(text: str, new: dict, module: str, template: str) -> str:
@@ -480,6 +476,12 @@ def main(argv=None) -> int:
     if stray:
         raise Refused("the template namespace %s survives in %s"
                       % (old["iri_base"], stray))
+
+    # The record of what init left in each seeded file, and the values it
+    # rewrote them with, beside the template's record: what the plain
+    # template_status report compares with, offline (decision 32).
+    template_status.initialize(root, new)
+    git(root, "add", "--", template_status.MANIFEST)
 
     if args.no_regenerate:
         print()

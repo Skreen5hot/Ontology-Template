@@ -22,6 +22,7 @@ rather than skipping when it is not.
 
 from __future__ import annotations
 
+import json
 import os
 import shutil
 import subprocess
@@ -172,6 +173,13 @@ def test_the_template_namespace_survives_only_where_the_network_is_needed(
         # old base may stand in front of /vendor/.
         if relative.startswith("protege/"):
             text = text.replace(old + "/vendor/", "")
+        # The manifest records what the project was made from, the
+        # template's own values included (`identity`, decision 32): there,
+        # and only in that block, the template's base is the record.
+        if relative == "config/template-manifest.json":
+            data = json.loads(text)
+            data.pop("identity", None)
+            text = json.dumps(data)
         if old in text:
             stray.append(relative)
     assert stray == [], stray
@@ -421,3 +429,159 @@ def test_init_refuses_to_write_an_owned_file(monkeypatch):
     with pytest.raises(SystemExit) as error:
         init.plan(init.layout.repository_root(), old, new)
     assert "which the template owns" in str(error.value)
+
+
+
+# ------------------------------------------ seeded files (P-A3, d. 32)
+#
+# A template copy with history of its own (a commit, then the manifest
+# recorded and committed, as a release does), and a project made from it.
+# Each test changes copies of the two, never the fixtures themselves.
+
+
+@pytest.fixture(scope="module")
+def template_copy(repo, tmp_path_factory):
+    root = copy_of(repo, tmp_path_factory.mktemp("template") / "t")
+    code, out = run(root, "tools/template_status.py", "--record")
+    assert code == 0, out
+    git(root, "add", "-A")
+    git(root, "commit", "-q", "-m", "record")
+    return root
+
+
+@pytest.fixture(scope="module")
+def made(template_copy, tmp_path_factory):
+    root = copy_of(template_copy, tmp_path_factory.mktemp("made") / "p")
+    code, out = run(root, "tools/init_project.py", *ARGS, "--offline")
+    assert code == 0, out
+    return root
+
+
+def clone(source, target):
+    shutil.copytree(source, target)
+    return target
+
+
+def append(root, relative, text="# changed\n"):
+    path = root / relative
+    path.write_bytes(path.read_bytes() + text.encode("utf-8"))
+
+
+def record(root, *, before_v030=False):
+    path = root / "config/template-manifest.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if before_v030:
+        for key in ("seeded", "seeded_digest", "identity", "initialized"):
+            data.pop(key, None)
+        data["format_version"] = 1
+        path.write_bytes(json.dumps(data, indent=2, sort_keys=True)
+                         .encode("utf-8") + b"\n")
+    return data
+
+
+REALIST = "shapes/realist_shapes.ttl"
+SKOS = "shapes/skos_shapes.ttl"
+NAMING = "config/naming.yaml"
+
+
+def test_init_records_each_seeded_file_as_it_left_it(made):
+    data = record(made)
+    status = load_tool("t_status_seeded", "tools/template_status.py")
+    seeded = data["initialized"]["seeded"]
+    assert len(seeded) == 10
+    for name, digest in seeded.items():
+        assert status.sha256_of((made / name).read_bytes()) == digest, name
+    assert data["initialized"]["values"]["iri_base"] == NEW_BASE
+    code, out = run(made, "tools/template_status.py")
+    assert code == 0, out
+    assert "every seeded file is as the template left it" in out
+
+
+def test_the_template_it_was_made_from_reports_no_change(made,
+                                                         template_copy):
+    """The round trip: the template's shapes, through init's rewrite,
+    are the project's shapes byte for byte. Compared as bytes, every
+    shape would be reported changed from the first commit."""
+    code, out = run(made, "tools/template_status.py", "--against",
+                    str(template_copy))
+    assert code == 0, out
+    assert "changed 0, removed 0, added 0 seeded" in out, out
+    assert "every seeded file is as the template left it" in out
+    assert "DEPENDENCY CHANGE" not in out and "NOT COMPARED" not in out
+
+
+def test_template_change_configuration_and_both_are_told_apart(
+        made, template_copy, tmp_path):
+    project = clone(made, tmp_path / "p")
+    template = clone(template_copy, tmp_path / "t")
+    append(project, NAMING)
+    append(project, REALIST)
+    append(template, REALIST)
+    append(template, SKOS)
+    code, out = run(template, "tools/template_status.py", "--record")
+    assert code == 0, out
+    code, out = run(project, "tools/template_status.py", "--against",
+                    str(template))
+    assert code == 0, out
+    assert "changed  %s" % REALIST in out and "changed  %s" % SKOS in out
+    assert "configured here (expected): %s, %s" % (NAMING, REALIST) in out
+    merge = out[out.index("merge by hand"):]
+    assert REALIST in merge and SKOS not in merge and NAMING not in merge
+
+
+def test_a_pin_the_template_moved_is_a_dependency_change(made, template_copy,
+                                                         tmp_path):
+    template = clone(template_copy, tmp_path / "t")
+    pins = template / "config/upstream-sources.yaml"
+    text = pins.read_bytes().decode("utf-8")
+    assert "release: v2.0-2024-11-06" in text
+    pins.write_bytes(text.replace("release: v2.0-2024-11-06",
+                                  "release: v9.9", 1).encode("utf-8"))
+    code, out = run(template, "tools/template_status.py", "--record")
+    assert code == 0, out
+    before = (made / "config/upstream-sources.yaml").read_bytes()
+    code, out = run(made, "tools/template_status.py", "--against",
+                    str(template))
+    assert code == 0, out
+    assert "changed  config/upstream-sources.yaml" in out
+    assert "DEPENDENCY CHANGE, for review" in out
+    assert "cco      here v2.0-2024-11-06, template v9.9" in out
+    assert (made / "config/upstream-sources.yaml").read_bytes() == before
+
+
+def test_a_manifest_from_before_v030_is_compared_through_history(
+        made, template_copy, tmp_path):
+    """A project made from v0.1.0 or v0.2.0 records no seeded file. On
+    its own it says it cannot compare them; with the template checkout
+    the base is found in its history, and the comparison is exact."""
+    project = clone(made, tmp_path / "p")
+    record(project, before_v030=True)
+    code, out = run(project, "tools/template_status.py")
+    assert code == 0, out
+    assert "NOT COMPARED" in out and "predates v0.3.0" in out
+    assert "every seeded file is as" not in out
+
+    code, out = run(project, "tools/template_status.py", "--against",
+                    str(template_copy))
+    assert code == 0, out
+    assert "every seeded file is as the template left it" in out
+    append(project, REALIST)
+    code, out = run(project, "tools/template_status.py", "--against",
+                    str(template_copy))
+    assert "configured here (expected): %s" % REALIST in out, out
+
+
+def test_without_the_history_nothing_is_reported_unchanged(
+        made, template_copy, tmp_path):
+    """Decision 32: a checkout without the history is a comparison not
+    made, exit 2, and no seeded file is called unchanged."""
+    project = clone(made, tmp_path / "p")
+    record(project, before_v030=True)
+    files = tmp_path / "files"
+    shutil.copytree(template_copy, files,
+                    ignore=shutil.ignore_patterns(".git"))
+    code, out = run(project, "tools/template_status.py", "--against",
+                    str(files))
+    assert code == 2, out
+    assert "NOT COMPARED" in out and "not a git checkout" in out
+    assert "every seeded file is as" not in out

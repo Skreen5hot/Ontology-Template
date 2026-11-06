@@ -491,9 +491,26 @@ each change.
 
 ## The template
 
-`config/template-manifest.json` is the digest of every template-owned file as the template
-shipped it. In a project it is never rewritten: it is the record of what the project was
-made from.
+`config/template-manifest.json` is the digest of every template-owned and template-seeded
+file as the template shipped it. In a project it is never rewritten: it is the record of
+what the project was made from, with the block init adds (`initialized`) saying what init
+left in each seeded file.
+
+A **seeded** file (`template: seeded` in the layout contract) is one the template keeps
+improving and a project is expected to change: the shapes and their fixtures, and the
+annotation-profile, naming, reasoning and upstream-pin config (template decision 32). The
+report keeps three things apart: what the template changed since the project's record,
+what was **configured here** (expected), and a file changed on **both** sides, for a person
+to merge. A shape is compared after the template's copy goes through init's own namespace
+rewrite, so an unchanged shape matches exactly.
+
+- A difference in a BFO or CCO pin is reported as a **dependency change** for review, both
+  releases named. Nothing is upgraded: the project's pin holds until the project adopts
+  another, as a decision.
+- A project made before v0.3.0 records no seeded file. `--against` finds the commit it was
+  made from in the template checkout's history and compares from there; without that
+  history it says **NOT COMPARED** and exits 2. A comparison not made is never reported as
+  unchanged.
 
 ```bash
 python tools/template_status.py                                 # what this project changed

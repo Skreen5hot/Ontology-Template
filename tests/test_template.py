@@ -150,7 +150,9 @@ def test_record_names_the_commit_it_was_made_on(status, monkeypatch,
     monkeypatch.setattr(status, "MANIFEST", "manifest.json")
     monkeypatch.setattr(status.layout, "repository_root", lambda: tmp_path)
     monkeypatch.setattr(status, "measure",
-                        lambda root=None: {"files": {}, "digest": "d"})
+                        lambda root=None: {"files": {}, "digest": "d",
+                                           "seeded": {}, "seeded_digest": "s"})
+    monkeypatch.setattr(status, "identity", lambda: {})
     monkeypatch.setattr(status, "head_commit", lambda root: "c" * 40)
     assert status.main(["--record"]) == 0
     record = json.loads((tmp_path / "manifest.json").read_text(
@@ -228,3 +230,79 @@ def test_against_names_what_both_sides_changed(status, monkeypatch,
     report = status.against(tmp_path)
     assert report["both"] == [both], report
     assert theirs_only in report["template_changed"]["changed"]
+
+
+# ------------------------------------------------- seeded (P-A3, d. 32)
+
+#: Decision 32's list, by component id.
+SEEDED = {"validation.wellformedness", "validation.realist",
+          "validation.skos", "fixture.wellformedness-bad-examples",
+          "fixture.realist-bad-examples", "fixture.skos-bad-examples",
+          "config.annotation-profile", "config.naming", "config.reasoning",
+          "config.upstream-sources"}
+
+
+def test_the_seeded_set_is_the_one_decided(layout):
+    """Decision 32 named these, and the generated profile shapes are not
+    among them: their generator is owned and their config seeded. Every
+    seeded Turtle file is in a role init rewrites, or the comparison's
+    rewrite would undo a change init never made."""
+    seeded = {c.id for c in layout.components() if c.template == "seeded"}
+    assert seeded == SEEDED, seeded ^ SEEDED
+    init = load_tool("t_init_roles", "tools/init_project.py")
+    for entry in layout.components():
+        if entry.template == "seeded" and entry.path.endswith(".ttl"):
+            assert entry.role in init.TURTLE_ROLES, entry.id
+    assert layout.component("validation.annotation-profile").template is None
+
+
+def test_init_and_the_comparison_rewrite_with_one_function():
+    init = load_tool("t_init_rewrite", "tools/init_project.py")
+    assert init.turtle is init.project.rewrite_turtle
+
+
+def test_the_manifest_records_the_seeded_files_and_the_values(status,
+                                                              project):
+    record = status.recorded()
+    if not project.is_template():
+        return
+    assert record["seeded"] == status.measure()["seeded"]
+    assert len(record["seeded"]) == len(SEEDED)
+    assert record["seeded_digest"] == status.digest_of(record["seeded"])
+    assert record["identity"] == status.identity()
+
+
+def test_a_changed_seeded_file_makes_the_template_record_stale(
+        status, project, monkeypatch, capsys):
+    """A seeded file the template changed without recording it would
+    reach no project's report, which is P-A3 again. In a project --check
+    only reports, as the owned files' does."""
+    if not project.is_template():
+        return
+    real = status.measure()
+    name = sorted(real["seeded"])[0]
+    monkeypatch.setattr(status, "measure", lambda root=None: dict(
+        real, seeded=dict(real["seeded"], **{name: "0" * 64})))
+    assert status.main(["--check"]) == 1
+    out = capsys.readouterr().out
+    assert "changed  %s (seeded)" % name in out and "STALE" in out
+
+
+def test_a_pin_difference_is_reported_for_review_never_as_an_upgrade(
+        status, capsys):
+    """Decision 32: a BFO or CCO pin that differs is a dependency change
+    for a person to review, both sides named. The project's pin holds."""
+    mine = b"sources:\n  - id: cco\n    release: v2.0\n  - id: bfo\n" \
+        b"    release: r1\n"
+    theirs = b"sources:\n  - id: cco\n    release: v2.2\n  - id: bfo\n" \
+        b"    release: r1\n"
+    rows = status.dependency_changes(mine, theirs)
+    assert rows == [{"source": "cco", "here": "v2.0", "template": "v2.2"}]
+    assert status.dependency_changes(mine, mine) == []
+    status.print_seeded({"template_changed": None, "configured_here": None,
+                         "both": [], "not_compared": [],
+                         "dependencies": rows})
+    out = capsys.readouterr().out
+    assert "DEPENDENCY CHANGE, for review" in out
+    assert "here v2.0, template v2.2" in out
+    assert "This project's pin holds" in out and "not an upgrade" in out

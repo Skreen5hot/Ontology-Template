@@ -52,8 +52,35 @@ REQUIRED = ("template", "id", "code", "title", "description", "namespace",
             "correspondents")
 
 
+#: The values init writes into Turtle as well as into the project file,
+#: because SPARQL in a shape cannot read this file (rewrite_turtle).
+IDENTITY = ("iri_base", "prefix", "title", "description", "licence_holder")
+
+
 class ProjectError(SystemExit):
     """The project file is missing a value or contradicts itself."""
+
+
+def rewrite_turtle(text: str, old: dict, new: dict) -> str:
+    """The namespace, the prefix, and the module's title and comment.
+
+    What tools/init_project.py does to every authored Turtle file, and
+    what tools/template_status.py does to the template's copy of a seeded
+    shape before comparing it with the project's: one function, so the
+    comparison makes exactly the change init made (template decision 32).
+    `old` and `new` are project values; only IDENTITY is read.
+    """
+    text = text.replace(old["iri_base"], new["iri_base"])
+    text = re.sub(r"(?<![A-Za-z0-9_/#.\-])" + re.escape(old["prefix"]) + ":",
+                  new["prefix"] + ":", text)
+    text = text.replace('"%s"' % old["title"], '"%s"' % new["title"])
+    text = text.replace("# %s --" % old["title"], "# %s --" % new["title"])
+    text = text.replace('"%s"' % old["description"],
+                        '"%s"' % new["description"].replace('"', "'"))
+    text = text.replace('dcterms:creator "%s"' % old["licence_holder"],
+                        'dcterms:creator "%s"'
+                        % new["licence_holder"].replace('"', "'"))
+    return text
 
 
 def problems_of(raw: dict) -> list[str]:
