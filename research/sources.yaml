@@ -1,0 +1,19 @@
+# The source register (P4, template decision 36): every source a design
+# decision may rely on, and how well each part of it was read.
+# tools/sources.py states the fields and the rules; research/sources.md is
+# generated from this file (python tools/sources.py --write).
+#
+# A claim says how a part of a source was read: V read in the primary
+# text, P part of it read, S secondary only, K prior knowledge, L behind
+# a login or paywall and not read. A V or P claim states its scope. Each
+# claim has an explicit id (C1, C2, ...) that never changes, so a
+# decision citing a claim always means the same claim.
+#
+# A decision file cites a claim (an entry id with -C<n>) or a source
+# whole (the entry id); writes mention: before the id for a source named
+# only as background; and needs an exception here, approved by the
+# architect, to rest on anything not graded V or P.
+
+format_version: 1
+entries: []
+exceptions: []

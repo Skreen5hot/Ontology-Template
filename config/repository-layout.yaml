@@ -61,6 +61,24 @@ components:
       Linted with the modules; never in the corpus digest or the SHACL
       ladder.
 
+  - id: research.sources
+    path: research/sources.yaml
+    role: research
+    template: seeded
+    description: >-
+      The source register: every source a decision may rely on, each claim
+      graded V, P, S, K or L with its scope, under a stable id; and the
+      exceptions, each excusing one citation in one decision file (P4,
+      template decision 36).
+
+  - id: generated.research-sources
+    path: research/sources.md
+    role: generated-artifact
+    generator: tool.sources
+    description: >-
+      The source register for a reader, generated from research/sources.yaml
+      by tools/sources.py --write; a stale one fails.
+
   - id: research
     path: research
     role: research
@@ -316,6 +334,15 @@ components:
       The review register: its rules, candidates imported from elsewhere,
       and which candidates are answered, unanswered or stale. --propose
       prints entries for a person to answer.
+
+  - id: tool.sources
+    path: tools/sources.py
+    role: tool
+    template: owned
+    description: >-
+      The source register's rules, every SRC identifier resolving, and
+      source adequacy: each citation in a decision file graded V or P, or
+      individually excused. Never grades or reads a source.
 
   - id: tool.candidates
     path: tools/ontology/candidates.py
@@ -649,6 +676,15 @@ components:
       expert, architect, rights reviewer -- and what each means; a project
       may add kinds, not remove these. The findings register's
       classified_by names one (P5, template decisions 32 and 35).
+
+  - id: config.sources
+    path: config/sources.yaml
+    role: configuration
+    template: seeded
+    description: >-
+      Which files record decisions, who may approve a source exception
+      (the architect, or a kind delegated by a recorded decision), and the
+      quote limit, unset by default (P4, decision 36).
 
   - id: config.candidates
     path: config/candidates.yaml

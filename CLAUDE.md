@@ -54,6 +54,7 @@ the checks, `docs/process/METHOD.md` for the method of building an ontology.
 .venv/Scripts/python tools/ontology/competency.py
 .venv/Scripts/python tools/ontology/reason.py        # needs Java; the Reasoning workflow runs it too
 .venv/Scripts/python tools/review.py
+.venv/Scripts/python tools/sources.py
 .venv/Scripts/python tools/stages.py
 .venv/Scripts/python tools/communications.py
 .venv/Scripts/python tools/template_status.py --check

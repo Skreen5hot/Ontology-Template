@@ -1,0 +1,32 @@
+# How tools/sources.py checks source adequacy (P4, template decision 36).
+#
+#   decisions            the files that record design decisions: every
+#                        source citation in them must be graded V or P, or
+#                        individually excused in research/sources.yaml
+#   exception_approvers  the reviewer kinds (config/review.yaml) that may
+#                        approve an exception. The architect by default. A
+#                        project may delegate to another kind, and records
+#                        the delegation: delegated_by names the decision
+#                        file that made it. Adding a kind to review.yaml
+#                        confers no authority by itself.
+#   max_quote_words      the longest quote the register may hold, or null.
+#                        Unset: the template takes no copyright position,
+#                        and setting a limit is not a legal determination
+#                        (decision 33)
+#   scan_exclude         tracked files whose SRC identifiers are not
+#                        checked to resolve (the template's own records)
+
+version: 1
+
+decisions:
+  - docs/decisions/**/*.md
+  - docs/standards/**/*.md
+  - docs/charter.md
+
+exception_approvers:
+  - kind: architect
+
+max_quote_words: null
+
+scan_exclude:
+  - docs/template/**

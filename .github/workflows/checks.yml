@@ -115,6 +115,15 @@ jobs:
         continue-on-error: true
         run: python tools/review.py
 
+      # Source adequacy (P4, decision 36): every source citation in a
+      # decision file is graded V or P, or individually excused; every SRC
+      # identifier resolves; research/sources.md is current. No citation
+      # passes, and is said to prove nothing.
+      - name: Every cited source was read, or the reliance excused
+        id: sources
+        continue-on-error: true
+        run: python tools/sources.py
+
       # The SHACL ladder, gated through config/findings-register.yaml: a
       # violation or warning no entry accepts fails, and so does an entry
       # that matches nothing. A rung that cannot be evaluated is exit 2,

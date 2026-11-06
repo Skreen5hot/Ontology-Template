@@ -96,7 +96,12 @@ Each was found by doing without it.
 - **Source adequacy.** A source a design decision relies on has been read in the primary
   text, or the reliance is explicitly excused, before the decision cites it. BCO grades
   each claim by how it was verified: read in the primary text, partly read, secondary only,
-  prior knowledge, behind a login.
+  prior knowledge, behind a login. Here the register is `research/sources.yaml`, each claim
+  graded with its scope under a stable id, and `tools/sources.py` refuses a decision that
+  cites anything not graded V or P without an exception the architect approved for that
+  citation. A source named only as background is written `mention:` and is not evidence.
+  The check holds decisions to the grades; it cannot see a source a decision relies on but
+  does not cite.
 - **Rights and provenance, before any harvest.** Before text is taken from a source, its
   rights are reviewed and recorded, and what is gathered is withheld until they are.
   Whether the text may be used is a legal decision, recorded as one, never a check's
@@ -172,9 +177,9 @@ still unanswered, is a record rather than a memory. BCO re-pinned BPO five times
 
 ## 9. Not covered yet
 
-The gates in §4 are rules for people. The review gate is a check (template v0.4.0).
-Three more are planned as checks and not yet built: a source register with verification
-grades, decision propagation, and a rights and provenance record. Conceptual fidelity is
+The gates in §4 are rules for people. The review gate is a check (template v0.4.0), and
+so is source adequacy (v0.5.0). Two more are planned as checks and not yet built: decision
+propagation, and a rights and provenance record. Conceptual fidelity is
 last, because it should be designed against a real formalization. Until then those are
 held by the gate's holder, and a standard can say what the holder checks by hand. The
 review candidates find only some kinds of defect, and few of the ones a careful reviewer

@@ -94,6 +94,8 @@ python tools/ontology/term_diff.py --base origin/main   # which terms this branc
 python tools/ontology/normalize.py --check    # modules declared canonical are canonical
 python tools/ontology/candidates.py           # review candidates: places a person looks
 python tools/review.py                        # the review register: answered, unanswered, stale
+python tools/sources.py                       # the source register; every cited source read, or excused
+python tools/sources.py --write               # regenerate research/sources.md from the register
 python tools/stages.py                        # every started stage has its standard, and a done
                                               # stage's review candidates are answered
 python tools/communications.py                # the communications record follows its protocol
@@ -612,6 +614,29 @@ answer them. `python tools/stages.py` refuses such a stage marked `done` until e
 candidate in its scope is answered by someone the charter names in an allowed role
 (`docs/charter.md`, "Who holds which gate", one line per role). `docs/process/review-example.md`
 works four candidates through.
+
+## Sources, and whether a decision's sources were read
+
+`research/sources.yaml` registers each source a decision may rely on. Each claim says how
+a part of it was read -- **V** in the primary text, **P** partly, **S** secondary only,
+**K** prior knowledge, **L** behind a login or paywall, not read -- with an explicit id
+(`C1`, `C2`) that never changes, and, for V and P, the scope examined.
+`research/sources.md` is generated from it with `python tools/sources.py --write`.
+
+In the decision files `config/sources.yaml` names (by default `docs/decisions/`,
+`docs/standards/`, `docs/charter.md`), a citation is the entry id with `-C<n>` for one
+claim, or the entry id alone for the whole source. `python tools/sources.py` fails the
+Checks job on a citation that is not graded V or P -- for a whole source, every claim, and
+at least one -- unless `research/sources.yaml` holds an exception for that citation in that
+file: its scope, its reason, and who approved it, the architect unless a recorded decision
+delegates (`config/sources.yaml`). An exception never changes a grade, and one that is no
+longer needed is stale and fails. Write `mention:` before an id to name a source as
+background without resting on it.
+
+A whole-source citation that passes says every registered claim was read, not that the
+register covers the whole source: where a decision rests on a passage, cite the claim. And
+the check cannot find a source a decision relies on but does not cite. With no citations
+it passes, and says that this proves nothing.
 
 ## Naming, deprecation, and what changed
 
