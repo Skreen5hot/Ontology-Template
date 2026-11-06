@@ -41,7 +41,8 @@ attribution is in [`vendor/NOTICE.md`](vendor/NOTICE.md).
 
 ```bash
 python -m venv .venv && .venv/Scripts/activate      # Windows; source .venv/bin/activate elsewhere
-python -m pip install -r requirements-dev.txt
+python tools/lock.py --bootstrap                    # the pinned pip, first
+python -m pip install --require-hashes -r requirements-lock.txt
 git config core.hooksPath .githooks                 # the IRI linter on every commit
 python -m pytest tests/ -q -p no:randomly -m "not reasoning and not scale and not corpus"
 ```

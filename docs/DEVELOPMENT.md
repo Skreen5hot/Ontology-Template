@@ -13,15 +13,33 @@ README, its HANDOFF, or a document of its own.
 
 ## Setup
 
-Python 3.12. Dependencies are pinned exactly, and the pinning is verified the one way it
-can be — by installing into an empty environment and running the suite there:
+Python 3.12. What is installed is `requirements-lock.txt`: every distribution, direct and
+transitive, pinned exactly with the hash of every file, for Linux, Windows and macOS.
+`--bootstrap` has the pip that came with the interpreter install only the pinned pip; that
+pip installs the rest, in hash-checking mode, which refuses anything the lock does not list.
 
 ```bash
 python -m venv .venv
 .venv/Scripts/activate          # Windows;  source .venv/bin/activate elsewhere
-python -m pip install -r requirements-dev.txt
+python tools/lock.py --bootstrap
+python -m pip install --require-hashes -r requirements-lock.txt
 python -m pytest tests/ -q -p no:randomly
 ```
+
+The lock is generated (template decision 32). `requirements-dev.txt` says what the tools
+import and why; `requirements-pip.txt` pins pip; `config/tooling.yaml` pins uv, which
+resolves the lock and is used for nothing else, and the cutoff after which no release is
+taken. Change any of the three, then:
+
+| Command | What it does |
+|---|---|
+| `python tools/lock.py --write` | Resolves the lock again with the pinned uv, installed into a scratch environment against its checksums. Network |
+| `python tools/lock.py` | Offline: the lock was resolved from the inputs as they are now, lists every direct pin at its version, and hashes every entry. A Checks step |
+| `python tools/lock.py --verify` | Resolves it again in a scratch directory and compares, byte for byte. Network |
+
+The Install workflow installs the lock fresh on `ubuntu-24.04`, `windows-2025` and
+`macos-15`, then runs `--verify` and the validation ladder on each, whenever an input
+changes and weekly.
 
 The tests marked `reasoning` need Java 11 or later (they run the pinned ROBOT jar); without
 Java they fail, by design, rather than skip. The tests marked `scale` take a few minutes
@@ -449,15 +467,19 @@ python tools/pins.py
 
 checks all of them and prints a report that can be cited: the commit it ran on and when,
 then each pin with the latest release upstream. A newer release is reported, not failed;
-it exits 1 on a published advisory against a Python pin, on a pinned commit that is not
-what its tag names upstream, and on a pin it could not check. It needs the network, and
+it exits 1 on a published advisory against any Python distribution the lock installs, or
+uv, on a uv checksum PyPI does not publish, on a pinned commit that is not what its tag
+names upstream, and on a pin it could not check. It says whether the advisory scan ran: a
+scan that could not run is reported as not scanned, never as clean. It needs the network, and
 uses `GITHUB_TOKEN` for the GitHub API's rate limit if it is set. The table says where each
 pin lives and how to check one by hand.
 
 | Pin | Where | How to check |
 |---|---|---|
 | GitHub Actions, by commit SHA, version in the trailing comment | `.github/workflows/*.yml` (`uses:`) | each action's releases page, or `gh api repos/<owner>/<action>/releases/latest` |
-| Python packages, exact versions | `requirements-dev.txt` | `python -m pip list --outdated`, and the advisories at https://osv.dev |
+| Python packages, exact versions | `requirements-dev.txt`, and pip in `requirements-pip.txt` | `python -m pip list --outdated`, and the advisories at https://osv.dev |
+| Every distribution installed, with hashes | `requirements-lock.txt`, generated | moved by moving an input, or `exclude_newer`, then `python tools/lock.py --write` |
+| uv, by version and checksums | `config/tooling.yaml` | the uv releases; every checksum must be one PyPI publishes |
 | BFO and CCO, by commit and digest | `config/upstream-sources.yaml` | the upstream repositories; a move is a decision, then `vendor_upstream.py --rebuild` |
 | ROBOT, by version and digest | `config/reasoning.yaml` | the ROBOT releases; a move is a decision |
 

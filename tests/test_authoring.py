@@ -179,7 +179,9 @@ def test_the_pins_section_names_every_pin_file(repo):
     section = text[text.index("## Pins"):]
     section = section[:section.index("\n## ", 1)]
     for where in (".github/workflows/*.yml", "requirements-dev.txt",
-                  "config/upstream-sources.yaml", "config/reasoning.yaml"):
+                  "requirements-pip.txt", "requirements-lock.txt",
+                  "config/tooling.yaml", "config/upstream-sources.yaml",
+                  "config/reasoning.yaml"):
         assert "`%s`" % where in section, where
         if "*" not in where:
             assert (repo / where).is_file(), where

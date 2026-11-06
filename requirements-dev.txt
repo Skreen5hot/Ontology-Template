@@ -22,9 +22,12 @@
 #               per-focus evaluation does not finish at 3,000 classes
 #   Markdown    the site build renders a specification and reviews
 #
-# jsonschema and owlrl are not pinned:
-# nothing here imports them, and the rule is to take out a pin nothing
-# exercises. Add each back in the commit that adds what needs it.
+# What these pull in -- owlrl, which pyshacl runs, among them -- is not
+# listed here. It is pinned, with every file's hash, in
+# requirements-lock.txt, which tools/lock.py resolves from this file and
+# which is what CI and the setup install (template decision 32). This
+# file says what the tools need and why; the lock says exactly what is
+# installed. Change this file, then: python tools/lock.py --write
 
 pytest==9.2.0
 PyYAML==6.0.3

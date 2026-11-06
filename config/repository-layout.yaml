@@ -626,8 +626,45 @@ components:
     role: configuration
     template: owned
     description: >-
-      The Python dependencies, pinned exactly, and only what the tools and
-      tests import.
+      The Python dependencies the tools and tests import, pinned exactly.
+      An input to the lock, which is what is installed.
+
+  - id: config.requirements-pip
+    path: requirements-pip.txt
+    role: configuration
+    template: owned
+    description: >-
+      The pip that installs the lock. An input to it; tools/lock.py
+      --bootstrap installs it first, from the lock's hashes.
+
+  - id: config.tooling
+    path: config/tooling.yaml
+    role: configuration
+    template: owned
+    description: >-
+      uv, which resolves the lock and nothing else, by version and the
+      checksum of every file it is published as; the interpreter the lock
+      is for; and the cutoff after which no release is taken.
+
+  - id: generated.requirements-lock
+    path: requirements-lock.txt
+    role: generated-artifact
+    generator: tool.lock
+    template: owned
+    description: >-
+      Every Python distribution the checks install, direct and
+      transitive, pinned and hashed for every platform, with the digest
+      of the three inputs it was resolved from. CI and the setup install
+      it with pip --require-hashes.
+
+  - id: tool.lock
+    path: tools/lock.py
+    role: tool
+    template: owned
+    description: >-
+      Writes the lock with the pinned uv (--write), resolves it again and
+      compares (--verify), checks offline that it is current and whole,
+      and installs the pinned pip from it (--bootstrap, stdlib only).
 
   - id: github.meta
     path: .github

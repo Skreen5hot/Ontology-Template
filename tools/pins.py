@@ -17,7 +17,11 @@ What it reads is what docs/DEVELOPMENT.md, "Pins", lists:
 
   - each GitHub Action in .github/workflows/*.yml, by commit SHA, with
     the release tag in its trailing comment;
-  - each Python package in requirements-dev.txt;
+  - each Python package in requirements-dev.txt, and the pip in
+    requirements-pip.txt;
+  - each distribution requirements-lock.txt adds to them (transitive);
+  - uv in config/tooling.yaml, by version and by the checksum of every
+    file it was published as;
   - each upstream in config/upstream-sources.yaml, by release and commit;
   - ROBOT in config/reasoning.yaml, by version and tag commit.
 
@@ -25,7 +29,12 @@ For each it reports the latest release upstream. A pin behind it is
 reported, not failed: keeping a pin can be a decision (CCO, decision
 18). It fails, and exits 1, on what no decision makes right:
 
-  - a published advisory against a Python pin (osv.dev);
+  - a published advisory against any Python distribution the checks
+    install, direct or locked, or against uv (osv.dev). The report says
+    whether the scan ran, so a scan that could not run is never read as
+    a clean one;
+  - a uv checksum that is not one PyPI publishes for that release, or a
+    published file with no checksum recorded;
   - a pinned commit that is not what its tag names upstream -- the tag
     moved, or the comment or the commit is wrong;
   - a pin it could not check. An unchecked pin is not a checked one.
@@ -50,18 +59,25 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import layout  # noqa: E402
+import lock  # noqa: E402
 
 WORKFLOWS = ".github/workflows"
 REQUIREMENTS = "requirements-dev.txt"
+PIP = "requirements-pip.txt"
+LOCK = "requirements-lock.txt"
+TOOLING = "config/tooling.yaml"
 UPSTREAMS = "config/upstream-sources.yaml"
 REASONING = "config/reasoning.yaml"
 
 GITHUB = "https://api.github.com"
 PYPI = "https://pypi.org/pypi/%s/json"
+PYPI_RELEASE = "https://pypi.org/pypi/%s/%s/json"
 OSV = "https://api.osv.dev/v1/querybatch"
 
 USES = re.compile(r"uses:\s*([\w.-]+/[\w.-]+)@([0-9a-f]{40})\s*#\s*(\S+)")
 REQUIREMENT = re.compile(r"^([A-Za-z0-9_.-]+)==(\S+)$")
+#: The kinds osv.dev is asked about: everything pip installs, and uv.
+SCANNED = ("python", "locked", "tool")
 RAW = re.compile(r"^https://raw\.githubusercontent\.com/([\w.-]+/[\w.-]+)/")
 
 
@@ -106,14 +122,28 @@ def collect(root: Path) -> list[dict]:
             pin["where"].append(where)
     pins.extend(actions.values())
 
-    for number, line in enumerate(
-            (root / REQUIREMENTS).read_text(encoding="utf-8").splitlines(),
-            1):
-        match = REQUIREMENT.match(line.strip())
-        if match:
-            pins.append({"kind": "python", "name": match.group(1),
-                         "pinned": match.group(2),
-                         "where": ["%s:%d" % (REQUIREMENTS, number)]})
+    direct = set()
+    for source in (REQUIREMENTS, PIP):
+        for number, line in enumerate(
+                (root / source).read_text(encoding="utf-8").splitlines(), 1):
+            match = REQUIREMENT.match(line.strip())
+            if match:
+                direct.add(lock.normalized(match.group(1)))
+                pins.append({"kind": "python", "name": match.group(1),
+                             "pinned": match.group(2),
+                             "where": ["%s:%d" % (source, number)]})
+    for entry in lock.entries((root / LOCK).read_text(encoding="utf-8")):
+        if entry["name"] and entry["name"] not in direct:
+            pins.append({"kind": "locked", "name": entry["name"],
+                         "pinned": entry["version"], "where": [LOCK]})
+
+    uv = (yaml.safe_load((root / TOOLING).read_text(encoding="utf-8"))
+          or {}).get("uv") or {}
+    if uv:
+        pins.append({"kind": "tool", "name": "uv",
+                     "pinned": str(uv.get("version")),
+                     "sha256": dict(uv.get("sha256") or {}),
+                     "where": [TOOLING]})
 
     upstreams = yaml.safe_load(
         (root / UPSTREAMS).read_text(encoding="utf-8")) or {}
@@ -171,21 +201,30 @@ def check(pins: list[dict]) -> list[dict]:
         try:
             if pin["kind"] == "action":
                 check_tagged(pin, pin["name"])
-            elif pin["kind"] == "python":
+            elif pin["kind"] in ("python", "locked"):
                 pin["latest"] = fetch_json(PYPI % pin["name"])["info"][
                     "version"]
+            elif pin["kind"] == "tool":
+                check_published(pin)
             else:
                 check_tagged(pin, pin.get("repo"))
         except Exception as exc:  # urllib and json raise several types
             pin["problems"].append("not checked: %s" % exc)
 
-    python = [p for p in pins if p["kind"] == "python"]
+    python = [p for p in pins if p["kind"] in SCANNED]
+    for pin in python:
+        pin["scanned"] = False
     if python:
         try:
             answer = fetch_json(OSV, {"queries": [
                 {"package": {"name": p["name"], "ecosystem": "PyPI"},
                  "version": p["pinned"]} for p in python]})
-            for pin, result in zip(python, answer["results"]):
+            results = answer["results"]
+            if len(results) != len(python):
+                raise ValueError("osv.dev answered %d of %d queries"
+                                 % (len(results), len(python)))
+            for pin, result in zip(python, results):
+                pin["scanned"] = True
                 pin["advisories"] = sorted(v["id"] for v in
                                            result.get("vulns") or [])
                 if pin["advisories"]:
@@ -196,6 +235,38 @@ def check(pins: list[dict]) -> list[dict]:
             for pin in python:
                 pin["problems"].append("advisories not checked: %s" % exc)
     return pins
+
+
+def check_published(pin: dict) -> None:
+    """uv, installed by its checksums: each one recorded must be what
+    PyPI publishes for the release, and every file PyPI has must be
+    recorded, so pip can install it on any platform it picks a file for."""
+    pin["latest"] = fetch_json(PYPI % pin["name"])["info"]["version"]
+    files = fetch_json(PYPI_RELEASE % (pin["name"], pin["pinned"]))["urls"]
+    published = {f["filename"]: f["digests"]["sha256"] for f in files}
+    if pin["sha256"] != published:
+        wrong = sorted(n for n in pin["sha256"]
+                       if published.get(n) != pin["sha256"][n])
+        missing = sorted(set(published) - set(pin["sha256"]))
+        said = []
+        if wrong:
+            said.append("not as published: " + ", ".join(wrong))
+        if missing:
+            said.append("not recorded: " + ", ".join(missing))
+        pin["problems"].append("checksums are not the %d PyPI publishes "
+                               "for %s (%s)" % (len(published),
+                                                pin["pinned"],
+                                                "; ".join(said)))
+
+
+def scan(pins: list[dict]) -> dict:
+    """Whether the advisory scan ran, and over how many distributions. A
+    scan that could not run is reported as one, never as clean."""
+    python = [p for p in pins if p["kind"] in SCANNED]
+    return {"distributions": len(python),
+            "ran": bool(python) and all(p.get("scanned") for p in python),
+            "with_advisories": sorted(p["name"] for p in python
+                                      if p["advisories"])}
 
 
 # -------------------------------------------------------------- report
@@ -211,7 +282,8 @@ def head(root: Path) -> str:
     commit = result.stdout.decode("ascii").strip()
     changed = subprocess.run(
         ["git", "status", "--porcelain", "--", WORKFLOWS, REQUIREMENTS,
-         UPSTREAMS, REASONING], cwd=str(root), capture_output=True)
+         PIP, LOCK, TOOLING, UPSTREAMS, REASONING], cwd=str(root),
+        capture_output=True)
     if changed.stdout.strip():
         commit += " (with uncommitted changes to the pin files)"
     return commit
@@ -241,7 +313,21 @@ def report(pins: list[dict], commit: str, when: str) -> str:
     if newer:
         lines.append("  A newer release is reported, not failed: take it, "
                      "or keep the pin and say why (docs/DEVELOPMENT.md, "
-                     "\"Pins\").")
+                     "\"Pins\"). A locked distribution moves when "
+                     "exclude_newer in %s does, then python tools/lock.py "
+                     "--write." % TOOLING)
+    scanned = scan(pins)
+    if scanned["ran"]:
+        found = scanned["with_advisories"]
+        lines.append("  Advisories: osv.dev scanned all %d Python "
+                     "distribution(s); %s." % (
+                         scanned["distributions"],
+                         ", ".join(found) + " have advisories" if found
+                         else "none has one"))
+    else:
+        lines.append("  Advisories: NOT SCANNED. The %d Python "
+                     "distribution(s) are not known to be free of "
+                     "advisories." % scanned["distributions"])
     return "\n".join(lines) + "\n"
 
 
@@ -256,7 +342,8 @@ def main(argv=None) -> int:
     commit = head(root)
     when = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     if args.json:
-        print(json.dumps({"commit": commit, "checked": when, "pins": pins},
+        print(json.dumps({"commit": commit, "checked": when, "pins": pins,
+                          "advisory_scan": scan(pins)},
                          indent=2, sort_keys=True))
     else:
         sys.stdout.write(report(pins, commit, when))

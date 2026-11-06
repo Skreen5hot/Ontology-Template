@@ -58,8 +58,8 @@ jobs:
 
       - name: Install the pinned dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements-dev.txt
+          python tools/lock.py --bootstrap
+          python -m pip install --disable-pip-version-check --require-hashes -r requirements-lock.txt
           python -m pip list
 
       # First, because everything after it would otherwise pass in a copy
@@ -74,6 +74,14 @@ jobs:
         id: layout
         continue-on-error: true
         run: python tools/layout.py
+
+      # Every distribution pip installed above, pinned and hashed, and
+      # resolved from the inputs as they now are (tools/lock.py). The
+      # install itself refuses a distribution the lock does not list.
+      - name: The dependency lock is current and whole
+        id: lock
+        continue-on-error: true
+        run: python tools/lock.py
 
       - name: Every tracked file has exactly one disposition
         id: disposition
@@ -224,8 +232,8 @@ jobs:
 
       - name: Install the pinned dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements-dev.txt
+          python tools/lock.py --bootstrap
+          python -m pip install --disable-pip-version-check --require-hashes -r requirements-lock.txt
 
       - name: Fetch the pinned upstreams and compare
         run: python tools/ontology/vendor_upstream.py --confirm

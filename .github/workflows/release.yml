@@ -36,7 +36,7 @@ concurrency:
 jobs:
   which:
     name: Template or project
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       template: ${{ steps.flag.outputs.template }}
     steps:
@@ -57,7 +57,7 @@ jobs:
     name: Check, build twice, publish
     needs: which
     if: needs.which.outputs.template != 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -73,8 +73,8 @@ jobs:
 
       - name: Install the pinned dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements-dev.txt
+          python tools/lock.py --bootstrap
+          python -m pip install --disable-pip-version-check --require-hashes -r requirements-lock.txt
 
       - name: What is being released
         id: what

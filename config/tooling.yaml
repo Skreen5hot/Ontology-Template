@@ -1,0 +1,45 @@
+# The tools that write pinned files. The checks never run them.
+#
+# uv resolves requirements-lock.txt (tools/lock.py --write). It is used
+# for that alone: CI and a developer install with pip, from the lock, in
+# hash-checking mode (template decision 32).
+#
+#   version        the uv release, exactly
+#   sha256         every distribution PyPI publishes for that release, by
+#                  file name. tools/lock.py installs uv with pip's
+#                  --require-hashes against these, so pip checks the one
+#                  file it downloads; tools/pins.py checks the list
+#                  against PyPI's
+#   python         the interpreter the lock is resolved for: the declared
+#                  baseline. A run records its exact patch version
+#   exclude_newer  the lock takes no release published after this
+#                  instant, so the same inputs resolve to the same lock
+#                  on any day. Moving it is how the transitive versions
+#                  move; it is checked with the pins before a release
+
+version: 1
+
+uv:
+  version: 0.13.6
+  python: "3.12"
+  exclude_newer: "2026-10-30T00:00:00Z"
+  sha256:
+    uv-0.13.6-py3-none-linux_armv6l.whl: 4d20de8a3ed6c3d39b4e2f8f7d0411cd13a3959f5191b2b5d0209344034ed056
+    uv-0.13.6-py3-none-macosx_10_12_x86_64.whl: 95f042b95e67ef8c3d3569bb6e9d895e592002c5e871cf3f1afe407c9d77a294
+    uv-0.13.6-py3-none-macosx_11_0_arm64.whl: 51361029b7cf91185d0092c4b356d110b4ad629e9cb11593f1e006ac72a72ca9
+    uv-0.13.6-py3-none-manylinux_2_17_aarch64.manylinux2014_aarch64.musllinux_1_1_aarch64.whl: 7ec5486476d67a4214c460b5492393ee2300d84e1de17b293100a019b413568b
+    uv-0.13.6-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.musllinux_1_1_armv7l.whl: 710c68ea4853aaf70ab2d0ccf2e147dee59449f035a1f8fe7759f087a31cdbf5
+    uv-0.13.6-py3-none-manylinux_2_17_armv7l.manylinux2014_armv7l.whl: d4d7026c7327dd11fc2c0d4bae4735ff6944293d370644f35d2e6e917cdcae04
+    uv-0.13.6-py3-none-manylinux_2_17_i686.manylinux2014_i686.whl: 46c2ef1f744f20007be0cdd66db3022bb1ddcac477c754efda875e401a48d810
+    uv-0.13.6-py3-none-manylinux_2_17_ppc64le.manylinux2014_ppc64le.whl: b2d25a49d135a441f688a6869d6d8062fb6f0a2e3e32e18b72c9de1d0eb9521e
+    uv-0.13.6-py3-none-manylinux_2_17_s390x.manylinux2014_s390x.whl: b9f57153fc98b7aa41dd6720e3de7578747f60b7bff22f50b76dcc47205bdde3
+    uv-0.13.6-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl: 22759b8895e1103578de6fb4cd27e94b4399d021023378d29f01333717751fba
+    uv-0.13.6-py3-none-manylinux_2_28_aarch64.whl: 2e9a99100abe4f99605366974c4f9fe27f236615e05de8e78c0f357e38f09f97
+    uv-0.13.6-py3-none-manylinux_2_31_riscv64.musllinux_1_1_riscv64.whl: 1cd4b0a35fa599b83da5437748150319ae0917c522da60898327645382942faa
+    uv-0.13.6-py3-none-manylinux_2_31_riscv64.whl: 8542dcf118ce8a7cf2e4ba1fea7f5cc1638bc02b5b30dab1ead7e9034dc62fd3
+    uv-0.13.6-py3-none-musllinux_1_1_i686.whl: feb0f1d555798f68f28719cab437ab1dfb5d918db86ab4554215cbf9d940f63b
+    uv-0.13.6-py3-none-musllinux_1_1_x86_64.whl: d1efed1d15102ffdbf5e0fd49a440643dda2d921a2ad856792ae42ccd43c253f
+    uv-0.13.6-py3-none-win32.whl: 29135609166960c74539abdaf4264f9819a0381be18b224125418356d67dd208
+    uv-0.13.6-py3-none-win_amd64.whl: 7c9bc35ccb65932d8dc10a0669f9c805eaa3c9827ce18ecbecb1bd67944b2cdf
+    uv-0.13.6-py3-none-win_arm64.whl: 722c7f96803f115e53918b8ee8858d1680ea6077c614b6db750747d709ab8d9a
+    uv-0.13.6.tar.gz: d762215478854f6cf20c3faed8f1eb30c8101d568e7bc32a3abafc063929d5c5

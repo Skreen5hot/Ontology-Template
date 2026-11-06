@@ -1,0 +1,9 @@
+# The pip that installs everything else (template decision 32).
+#
+# The pip that first runs in a fresh environment is whichever came with
+# the interpreter, and it cannot be pinned. So it installs only this one,
+# from requirements-lock.txt with its hashes (tools/lock.py --bootstrap),
+# and the pinned pip installs the rest. Both versions are printed, so a
+# run records which pip started it.
+
+pip==26.2.2

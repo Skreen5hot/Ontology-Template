@@ -51,7 +51,8 @@ What it does not have yet (an end-to-end proof in CI) is in [`docs/template/ROAD
 
    ```bash
    python -m venv .venv && .venv/Scripts/activate      # Windows; source .venv/bin/activate elsewhere
-   python -m pip install -r requirements-dev.txt
+   python tools/lock.py --bootstrap                   # the pinned pip, first
+   python -m pip install --require-hashes -r requirements-lock.txt
    git config core.hooksPath .githooks
    ```
 

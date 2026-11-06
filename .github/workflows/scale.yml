@@ -26,6 +26,9 @@ on:
       - 'tools/**'
       - 'shapes/**'
       - 'requirements-dev.txt'
+      - 'requirements-pip.txt'
+      - 'requirements-lock.txt'
+      - 'config/tooling.yaml'
       - 'config/upstream-sources.yaml'
       - 'vendor/**'
 
@@ -52,8 +55,8 @@ jobs:
 
       - name: Install the pinned dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements-dev.txt
+          python tools/lock.py --bootstrap
+          python -m pip install --disable-pip-version-check --require-hashes -r requirements-lock.txt
 
       - name: The budgets, and the corpus-sized tests, with each test's time
         run: python -m pytest tests/ -q -p no:randomly -m "scale or corpus" --durations=0
