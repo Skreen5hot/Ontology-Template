@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7. See "Release v0.1.0" to "Release v0.4.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4. See "Release v0.1.0" to "Release v0.5.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -822,6 +822,70 @@ The rest of the checklist, with decision 32's three verifications:
   seeded file as the template left it, and the suite passes (575).
 - Item 4: the manifest recorded with the label `v0.4.0` in its own commit.
 
+### Release v0.5.0 (2026-11-06)
+
+The fifth template release, made under `RELEASING.md`: P4 alone, as decision 36 approved
+it with three refinements and authorized its release once its tests passed. Not P7, P8,
+P6 or other source-governance features.
+
+**What changes for a project made from v0.4.0.**
+
+- New: `tools/sources.py`, with `research/sources.yaml` and `config/sources.yaml` (both
+  seeded) and the generated `research/sources.md`. `--against` lists the tool, its tests and
+  the two seeded files as added; after taking them, `python tools/sources.py --write`
+  generates the Markdown, and the check says so if it is missing.
+- The Checks job gains "Every cited source was read, or the reliance excused". It fails on
+  a source citation in a decision file (`docs/decisions/`, `docs/standards/`,
+  `docs/charter.md` by default) not graded V or P and not excused, and on an `SRC`
+  identifier anywhere that names nothing. A project with no sources and no citations
+  passes, and is told this proves nothing.
+
+| What | Why | Tests |
+|---|---|---|
+| `a79fcfb`: the source register, each claim graded V, P, S, K or L under an explicit, stable id, a V or P claim with its scope; quote keys, no typed quotation marks in entry prose, every `SRC` reference resolving, a generated `research/sources.md`; source adequacy in decision files, claim by claim or whole-source (at least one claim, every claim V or P); `mention:` for a source named as background; exceptions individual, never changing a grade, approved by the architect or a recorded delegation, stale when no longer needed | P4 (decisions 21 and 36): METHOD §4's source adequacy gate, which BCO found late and had no check for | `tests/test_sources.py` |
+| `0057fc3`: the read-only measurement on BCO | Decision 36, §5 | -- |
+
+**What it does not do.** It never grades or reads a source: a grade is a person's
+statement of how they read it, and the check holds decisions to the statement. A
+whole-source citation that passes says every registered claim was read, not that the
+register covers the source. A decision that relies on a source without citing it is not
+seen. Measured on BCO (`evaluations/2026-11-06-p4-measurement.md`, counts only): the
+carried check read all 63 entries, with 12 findings, all V or P claims without a scope; 3
+of BCO's 43 decision and ADR files cite a register source, 8 citations, 7 adequate and 1
+not, which shows how much of a project's reliance on sources lies outside the files the
+check is configured to read.
+
+Not in it, and still open: the rest of the backlog, below, in its order: P7, P8, then P6;
+P-A2, P-A4 to P-A6, P-A8; SDD's domain and range file; items 8 to 11.
+
+Pins: item 1, every pin checked at `0057fc3` (2026-11-06). 29 pins, none failed; osv.dev
+scanned all 18 Python distributions, none has an advisory. The same four have a newer
+release and are kept for the reasons recorded at v0.3.0: pip 26.3, uv 0.13.7 and Markdown
+3.11.3 postdate the lock's cutoff, and a re-lock is a change of its own; CCO stays at
+`v2.0-2024-11-06` (decisions 3 and 18).
+
+The rest of the checklist, with decision 32's three verifications:
+
+- Item 2: the suite passes locally at `0057fc3` (641 passed), every check tool exits 0, and
+  the site checks clean; CI green on the tagged commit, confirmed before the tag is pushed.
+- Negative tests: every rule of the register, of adequacy and of exceptions has a planted
+  case refused by name and a near miss that passes, including decision 36's regressions:
+  reordered claims keep their ids; a whole source with no claim; an exception whose
+  citation is gone, and one whose claim is now read; mentions, evaluated never and
+  resolved always.
+- Mutation tests: 31 of 31 caught.
+- Compatibility: a project made from tag v0.4.0. Its own `--against` the new template lists
+  the tool, its tests and the two seeded files as added, every seeded file as the template
+  left it. The new tool without the register refuses, naming the file; with the seeded
+  files taken and the Markdown generated, it passes and reports zero citations as proving
+  nothing.
+- Item 3: a fresh clone of `0057fc3`, installed from the lock (`--bootstrap`, then pip,
+  `pip check` clean), initialized as a project with the network rebuild: init exit 0; in
+  the project every reference resolves, the gate passes, the review register, the source
+  check and the stage check exit 0, `--against` the template reports every owned and
+  seeded file as the template left it, and the suite passes (612).
+- Item 4: the manifest recorded with the label `v0.5.0` in its own commit.
+
 ### After WP6: the prioritized backlog (decision 29)
 
 From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
@@ -837,7 +901,7 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.3.0 | 5 | **P-A7**: separate fields for a finding's validity, its origin and its resolution, designed with P5 | approved; amended (decision 32); in v0.3.0 |
 | v0.3.0 | 6 | **P-A1** transitive dependency locking; **P-A3** drift report sees shapes and config | approved; amended (decision 32); in v0.3.0 |
 | v0.4.0 | 12 | Review as a gate: machine candidates for over-claiming, homonyms, duplicates and misclassification, each answered by a named reviewer in the role the stage requires (Domain Expert, Proxy Domain Expert or Ontologist, decision 35), checked by `stages.py`; P5's other half; item 7 folded in; the "merge by hand" defect fixed alongside | approved; designed (decision 34, `evaluations/2026-11-06-item-12-design.md`); in v0.4.0 |
-| v0.5.0 | -- | **P4**, the source register and source adequacy | approved; amended (decision 36) |
+| v0.5.0 | -- | **P4**, the source register and source adequacy | approved; amended (decision 36); in v0.5.0 |
 | Next | -- | P7, P8, then P6 (decision 21; P5 is in v0.4.0); P-A2, P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
