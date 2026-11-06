@@ -193,3 +193,180 @@ def test_the_shipped_skeleton_is_the_one_refused(stages, repo):
     found = stages.problems_of(raw, repo, COMPONENTS, skeleton)
     assert any("charter: standard docs/standards/stage-standard.md is the "
                "blank skeleton" in f for f in found), found
+
+
+# ------------------------------------------- the review gate (item 12)
+
+import datetime  # noqa: E402
+
+TODAY = datetime.date(2026, 11, 6)
+DOMAIN = {"rules": ["genus-differs", "near-duplicate"],
+          "roles": ["domain-expert", "proxy-domain-expert"]}
+ONTOLOGY = {"rules": ["necessity-without-axiom"], "roles": ["ontologist"]}
+EXTERNAL = {"rules": ["external:*"],
+            "roles": ["domain-expert", "proxy-domain-expert", "ontologist"]}
+ROLES = {"proxy-domain-expert": ["A. Damiano"], "ontologist": ["O. Logist"]}
+
+
+def reviewed(status="done", groups=(DOMAIN, ONTOLOGY, EXTERNAL)):
+    return [{"id": "formalization", "kind": "path", "status": status,
+             "review": list(groups)}]
+
+
+def candidate(rule="near-duplicate", about=("urn:a", "urn:b")):
+    return {"rule": rule, "about": sorted(about), "message": "m",
+            "evidence": {}}
+
+
+def answer(rule="near-duplicate", about=("urn:a", "urn:b"),
+           by="A. Damiano (proxy-domain-expert)", **fields):
+    out = {"rule": rule, "about": list(about), "validity": "real",
+           "resolution": "fixed", "classified_by": by, "reason": "merged"}
+    out.update(fields)
+    return out
+
+
+def gate(stages, candidates, entries, roles=ROLES, older=None,
+         stage_list=None):
+    return stages.review_problems(stage_list or reviewed(), candidates,
+                                  entries, roles, older or {}, TODAY)
+
+
+def test_every_candidate_answered_by_a_named_role_passes(stages):
+    assert gate(stages, [candidate(), candidate("necessity-without-axiom",
+                                                ["urn:c"])],
+                [answer(), answer("necessity-without-axiom", ["urn:c"],
+                                  by="O. Logist (ontologist)")]) == []
+
+
+def test_whatever_the_answers_say_the_gate_is_the_same(stages):
+    """It checks that an answer exists, from the right role; never what
+    it concludes."""
+    for fields in ({"validity": "real", "resolution": "accepted"},
+                   {"validity": "false-alarm",
+                    "resolution": "not-a-defect"}):
+        assert gate(stages, [candidate()], [answer(**fields)]) == []
+
+
+def test_an_unanswered_candidate_holds_the_stage(stages):
+    got = gate(stages, [candidate()], [])
+    assert got == ["formalization: is done, but candidate near-duplicate "
+                   "urn:a urn:b has no answer in "
+                   "config/review-register.yaml"]
+
+
+def test_a_stage_not_done_is_not_held(stages):
+    assert gate(stages, [candidate()], [],
+                stage_list=reviewed(status="in-progress")) == []
+
+
+def test_a_candidate_outside_the_stages_rules_is_not_its_to_answer(stages):
+    assert gate(stages, [candidate("inverse-necessity", ["urn:p"])], []) \
+        == []
+
+
+def test_an_answer_from_the_wrong_role_does_not_count(stages):
+    got = gate(stages, [candidate()],
+               [answer(by="O. Logist (ontologist)")])
+    assert any("was answered as ontologist; this stage needs domain-expert "
+               "or proxy-domain-expert" in p for p in got), got
+
+
+def test_an_answer_from_someone_the_charter_does_not_name(stages):
+    got = gate(stages, [candidate()],
+               [answer(by="J. Doe (proxy-domain-expert)")])
+    assert any("answered by J. Doe as proxy-domain-expert, whom the "
+               "charter does not name" in p for p in got), got
+
+
+def test_a_charter_naming_no_one_for_a_group(stages):
+    got = gate(stages, [], [], roles={"ontologist": ["O. Logist"]})
+    assert any("the charter names no one as domain-expert or "
+               "proxy-domain-expert" in p for p in got), got
+
+
+def test_an_overdue_deferral_holds_the_stage(stages):
+    got = gate(stages, [candidate()], [answer(
+        validity="unsure", resolution="deferred", review="2026-11-01")])
+    assert any("deferred to 2026-11-01, which has passed" in p
+               for p in got), got
+
+
+def test_an_import_from_another_corpus_holds_the_stage(stages):
+    got = gate(stages, [], [], older={"review/candidates/run.yaml": "abc"})
+    assert any("review/candidates/run.yaml was run on another corpus" in p
+               for p in got), got
+
+
+def test_an_imported_candidate_is_matched_by_pattern(stages):
+    got = gate(stages, [candidate("external:model-review", ["urn:z"])], [])
+    assert any("external:model-review urn:z has no answer" in p
+               for p in got), got
+
+
+def test_the_charter_role_lines(stages):
+    roles = stages.charter_roles("""## Who holds which gate
+- Domain expert: none found yet
+- Proxy domain expert: A. Damiano
+* Ontologists: O. Logist; P. Second
+Prose that mentions a domain expert: is not a line.
+""")
+    assert roles == {"domain-expert": [],
+                     "proxy-domain-expert": ["A. Damiano"],
+                     "ontologist": ["O. Logist", "P. Second"]}
+
+
+def test_the_shipped_charter_names_no_one_yet(stages, repo):
+    roles = stages.charter_roles((repo / "docs/charter.md").read_text(
+        encoding="utf-8"))
+    assert roles == {"domain-expert": [], "proxy-domain-expert": [],
+                     "ontologist": []}
+
+
+@pytest.mark.parametrize("block, said", [
+    ("everyone", "is not a list"),
+    ([{"rules": ["genus-differs"]}], "group 1 needs rules and roles"),
+    ([{"rules": ["x"], "roles": ["y"], "kinds": ["z"]}],
+     "unknown field(s): kinds"),
+])
+def test_a_malformed_review_block_is_refused(stages, root, block, said):
+    raw = passing()
+    raw["path"][0]["review"] = block
+    got = problems(stages, root, raw)
+    assert any(said in p for p in got), got
+
+
+def test_the_shipped_stages_name_the_review_roles(stages):
+    found, _ = stages.check()
+    by_id = {s["id"]: s for s in found}
+    roles = {r for g in by_id["formalization"]["review"] for r in g["roles"]}
+    assert roles == {"domain-expert", "proxy-domain-expert", "ontologist"}
+    assert all(set(g["roles"]) <= {"domain-expert", "proxy-domain-expert"}
+               for g in by_id["conceptual-model"]["review"]
+               if "external:*" not in g["rules"])
+
+
+def test_check_runs_the_gate_only_for_a_done_reviewed_stage(stages, root,
+                                                            monkeypatch):
+    """The wiring: a stage marked done that names a review reaches the
+    gate; one in progress does not, so the corpus is not read for it."""
+    raw = passing()
+    raw["path"][0]["review"] = [DOMAIN]
+    path = root / "stages.yaml"
+    called = []
+    monkeypatch.setattr(stages, "gate",
+                        lambda r, s: called.append(r) or ["GATED"])
+    monkeypatch.setattr(stages.layout, "path",
+                        lambda cid: path if cid == "config.stages"
+                        else root / "docs/standards")
+    monkeypatch.setattr(stages.layout, "components", lambda: [
+        type("C", (), {"id": cid})() for cid in COMPONENTS])
+    path.write_text(yaml.safe_dump(raw), encoding="utf-8")
+    _found, problems_found = stages.check(root)
+    assert problems_found == ["GATED"] and called == [root]
+    raw["path"][0]["status"] = "in-progress"
+    raw["path"][1]["status"] = "in-progress"
+    path.write_text(yaml.safe_dump(raw), encoding="utf-8")
+    called.clear()
+    _found, problems_found = stages.check(root)
+    assert problems_found == [] and called == []

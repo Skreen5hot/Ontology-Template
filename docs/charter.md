@@ -52,3 +52,11 @@ For each stage the project runs: who approves its standard and its gate, and in 
 capacity (ontologist, domain expert, proxy domain expert, architect, rights). Name the
 domain experts, or say that none has been found yet; and name any proxy domain expert
 standing in for one, with their experience in the domain and the reason a proxy is acting.
+
+The review roles, one line each, names separated by ";". `tools/stages.py` reads these
+lines: an answer to a review candidate counts only from someone named here in the role it
+was given in (`config/review-register.yaml`).
+
+- Domain expert: none found yet
+- Proxy domain expert: none
+- Ontologist: none

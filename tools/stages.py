@@ -17,9 +17,32 @@ can hold:
 - every status, layout component and joined stage is one that exists, and
   no stage is listed twice.
 
+THE REVIEW GATE (backlog item 12, template decisions 34 and 35)
+
+A stage may name, in `review`, groups of review-candidate rules and the
+roles that may answer each (Domain Expert, Proxy Domain Expert,
+Ontologist: config/review.yaml). Such a stage is refused as done while
+
+- a current candidate from one of its rules has no answer in
+  config/review-register.yaml;
+- an answer is by a role the group does not allow: an ontologist's
+  answer does not pass a question for a domain expert;
+- the person an answer names is not named in the charter in that role
+  (docs/charter.md, "Who holds which gate": one line per role, such as
+  "- Proxy domain expert: Jane Doe");
+- the charter names no one in any of a group's roles;
+- an answer deferred is past its review date;
+- candidates imported from elsewhere were run on another corpus.
+
+A candidate is a place to look, never a defect: nothing fails because one
+exists. The gate checks that each has an answer from the right role on
+the current corpus. It cannot check that the person is what the role
+says; the charter says it, and the answer is signed.
+
 It never reads what a standard says, and never judges whether a gate's
-conditions were met: those are for the person who holds the gate. A
-standard that exists is evidence that one was written, nothing more.
+conditions were met, or whether an answer is right: those are for the
+person who holds the gate. A standard that exists is evidence that one
+was written, nothing more.
 
 Exit codes: 0 no findings; 1 findings.
 """
@@ -27,7 +50,10 @@ Exit codes: 0 no findings; 1 findings.
 from __future__ import annotations
 
 import argparse
+import datetime
+import fnmatch
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -36,6 +62,16 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import layout  # noqa: E402
 
 STATUSES = ("not-started", "in-progress", "done")
+CHARTER = "docs/charter.md"
+#: The charter's line for each review role: "- Domain expert: <names>".
+ROLE_LINES = {"domain expert": "domain-expert",
+              "proxy domain expert": "proxy-domain-expert",
+              "ontologist": "ontologist"}
+ROLE_LINE = re.compile(
+    r"^\s*[-*]\s*(proxy domain experts?|domain experts?|ontologists?)\s*:"
+    r"\s*(.*?)\s*$", re.I)
+#: A charter line that names no one.
+NOBODY = re.compile(r"^(none\b.*|)$", re.I)
 STARTED = ("in-progress", "done")
 FIELDS = ("id", "runs", "status", "standard", "where")
 #: The blank skeleton in docs/standards/, which is not a standard until
@@ -88,6 +124,8 @@ def problems_of(raw: dict, root: Path, components: set[str],
         if stage["runs"] is False and stage["status"] != "not-started":
             found.append("%s: is %s, but the project does not run it"
                          % (name, stage["status"]))
+        for problem in review_block_problems(stage.get("review")):
+            found.append("%s: review %s" % (name, problem))
         standard = stage["standard"]
         if stage["status"] in STARTED and not standard:
             found.append("%s: is %s with no standard; a stage's standard "
@@ -125,6 +163,101 @@ def problems_of(raw: dict, root: Path, components: set[str],
     return found
 
 
+def review_block_problems(block) -> list[str]:
+    """What is wrong with a stage's `review` block, if it has one."""
+    if block is None:
+        return []
+    if not isinstance(block, list) or not block:
+        return ["is not a list of {rules, roles} groups"]
+    out = []
+    for index, group in enumerate(block):
+        if (not isinstance(group, dict) or not group.get("rules")
+                or not group.get("roles")):
+            out.append("group %d needs rules and roles" % (index + 1))
+            continue
+        unknown = sorted(set(group) - {"rules", "roles"})
+        if unknown:
+            out.append("group %d has unknown field(s): %s"
+                       % (index + 1, ", ".join(unknown)))
+    return out
+
+
+def charter_roles(text: str) -> dict:
+    """{role: [names]} from the charter's role lines. A line saying
+    "none" names no one; a role with no line is absent."""
+    out: dict = {}
+    for line in text.splitlines():
+        match = ROLE_LINE.match(line)
+        if not match:
+            continue
+        label = match.group(1).lower().rstrip("s")
+        role = ROLE_LINES[label]
+        value = match.group(2)
+        names = [] if NOBODY.match(value) else [
+            n.strip() for n in value.split(";") if n.strip()]
+        out.setdefault(role, []).extend(names)
+    return out
+
+
+def in_group(rule: str, group: dict) -> bool:
+    return any(fnmatch.fnmatchcase(rule, pattern)
+               for pattern in group.get("rules") or [])
+
+
+def review_problems(stages: list[dict], candidates: list[dict],
+                    entries: list[dict], roles: dict, older: dict,
+                    today: datetime.date) -> list[str]:
+    """The review gate, for each stage marked done that names one. Pure:
+    the candidates, the register, the charter's roles and the imports run
+    on another corpus are given."""
+    import review
+
+    found = []
+    answers = {review.key(e): e for e in entries}
+    for stage in stages:
+        groups = stage.get("review")
+        if stage.get("status") != "done" or not groups:
+            continue
+        name = stage.get("id")
+        for group in groups:
+            allowed = list(group["roles"])
+            if not any(roles.get(r) for r in allowed):
+                found.append("%s: is done, but the charter names no one as "
+                             "%s, the role(s) that answer %s" % (
+                                 name, " or ".join(allowed),
+                                 ", ".join(group["rules"])))
+        for record in candidates:
+            group = next((g for g in groups if in_group(record["rule"], g)),
+                         None)
+            if group is None:
+                continue
+            what = "%s %s" % (record["rule"], " ".join(record["about"]))
+            entry = answers.get(review.key(record))
+            if entry is None:
+                found.append("%s: is done, but candidate %s has no answer "
+                             "in %s" % (name, what, review.REGISTER))
+                continue
+            kind = review.kind_of(entry)
+            person = str(entry["classified_by"]).rsplit(" (", 1)[0]
+            if kind not in group["roles"]:
+                found.append("%s: candidate %s was answered as %s; this "
+                             "stage needs %s" % (name, what, kind,
+                                                 " or ".join(group["roles"])))
+            elif person not in roles.get(kind, []):
+                found.append("%s: candidate %s was answered by %s as %s, "
+                             "whom the charter does not name in that role"
+                             % (name, what, person, kind))
+            if (entry["resolution"] == "deferred" and
+                    datetime.date.fromisoformat(entry["review"]) < today):
+                found.append("%s: candidate %s was deferred to %s, which "
+                             "has passed" % (name, what, entry["review"]))
+        for path, corpus in sorted(older.items()):
+            found.append("%s: is done, but %s was run on another corpus "
+                         "(%s); run it again, or remove it"
+                         % (name, path, corpus[:12]))
+    return found
+
+
 def check(root: Path | None = None) -> tuple[list[dict], list[str]]:
     import yaml
 
@@ -134,7 +267,26 @@ def check(root: Path | None = None) -> tuple[list[dict], list[str]]:
     skeleton_path = layout.path("docs.standards") / SKELETON
     skeleton = skeleton_path.read_bytes() if skeleton_path.is_file() else None
     components = {c.id for c in layout.components()}
-    return stages_of(raw), problems_of(raw, root, components, skeleton)
+    stages = stages_of(raw)
+    found = problems_of(raw, root, components, skeleton)
+    if any(s.get("status") == "done" and s.get("review") for s in stages):
+        found.extend(gate(root, stages))
+    return stages, found
+
+
+def gate(root: Path, stages: list[dict]) -> list[str]:
+    """The review gate's inputs, read from the repository, then the gate.
+    Only run when a stage marked done names a review: generating the
+    candidates reads the whole corpus."""
+    import review
+
+    candidates, digest = review.current(root)
+    charter = root / CHARTER
+    roles = charter_roles(charter.read_text(encoding="utf-8")
+                          if charter.is_file() else "")
+    return review_problems(stages, candidates, review.load(root), roles,
+                           review.older(candidates, digest),
+                           datetime.date.today())
 
 
 def main(argv=None) -> int:

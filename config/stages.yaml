@@ -12,9 +12,16 @@
 #   where     layout component ids (config/repository-layout.yaml)
 #   joins     lanes only: the path stages its work waits on
 #
+#   review    optional: groups of review-candidate rules and the roles
+#             that may answer each (backlog item 12, decisions 34 and 35);
+#             the stage is not done while a candidate is unanswered
+#
 # tools/stages.py checks it. It refuses a started stage without a standard,
-# a path stage done before the ones before it, and a lane done before the
-# stages it joins. It never reads a standard or judges a gate.
+# a path stage done before the ones before it, a lane done before the
+# stages it joins, and a stage done while a review candidate in its scope
+# has no answer from a role it allows, by someone the charter names in
+# that role. It never reads a standard, never judges a gate, and never
+# fails because a candidate exists.
 
 version: 1
 
@@ -36,6 +43,12 @@ path:
     status: not-started
     standard: null
     where: []
+    review:
+      - rules: [genus-differs, definitions-differ, near-duplicate,
+                category-in-differentia]
+        roles: [domain-expert, proxy-domain-expert]
+      - rules: ["external:*"]
+        roles: [domain-expert, proxy-domain-expert, ontologist]
 
   # A small ontology's design may be its charter and its conceptual model,
   # ratified together: set runs to false and say so in the charter.
@@ -50,6 +63,14 @@ path:
     status: not-started
     standard: null
     where: [ontology.main, vocabulary.intake]
+    review:
+      - rules: [genus-differs, definitions-differ, near-duplicate,
+                category-in-differentia]
+        roles: [domain-expert, proxy-domain-expert]
+      - rules: [necessity-without-axiom, inverse-necessity]
+        roles: [ontologist]
+      - rules: ["external:*"]
+        roles: [domain-expert, proxy-domain-expert, ontologist]
 
   - id: instances
     runs: true

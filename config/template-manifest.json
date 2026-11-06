@@ -1,5 +1,5 @@
 {
-  "digest": "40fb0f552389a0db4b2abbc43a5ad28560a6c34081c2c0e7e399d460511b35a0",
+  "digest": "d414140a4733e50a47aade4e3764dbd2ce5bf5d7c587943473d571675e07ca4e",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -16,7 +16,7 @@
     ".github/workflows/scale.yml": "85b603eac76c2fd405d866daffeea830a90e1c1fe09997f01bf851f4ef0b65eb",
     ".github/workflows/term-diff.yml": "07265575d738ee0f4c3a777d449865b8eef61cc0254d7fd49e12e4f4646fd9df",
     ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
-    "config/review.yaml": "16e48187ec36ccae1196ee27ab973a8538b3bff55fc6c6e9cba36d9a235979de",
+    "config/review.yaml": "cb38aac49ee963e2249f14bf96e152f4333359b23cd4d5d6b627cd3b87dc15f8",
     "config/tooling.yaml": "a106bb41f68541125b979d3aeb022fb5c85ad1ce318e4ed03f5d0a4194b039ec",
     "docs/DEVELOPMENT.md": "9f2e475e8a56e0af31da600b3f694de25ebee648971db4d280613c7dea63bb52",
     "docs/PORTING.md": "f58802103aa3ee37dbfb939dc56a0c96297b2f2d1ede8d64497eed751ae164f7",
@@ -87,7 +87,7 @@
     "tests/test_review.py": "a6d3e80a9ac5cb7336bf4ec3226ed33108b8009097202d9cd1acf5a5e8e29eee",
     "tests/test_scale.py": "0f70716251c9078aa3b7b1a6bbccef808cd0e385072dd5ea85d792a86a5fad50",
     "tests/test_site.py": "b09f5a5044b793924b11a523dba1057b1661a68d2a5edcdbaec8f454943c5931",
-    "tests/test_stages.py": "ee858ec0166bb576cd82e2e4b5372171a707ada6f15204f0a2fd8bc9de871d39",
+    "tests/test_stages.py": "698bb9cb00911739f6dcb2678bfeaff611a3d1be4735bd9ffb414d4679b1b987",
     "tests/test_template.py": "5f742d0762768fa2cbc8c05c50ce5a7ead58e9e64ca0cb82b785338449791c1e",
     "tests/test_term_contract.py": "4c6394e578c0fce724c18acdb80651fc24751aad003388d817c3fbf63dbc8563",
     "tests/test_upstream_vendoring.py": "d69e1511158b51761b11e1395259ff59429b25763e0d888155ce2d09c07043c4",
@@ -122,7 +122,7 @@
     "tools/review.py": "42a89a9e3cc0e1309e60d237f1e8250f93d2494784cc8b406bf1c24fdee1e264",
     "tools/site/build_site.py": "18e96006e244abc6cb4848ab49e31880c38010b5f686f0bd1029ef2195b9407b",
     "tools/site/check_site.py": "c11a8be77c70ad969160b818911390411bd9df12c42565cc7a806c17bb9ddc25",
-    "tools/stages.py": "906803d6a7aaa990bf5f6b93cc41348745293acc08444ab2b7ac311dd7f0dce4",
+    "tools/stages.py": "da9c7b982bd00095f6fa087c60743d7e3192397b893255c02273d194945fe46c",
     "tools/template_status.py": "321742707b3acfedb751c03428c7dad5e086f04f4cdd1eafb72b40a7b7867e79"
   },
   "format_version": 2,
@@ -150,6 +150,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "0be69cb48f8af4f67dde257fd219435070cda8741446c3da20a58792c68c571f",
-  "template_commit": "333250a2a8b5edd98444848d1f36c4d0cd043bb6",
+  "template_commit": "fbfc3267b3eeb1c7b9910d0f0db6029cdfa2d149",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

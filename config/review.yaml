@@ -6,10 +6,11 @@
 # conceptual model ticked "domain stakeholders have reviewed the model"
 # on reviews no practitioner had made, because nothing recorded the kind.
 #
-# Read now by the findings register: `classified_by` on an entry is
-# "<name> (<kind>)", the kind one of these. P5's other half -- a gate that
-# names the kinds it needs, and is not passed by another -- is not built:
-# it waits for item 12, where the domain review it would hold is defined.
+# Read by the findings register and the review register: `classified_by`
+# on an entry is "<name> (<kind>)", the kind one of these. P5's other
+# half is tools/stages.py's review gate (backlog item 12): a stage names
+# the roles that answer its review candidates, and an answer from another
+# role, or from someone the charter does not name in it, does not pass.
 #
 # A project may add kinds, with what each means for it. It may not remove
 # one of the template's: tools/findings.py refuses a file without them.
