@@ -363,6 +363,11 @@ def seeded_report(root: Path, template: Path | None = None) -> dict:
             out["not_compared"].append(why)
         else:
             mine = identity()
+            # By the template's names: a project made before v0.3.0 has a
+            # layout that marks no file seeded, and every one would read
+            # as removed here.
+            current = digests(root, sorted(name for name in files
+                                           if (root / name).is_file()))
             out["configured_here"] = compare(
                 {name: sha256_of(as_received(name, data, values, mine))
                  for name, data in files.items()}, current)

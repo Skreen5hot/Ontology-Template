@@ -476,6 +476,10 @@ def record(root, *, before_v030=False):
         data["format_version"] = 1
         path.write_bytes(json.dumps(data, indent=2, sort_keys=True)
                          .encode("utf-8") + b"\n")
+        # And its layout, which marks no file seeded.
+        layout = root / "config/repository-layout.yaml"
+        layout.write_bytes(layout.read_bytes().replace(
+            b"    template: seeded\n", b""))
     return data
 
 
