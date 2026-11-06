@@ -492,7 +492,7 @@ def test_init_records_each_seeded_file_as_it_left_it(made):
     data = record(made)
     status = load_tool("t_status_seeded", "tools/template_status.py")
     seeded = data["initialized"]["seeded"]
-    assert len(seeded) == 10
+    assert seeded and set(seeded) == set(status.seeded_files(made))
     for name, digest in seeded.items():
         assert status.sha256_of((made / name).read_bytes()) == digest, name
     assert data["initialized"]["values"]["iri_base"] == NEW_BASE

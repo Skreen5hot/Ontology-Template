@@ -1,0 +1,50 @@
+# How tools/ontology/candidates.py looks for review candidates (backlog
+# item 12, template decision 34).
+#
+# A candidate is a place a person looks, never a verdict and never a
+# failed check: tuning these changes how many places are listed, not what
+# any check passes (item 14, loosening a check, stays rejected). Every
+# value here is a starting point; a project changes them for its corpus.
+#
+#   necessity_words      words in a definition that claim every instance
+#                        has or does something; matched as whole words
+#   duplicate_overlap    the share of content words two definitions must
+#                        have in common (0 to 1) to be listed as possible
+#                        duplicates
+#   duplicate_min_words  definitions with fewer content words than this
+#                        are not compared: short ones coincide by chance
+#   constitution_words   words that say a class includes, is made of, or
+#                        is also something; a class from a disjoint BFO
+#                        category named within a few words after one is a
+#                        misclassification candidate, a mention without
+#                        one is not
+
+version: 1
+
+necessity_words:
+  - requires
+  - required
+  - must
+  - always
+  - every
+  - necessarily
+  - only if
+
+duplicate_overlap: 0.8
+
+duplicate_min_words: 4
+
+constitution_words:
+  - includes
+  - including
+  - include
+  - comprises
+  - comprising
+  - consists of
+  - consisting of
+  - composed of
+  - made of
+  - made up of
+  - contains
+  - containing
+  - is also

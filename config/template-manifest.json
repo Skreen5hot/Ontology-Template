@@ -1,5 +1,5 @@
 {
-  "digest": "bd8f30ed35e65c60df8980c110791164d4ace314293ad95975a3d610cfec817f",
+  "digest": "dc4a128d188822fe1d8a493a5771068477630cc657505aa8f637e8198a23a4c2",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -66,6 +66,7 @@
     "tests/fixtures/reasoning/inconsistent-example.ttl": "8495583ac4788e65d99b2c8c9801c57a65f1f3cc6c2f713d64364d24058d10f9",
     "tests/fixtures/reasoning/unsatisfiable.ttl": "d521a5e5552e48b8e68cd2de34c72742d50557045e4ff17372c23375ef8bb636",
     "tests/test_authoring.py": "9e4fdb46dfca59a8f58905cb8e087a7af4c7d04e71f72fc874dc8b2030b85a41",
+    "tests/test_candidates.py": "80c7bc4485c3e360454ba821d5abd4fd83b2c63a45e37e7d0087518ca729c34c",
     "tests/test_classification.py": "fd9a51a01ba12372aacb5111fc95124336c8f8993f73985ff038ff7713df2bd1",
     "tests/test_communications.py": "bb1d3369db8785f4a6a331bbdb2142f48823dcd43caec3c3a1ff5d5a573d4bab",
     "tests/test_competency.py": "f8dd5c32fec0dd54150dee8231bf7a42e9c80096b7a35a13eefb478bfc7b9dda",
@@ -86,7 +87,7 @@
     "tests/test_scale.py": "0f70716251c9078aa3b7b1a6bbccef808cd0e385072dd5ea85d792a86a5fad50",
     "tests/test_site.py": "b09f5a5044b793924b11a523dba1057b1661a68d2a5edcdbaec8f454943c5931",
     "tests/test_stages.py": "ee858ec0166bb576cd82e2e4b5372171a707ada6f15204f0a2fd8bc9de871d39",
-    "tests/test_template.py": "4c77218c19afa8fc8ed3d22edc56edabcdfadc5e4c47f2b1ead8747bdb224dfc",
+    "tests/test_template.py": "5f742d0762768fa2cbc8c05c50ce5a7ead58e9e64ca0cb82b785338449791c1e",
     "tests/test_term_contract.py": "4c6394e578c0fce724c18acdb80651fc24751aad003388d817c3fbf63dbc8563",
     "tests/test_upstream_vendoring.py": "d69e1511158b51761b11e1395259ff59429b25763e0d888155ce2d09c07043c4",
     "tests/test_vocabulary.py": "a0b53c5d5a70a1b9f9d4d28194c93e215394c4f38714289fd3040f752e841ad7",
@@ -99,6 +100,7 @@
     "tools/licensing/third_party.py": "e69db849c00cfcf0427c7aa529122dd2b8c0e84ad641f91e80e9ff4efa364f34",
     "tools/lock.py": "89b6c363b3fd5278d16a88e94ec2fe1290f96aac00d874fb22cea3b9fcba7573",
     "tools/ontology/benchmark.py": "5f4a98e9a5b14d6b15b05e92a3fca77d23c88321e44e6e023441a88828a1b6a5",
+    "tools/ontology/candidates.py": "44031af54fe3d02eb507bfe80ed7e996e5ff7f2e0f4b7bec81b70600ae946138",
     "tools/ontology/canon.py": "c29c4f174ab7fd729ca1a84aa382cdf3cb8966ec3ab2b8551fb702de6dacf673",
     "tools/ontology/competency.py": "bbf0b7620808d53a7406ca1fb814910b8ac054f22ec94b1f2895abada2f71a91",
     "tools/ontology/corpus_digest.py": "f678be24b882091ba5627ad2d430e1ba0cefa9f74b823f3332706459de07a511",
@@ -134,6 +136,7 @@
   "note": "The digest of every template-owned and template-seeded file as the template shipped it, and the values init rewrites Turtle from (identity). A project keeps this as it arrived, with the block init adds (initialized): it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
   "seeded": {
     "config/annotation-profile.yaml": "22162f289468ef41edd97c3cd4c689215fc39177c5eba362a66da890440677dd",
+    "config/candidates.yaml": "8f04c720fbb8c8f74780de995a1fb25999c4042accaa8f06c2896713dcab7a85",
     "config/naming.yaml": "1c167c6d55c3f7caa565f4a76601ea2b2ad580fc5162da1accccd742b42d8eed",
     "config/reasoning.yaml": "3ef465495bad8c946d7e598a9d08c2bac763f577fb6a3833fd77ef0ff75a99e1",
     "config/upstream-sources.yaml": "9598fc10e84a85ec8e9bfae128146a8f912ee2215358062532ae4f2b77346112",
@@ -144,7 +147,7 @@
     "shapes/wellformedness_bad_examples.ttl": "313974a3fae0c318d4b75349eebff7f7b9d0db9ecad57cc4b7733652cc43c25d",
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
-  "seeded_digest": "c16e22ed2547b37fdb7ac7767f3c670ddfd80302c3ad764029ffc0d21c84845a",
-  "template_commit": "1030cc75ef612b58a5cfeb9a9fa7b69fdf787849",
+  "seeded_digest": "0be69cb48f8af4f67dde257fd219435070cda8741446c3da20a58792c68c571f",
+  "template_commit": "6fea1d1ab8c5089a08c7e7e888a1aebf53e5bcf3",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

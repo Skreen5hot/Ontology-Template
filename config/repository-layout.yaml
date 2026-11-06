@@ -282,6 +282,16 @@ components:
       changed -- each rule beside the check that holds it. The project's
       own policy; the template ships defaults.
 
+  - id: tool.candidates
+    path: tools/ontology/candidates.py
+    role: tool
+    template: owned
+    description: >-
+      Review candidates: every place a defect no check can decide may be
+      (over-claiming, homonyms, duplicates, misclassification), with the
+      evidence, for a person to answer. Offline and deterministic; never a
+      verdict and never a failed check (backlog item 12, decision 34).
+
   - id: tool.term-diff
     path: tools/ontology/term_diff.py
     role: tool
@@ -595,6 +605,15 @@ components:
       expert, architect, rights reviewer -- and what each means; a project
       may add kinds, not remove these. The findings register's
       classified_by names one (P5, template decisions 32 and 35).
+
+  - id: config.candidates
+    path: config/candidates.yaml
+    role: configuration
+    template: seeded
+    description: >-
+      How tools/ontology/candidates.py looks: the necessity words and the
+      duplicate thresholds. A project tunes them for its corpus; they
+      change how many places are listed, never what a check passes.
 
   - id: config.annotation-profile
     path: config/annotation-profile.yaml
