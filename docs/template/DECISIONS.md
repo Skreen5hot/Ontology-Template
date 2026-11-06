@@ -591,3 +591,30 @@ verbatim in
   fixed alongside; the rest of the backlog keeps its order after it.
 - "update and push": the record, the design's status and the ROADMAP are updated and
   pushed. Nothing is built yet.
+
+**35. "the roles are Domain Expert, Proxy Domain Expert, and Ontologist"** (2026-11-06)
+
+Given after decision 34, correcting its reading of "domain practioner or proxy". The whole
+text, which also says who holds the proxy role, is recorded verbatim in
+[`evaluations/2026-11-06-review-roles.md`](evaluations/2026-11-06-review-roles.md)
+(SHA-256 of the text below its rule `c4c0186636b6033deb28fa53f71cfd412c60bf285f3b999f298992922a519eb3`). Effect:
+
+- The review roles for item 12's candidates are **Domain Expert**, **Proxy Domain Expert**
+  and **Ontologist**. Decision 34's reading, a kind `domain-proxy` beside
+  `domain-practitioner`, is replaced: v0.4.0 renames `domain-practitioner` to
+  `domain-expert` in `config/review.yaml`, `tools/findings.py` and the charter form, and
+  adds `proxy-domain-expert`. `architect` and `rights-reviewer` stay, for decisions and
+  rights reviews (decision 32); they answer no item 12 candidate.
+- The domain rules (`genus-differs`, `near-duplicate`, `category-in-differentia`) accept a
+  Domain Expert or a Proxy Domain Expert; the ontologist rules accept an Ontologist. A
+  disposition names the role it was given in, so a proxy's answer is never recorded as an
+  expert's.
+- Who holds the proxy role, as the architect states it: the architect is the business
+  process Proxy Domain Expert, with twenty years in business and business process and no
+  business process certification, acting because the work is needed and no expert has
+  stepped forward, and will transfer the role to a Domain Expert when one comes. The work
+  goes forward under the proxy. This is recorded in the projects' charters (BPO's and
+  BCO's), which are those projects' to write; the template records only the roles.
+- Proposed for the v0.4.0 build, not decided: when a charter first names a Domain Expert,
+  no proxy answer is invalidated; the dispositions given by a Proxy Domain Expert are
+  listed as that expert's review queue.
