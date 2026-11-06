@@ -1,5 +1,5 @@
 {
-  "digest": "d414140a4733e50a47aade4e3764dbd2ce5bf5d7c587943473d571675e07ca4e",
+  "digest": "d34297f5737e8b341e1ebae04a3143db3c7ded30397df7efc9ec3235be6ee4f9",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -8,7 +8,7 @@
     ".github/ISSUE_TEMPLATE/defect.yml": "e11ea8b87a6e680957feee05cc4cd9d73145f4f8e635274d14066edc5170c593",
     ".github/ISSUE_TEMPLATE/term-request.yml": "6e9fc70cb09f6838b1d35abcdbe9c365bd876845dd8701bf469fdc83cae15a60",
     ".github/pull_request_template.md": "8ef17ba107d2ec008b0f05953ca1108c97b5ff042c644418c22cb186d10084be",
-    ".github/workflows/checks.yml": "41ad6a961a4044d93abe526da66d1772bf672adb4b7c6c0c0b4bab532a001a33",
+    ".github/workflows/checks.yml": "5cf5b809d9274002d3828b18d2be812cdd0947a174ea1d03df89d3b2d8156577",
     ".github/workflows/install.yml": "6eb33c900d2375b8015ee61717c3b906a66e5cc5e598c10df107c48769dbb466",
     ".github/workflows/pages.yml": "4e4c31eecb7949290a09d09c3fa68061ed21b12c495b49c5a9081f921f8ca9b5",
     ".github/workflows/reasoning.yml": "a19856a0ec1b3c07bd180bafc452f2977d7e4a5ac2681ae25d365c07033dca18",
@@ -18,11 +18,12 @@
     ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
     "config/review.yaml": "cb38aac49ee963e2249f14bf96e152f4333359b23cd4d5d6b627cd3b87dc15f8",
     "config/tooling.yaml": "a106bb41f68541125b979d3aeb022fb5c85ad1ce318e4ed03f5d0a4194b039ec",
-    "docs/DEVELOPMENT.md": "9f2e475e8a56e0af31da600b3f694de25ebee648971db4d280613c7dea63bb52",
+    "docs/DEVELOPMENT.md": "511f07aa9d030b37fafe1f60b814025a409ad61ed00ef9370d2ac81cf2cca77a",
     "docs/PORTING.md": "f58802103aa3ee37dbfb939dc56a0c96297b2f2d1ede8d64497eed751ae164f7",
     "docs/porting/port-report.md": "9cd44e61b1ca19f2723283648cf8220ae53ecfa67d57a0535cd0404458d0bf4d",
-    "docs/process/METHOD.md": "1e21ae6ed10fa8ea01d8f9c6d61b26c50359e88e94634c6a9a1d5d48b0e96d30",
+    "docs/process/METHOD.md": "dca575be4fdf0153e2185e9ebd06db30e0896cb4cd90ec51d44f775ea922dfd4",
     "docs/process/PROCESS.md": "7d05fe31365cbecfc27faa028671b0f95b12a196b91ff53bac4ccc01d4eea446",
+    "docs/process/review-example.md": "aada397e386f26a751b7daba29a3df4ee88ac2f1a1731b34a170bd6d96563806",
     "requirements-dev.txt": "76d1e8152c719743b6601c2cf2400b925c0b49766ca5ccfcb9e86291a69b9ddc",
     "requirements-lock.txt": "e6d9cbbd4563738772c039a7e9f12a6b3b839e6c392b1437f0827df7a48f9862",
     "requirements-pip.txt": "d4adda5f4d9391b2f5c4b7a6e912df7f2b524d233ae8ab728d80082a33a00dea",
@@ -150,6 +151,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "0be69cb48f8af4f67dde257fd219435070cda8741446c3da20a58792c68c571f",
-  "template_commit": "fbfc3267b3eeb1c7b9910d0f0db6029cdfa2d149",
+  "template_commit": "540eda679fdcd5916720607db8d052ff5c4b620a",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

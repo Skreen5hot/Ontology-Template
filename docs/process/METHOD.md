@@ -102,12 +102,18 @@ Each was found by doing without it.
   Whether the text may be used is a legal decision, recorded as one, never a check's
   verdict. BCO harvested before its rights review and had to withhold the result; one
   catalogue took three decisions and a re-sourcing to settle.
-- **Domain review, by the right kind of reviewer.** A gate that needs a domain
-  practitioner is not passed by an ontologist's review, however good. A review records who
-  did it, and in what capacity when one person holds two roles. BCO's conceptual model
-  ticked "domain stakeholders have reviewed the model" on two ontology reviews and the
-  architect's: the record said the gate passed when, by BCO's own account, no practitioner
-  had looked.
+- **Review, by the right role.** Some defects no check decides: a definition that claims
+  more than the axioms, one IRI used for two kinds, two IRIs for one, a class under the
+  wrong category. Whether each is a defect is a fact about what the authors meant. So a
+  machine lists every place one may be, with the evidence (`tools/ontology/candidates.py`);
+  a person answers each, signed with the role it was given in -- Domain Expert, Proxy Domain
+  Expert or Ontologist (`config/review-register.yaml`); and a stage is not done while a
+  candidate in its scope has no answer from a role the stage allows, by someone the charter
+  names in it (`tools/stages.py`). A proxy's answer is recorded as a proxy's, never as an
+  expert's. BCO's conceptual model ticked "domain stakeholders have reviewed the model" on
+  two ontology reviews and the architect's: the record said the gate passed when, by BCO's
+  own account, no practitioner had looked. `review-example.md` works the four kinds
+  through.
 - **Conceptual fidelity at formalization.** Each formal choice preserves the approved
   conceptual model's meaning, or documents why it changes it, in a decision. Meaning
   changes in axioms as well as in terms: an axiom that infers adequacy from components can
@@ -166,9 +172,11 @@ still unanswered, is a record rather than a memory. BCO re-pinned BPO five times
 
 ## 9. Not covered yet
 
-The gates in §4 are rules for people. Four of them are planned as checks and not yet
-built, on purpose, until the BPO evaluation of the template ends (decision 21): a source
-register with verification grades, reviewer kind and capacity on reviews and gates,
-decision propagation, and a rights and provenance record. Conceptual fidelity is last,
-because it should be designed against a real formalization. Until then, §4 is held by the
-gate's holder, and a standard can say what the holder checks by hand.
+The gates in §4 are rules for people. The review gate is a check (template v0.4.0).
+Three more are planned as checks and not yet built: a source register with verification
+grades, decision propagation, and a rights and provenance record. Conceptual fidelity is
+last, because it should be designed against a real formalization. Until then those are
+held by the gate's holder, and a standard can say what the holder checks by hand. The
+review candidates find only some kinds of defect, and few of the ones a careful reviewer
+would; the gate makes sure the places they find are answered, not that nothing else is
+wrong.

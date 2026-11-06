@@ -92,7 +92,10 @@ python tools/ontology/vocabulary.py --check   # the vocabulary module is what th
 python tools/ontology/mappings.py             # every SSSOM crosswalk holds
 python tools/ontology/term_diff.py --base origin/main   # which terms this branch changes
 python tools/ontology/normalize.py --check    # modules declared canonical are canonical
-python tools/stages.py                        # every started stage has its standard
+python tools/ontology/candidates.py           # review candidates: places a person looks
+python tools/review.py                        # the review register: answered, unanswered, stale
+python tools/stages.py                        # every started stage has its standard, and a done
+                                              # stage's review candidates are answered
 python tools/communications.py                # the communications record follows its protocol
 python tools/communications.py --inbox        # alerts on the board this record does not hold (gh)
 python tools/template_status.py               # where this has diverged from the template
@@ -118,7 +121,7 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `protege.py --check` | `protege/edit.ttl` or its catalog differing from what the modules and the vendored files generate; a module with no ontology header, or two |
 | `normalize.py --check` | a module declared `format: canonical` that is not in canonical Turtle |
 | `release.py` | a version that is not MAJOR.MINOR.PATCH; a file that does not parse back to the graph it was written from |
-| `stages.py` | in `config/stages.yaml`: a started or finished stage with no standard, or one naming a file that does not exist or is the blank skeleton; a path stage done before an earlier stage the project runs; a lane done before a stage it joins; a stage not run with a status; an unknown status, layout component or joined stage; a stage listed twice. It never reads a standard or judges a gate |
+| `stages.py` | in `config/stages.yaml`: a started or finished stage with no standard, or one naming a file that does not exist or is the blank skeleton; a path stage done before an earlier stage the project runs; a lane done before a stage it joins; a stage not run with a status; an unknown status, layout component or joined stage; a stage listed twice; and, for a stage marked `done` that names a review, a candidate with no answer, an answer from a role the stage does not allow or from someone the charter does not name in it, a deferral past its date, or an import run on another corpus. It never reads a standard, judges a gate or reads what an answer concludes |
 | `template_status.py --check` | in the template only: a manifest that does not describe the owned files. A project's divergence is reported, never refused |
 
 `validate.py` exits 2 when a rung could not be evaluated, in every mode, `-o` and
@@ -588,6 +591,27 @@ How the ontology is built is `docs/process/METHOD.md`. Its three files here:
 Mark a stage `in-progress` in the commit that starts it, naming its standard;
 `python tools/stages.py` refuses it otherwise, and refuses a stage marked `done` out of
 order.
+
+## Review candidates and the review gate
+
+Some defects no check decides: whether a definition claims more than its axioms, whether
+one IRI is used for two kinds, whether two IRIs are one, whether a class is under the right
+category. `python tools/ontology/candidates.py` lists every place one may be, with the
+evidence; its rules are in its docstring, and `config/candidates.yaml` tunes them. A
+candidate is never a finding: nothing fails because one exists.
+
+A person answers each in `config/review-register.yaml` (`tools/review.py` states the fields
+and rules): whether it is a defect, what is done about it, and who answered, in which role
+-- `domain-expert`, `proxy-domain-expert` or `ontologist` (`config/review.yaml`).
+`--propose` prints an entry per unanswered candidate with placeholders the register refuses.
+Candidates from a model or another tool go in `review/candidates/`, with their provenance;
+the template runs no model.
+
+A stage in `config/stages.yaml` may name a `review`: groups of rules and the roles that may
+answer them. `python tools/stages.py` refuses such a stage marked `done` until every
+candidate in its scope is answered by someone the charter names in an allowed role
+(`docs/charter.md`, "Who holds which gate", one line per role). `docs/process/review-example.md`
+works four candidates through.
 
 ## Naming, deprecation, and what changed
 

@@ -106,6 +106,15 @@ jobs:
         continue-on-error: true
         run: python tools/findings.py
 
+      # A person's answer to each review candidate (backlog item 12). A
+      # malformed answer, or an import without its provenance, fails here;
+      # an unanswered candidate does not -- only a stage marked done is
+      # held for it, by the stages step.
+      - name: The review register can be used
+        id: review
+        continue-on-error: true
+        run: python tools/review.py
+
       # The SHACL ladder, gated through config/findings-register.yaml: a
       # violation or warning no entry accepts fails, and so does an entry
       # that matches nothing. A rung that cannot be evaluated is exit 2,

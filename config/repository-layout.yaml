@@ -248,6 +248,15 @@ components:
       the separations, closure. Written from the BCO team's account of
       building BCO (template decision 21).
 
+  - id: docs.review-example
+    path: docs/process/review-example.md
+    role: documentation
+    template: owned
+    description: >-
+      The review gate worked through: four synthetic candidates of the
+      kinds WP6 found, a person's answer to each, and what tools/stages.py
+      says of the record.
+
   - id: docs.charter
     path: docs/charter.md
     role: documentation

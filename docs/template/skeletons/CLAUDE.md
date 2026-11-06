@@ -51,6 +51,7 @@ charter (`docs/charter.md`), the stages it runs (`config/stages.yaml`), and thei
 .venv/Scripts/python tools/ontology/iri_lint.py
 .venv/Scripts/python tools/ontology/competency.py
 .venv/Scripts/python tools/ontology/reason.py        # needs Java; the Reasoning workflow runs it too
+.venv/Scripts/python tools/review.py
 .venv/Scripts/python tools/stages.py
 .venv/Scripts/python tools/communications.py
 .venv/Scripts/python -m pytest tests/ -q -p no:randomly
