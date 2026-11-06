@@ -69,6 +69,15 @@ components:
       reasoning before a decision. Notes, tables and bibliographies only;
       the sources themselves go in docs/Reference, never tracked.
 
+  - id: review.candidates
+    path: review/candidates
+    role: research
+    description: >-
+      Review candidates from elsewhere -- a model, another tool, a person's
+      reading -- one YAML file per run with its provenance, answered in
+      config/review-register.yaml beside the generated ones. Produced
+      locally and committed; CI only reads them (backlog item 12).
+
   - id: mappings
     path: mappings
     role: mapping-set
@@ -281,6 +290,15 @@ components:
       How a term gets in, what it must be called, how it leaves, and what
       changed -- each rule beside the check that holds it. The project's
       own policy; the template ships defaults.
+
+  - id: tool.review
+    path: tools/review.py
+    role: tool
+    template: owned
+    description: >-
+      The review register: its rules, candidates imported from elsewhere,
+      and which candidates are answered, unanswered or stale. --propose
+      prints entries for a person to answer.
 
   - id: tool.candidates
     path: tools/ontology/candidates.py
@@ -595,6 +613,14 @@ components:
       Every finding a check accepts rather than fails on, one entry each by
       identity, with a reason, an owner and a review date. Written by a
       person; read by the validator, the IRI linter and the site.
+
+  - id: config.review-register
+    path: config/review-register.yaml
+    role: configuration
+    description: >-
+      A person's answer to each review candidate: whether it is a defect,
+      what is done about it, and who answered in which role. Read by
+      tools/review.py and the stage gate; it changes what no check finds.
 
   - id: config.review
     path: config/review.yaml

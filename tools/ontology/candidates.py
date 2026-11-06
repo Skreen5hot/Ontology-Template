@@ -3,6 +3,7 @@
 
     python tools/ontology/candidates.py           # the candidates, by rule
     python tools/ontology/candidates.py --json    # every one, with evidence
+    python tools/ontology/candidates.py --propose # register entries to answer
 
 WP6 found four kinds of defect in the BPO port that no validation check
 decides, because whether each is a defect is a fact about what the
@@ -622,7 +623,14 @@ def main(argv=None) -> int:
     ap.add_argument("--json", action="store_true",
                     help="every candidate, with its evidence, and the "
                          "corpus digest it was generated from")
+    ap.add_argument("--propose", action="store_true",
+                    help="entries for config/review-register.yaml, one per "
+                         "unanswered candidate, for a person to answer")
     args = ap.parse_args(argv)
+    if args.propose:
+        import review
+
+        return review.main(["--propose"])
     root = layout.repository_root()
     found = corpus(root)
     records = generate(found, configuration(root))

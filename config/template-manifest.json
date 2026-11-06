@@ -1,5 +1,5 @@
 {
-  "digest": "dc4a128d188822fe1d8a493a5771068477630cc657505aa8f637e8198a23a4c2",
+  "digest": "40fb0f552389a0db4b2abbc43a5ad28560a6c34081c2c0e7e399d460511b35a0",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -84,6 +84,7 @@
     "tests/test_reasoning.py": "20bb50f7a02dc110103f90c4911ce4f74eaddeaff91453f448729d4ca584d22f",
     "tests/test_release.py": "f82456810f19dc30c6c5bbaca1ca361efd1180612dc6fac33f19b3ba3a510016",
     "tests/test_repository_layout.py": "d666c466a317900f42894d055ade31b6c4139d5031608a72f07a371c23b197f0",
+    "tests/test_review.py": "a6d3e80a9ac5cb7336bf4ec3226ed33108b8009097202d9cd1acf5a5e8e29eee",
     "tests/test_scale.py": "0f70716251c9078aa3b7b1a6bbccef808cd0e385072dd5ea85d792a86a5fad50",
     "tests/test_site.py": "b09f5a5044b793924b11a523dba1057b1661a68d2a5edcdbaec8f454943c5931",
     "tests/test_stages.py": "ee858ec0166bb576cd82e2e4b5372171a707ada6f15204f0a2fd8bc9de871d39",
@@ -100,7 +101,7 @@
     "tools/licensing/third_party.py": "e69db849c00cfcf0427c7aa529122dd2b8c0e84ad641f91e80e9ff4efa364f34",
     "tools/lock.py": "89b6c363b3fd5278d16a88e94ec2fe1290f96aac00d874fb22cea3b9fcba7573",
     "tools/ontology/benchmark.py": "5f4a98e9a5b14d6b15b05e92a3fca77d23c88321e44e6e023441a88828a1b6a5",
-    "tools/ontology/candidates.py": "44031af54fe3d02eb507bfe80ed7e996e5ff7f2e0f4b7bec81b70600ae946138",
+    "tools/ontology/candidates.py": "7775be94d6dbef9ce0aaef7167e26adac3d054a59b01d9826fae2f5012a886af",
     "tools/ontology/canon.py": "c29c4f174ab7fd729ca1a84aa382cdf3cb8966ec3ab2b8551fb702de6dacf673",
     "tools/ontology/competency.py": "bbf0b7620808d53a7406ca1fb814910b8ac054f22ec94b1f2895abada2f71a91",
     "tools/ontology/corpus_digest.py": "f678be24b882091ba5627ad2d430e1ba0cefa9f74b823f3332706459de07a511",
@@ -118,6 +119,7 @@
     "tools/pins.py": "121b6f0f092aa836fc8f08d1f12d53007c7d88a7d0afe02be3266a0404aafca6",
     "tools/project.py": "03cdd60299f268b469580d1964bd725f88665bff7d5f874777605e86d92663cf",
     "tools/release.py": "d9fc67f1c1a49ce39ee4de9ae61011b77497d390ed43d78077112bb74b8a67c5",
+    "tools/review.py": "42a89a9e3cc0e1309e60d237f1e8250f93d2494784cc8b406bf1c24fdee1e264",
     "tools/site/build_site.py": "18e96006e244abc6cb4848ab49e31880c38010b5f686f0bd1029ef2195b9407b",
     "tools/site/check_site.py": "c11a8be77c70ad969160b818911390411bd9df12c42565cc7a806c17bb9ddc25",
     "tools/stages.py": "906803d6a7aaa990bf5f6b93cc41348745293acc08444ab2b7ac311dd7f0dce4",
@@ -148,6 +150,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "0be69cb48f8af4f67dde257fd219435070cda8741446c3da20a58792c68c571f",
-  "template_commit": "6fea1d1ab8c5089a08c7e7e888a1aebf53e5bcf3",
+  "template_commit": "333250a2a8b5edd98444848d1f36c4d0cd043bb6",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

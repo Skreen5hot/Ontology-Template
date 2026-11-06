@@ -1,0 +1,17 @@
+# The review register: a person's answer to each review candidate
+# (tools/review.py states the fields and the rules; backlog item 12,
+# template decisions 34 and 35).
+#
+# tools/ontology/candidates.py lists where a defect no check can decide
+# may be. Each answer here says whether it is one, what is done about it,
+# and who answered, in which role -- Domain Expert, Proxy Domain Expert or
+# Ontologist (config/review.yaml). `--propose` prints an entry for each
+# unanswered candidate with placeholders, which this file refuses until a
+# person replaces them.
+#
+# Nothing here changes what a check finds or what any gate passes:
+# tools/stages.py refuses only a stage marked done while a candidate in
+# its scope has no answer from a role the stage requires.
+
+format_version: 1
+entries: []
