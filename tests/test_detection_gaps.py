@@ -271,7 +271,7 @@ def test_third_party_text_in_a_module_is_classified(project, tmp_path,
                                                     monkeypatch):
     """T9: the disposition report lists the text apart from the module's
     own licence, with the licence as declared and the statement that it
-    judges nothing -- which is pending Legal, and says so."""
+    judges nothing."""
     disposition = load_tool("dg_disposition", "tools/licensing/disposition.py")
     import third_party
 
@@ -282,23 +282,22 @@ def test_third_party_text_in_a_module_is_classified(project, tmp_path,
     assert row == {"module": "quoting.ttl", "property": DECLARATION["property"],
                    "values": 2, "source": "Example Framework v1.0",
                    "licence": "CC-BY-SA-4.0"}
-    assert third_party.STATEMENT.startswith("PENDING LEGAL")
+    assert "PENDING" not in third_party.STATEMENT, "decision 33"
     assert "does not judge whether" in third_party.STATEMENT
 
 
-def test_the_statement_is_the_proposed_wording():
-    """The one sentence that bounds what the check means is the wording
-    sent to Legal for its answer, held exactly: a change to it is a
-    change in what the template claims, and is made when Legal answers,
-    in a diff, not in passing (decision 14)."""
+def test_the_statement_is_the_adopted_wording():
+    """The one sentence that bounds what the check means is the policy
+    the architect adopted (decision 33), held exactly: a change to it is
+    a change in what the template claims, made by decision, in a diff,
+    not in passing."""
     import third_party
 
     assert third_party.STATEMENT == (
-        "PENDING LEGAL (EXAMPLE-LEGAL-2026-10-28-t9-third-party-text): "
-        "proposed wording, not yet Legal's. This report records what the "
-        "project declares about third-party text and checks that the "
-        "declared source, release and attribution are present. It does not "
-        "judge whether the text may be redistributed.")
+        "This report records what the project declares about third-party "
+        "text and checks that the declared source, release and attribution "
+        "are present. It does not judge whether the text may be "
+        "redistributed.")
 
 
 def test_a_declaration_needs_every_field(tmp_path):

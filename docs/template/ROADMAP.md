@@ -29,7 +29,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 9 | WP1 Scale: validation, release build, a size benchmark | **done** (2026-10-27) |
 | 10 | WP2 One findings register, every Checks step run | **done** (accepted 2026-10-28, decision 13) |
 | 11 | WP3 One term contract for validation and the site | **done** (accepted 2026-10-28, decision 14) |
-| 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | **done** (accepted 2026-10-29, decision 15); T9's policy awaits Legal |
+| 12 | WP4 Detection gaps: drift, licensing in content, punning, scheme rules, provenance | **done** (accepted 2026-10-29, decision 15); T9's policy adopted 2026-11-06 (decision 33) |
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
@@ -460,7 +460,8 @@ entry for the old finding goes stale, so the fix must be recorded
     attribution in `dcterms:rights` (T9).
   - `disposition.py` lists the text apart from the module's licence.
   - The one sentence bounding what this means is held as "PENDING LEGAL" until Legal
-    answers the T9 request. A test pins it, so it cannot change in passing.
+    answers the T9 request. A test pins it, so it cannot change in passing. (On
+    2026-11-06 the architect adopted it, without the prefix, as policy: decision 33.)
 - **T10.** Two realist violations: an object property asserted from one class to another,
   and a restriction on an annotation property.
 - **T11.** The genus check ignores a trailing `(…)` in the parent's label. The response
@@ -689,8 +690,9 @@ dependency, and none was identified.
 | P-A7, `6d5c04a`: a register entry's `validity`, `origin` (`unknown` among them), `resolution`, `reference` and `classified_by`, with decision 32's rules, each refused by name; `config/review.yaml` with the four kinds of reviewer; `findings.py --classify`; the counts on the status page and each entry's classification in the explorer | Decision 32, item 5, with P5's shared half: in WP6 the BPO Testing Team kept this table by hand, beside the register | `tests/test_classification.py`, `tests/test_findings.py` |
 | `6d8660a`: `actions/setup-java` v6.2.0 | Kept at v0.2.0 for being a day old, to be taken in this release | the Reasoning workflow |
 
-Not in it, and still open: the rest of the backlog, below, in its order; T9's licensing
-policy, awaiting Legal (decision 15); P5's stage gates, which wait for item 12. A known
+Not in it, and still open: the rest of the backlog, below, in its order; P5's stage
+gates, which wait for item 12. T9's licensing policy, listed here as awaiting Legal when
+the release was tagged, was adopted by the architect after it (decision 33). A known
 defect, for the next release: the owned-file report lists a file changed on both sides as
 "merge by hand" even when the project's copy already equals the template's. It is
 v0.2.0's behaviour, found in this release's compatibility check.

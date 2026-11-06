@@ -31,10 +31,11 @@ WHAT THIS IS NOT
 
 It records what a project was told and checks that it is present. It does
 not decide whether the text may be redistributed, or on what terms, and
-the template ships no declaration, licence or attribution of its own. That
-is Legal's to say; the request is
-communications/legal/outgoing/2026-10-28-t9-third-party-text.md, and the
-sentence below is held until Legal answers it.
+the template ships no declaration, licence or attribution of its own.
+That is the policy (template decision 33, adopting the behaviour the T9
+request to Legal described): text whose licence is "unknown" is reported
+and passes when declared and attributed; the attribution is checked on
+the module header only; nothing is refused for its licence.
 """
 
 from __future__ import annotations
@@ -51,15 +52,11 @@ DECLARATIONS = "config/third-party-text.yaml"
 FIELDS = ("property", "source", "release", "licence", "attribution")
 SPDX = re.compile(r"^[A-Za-z0-9.+\-]+$")
 
-#: What a report about third-party text may claim. Pending Legal (the
-#: request named in the docstring): the template's proposed wording, not
-#: Legal's, and marked as such wherever it is shown.
+#: What a report about third-party text may claim (decision 33).
 STATEMENT = (
-    "PENDING LEGAL (EXAMPLE-LEGAL-2026-10-28-t9-third-party-text): proposed "
-    "wording, not yet Legal's. This report records what the project "
-    "declares about third-party text and checks that the declared source, "
-    "release and attribution are present. It does not judge whether the "
-    "text may be redistributed.")
+    "This report records what the project declares about third-party text "
+    "and checks that the declared source, release and attribution are "
+    "present. It does not judge whether the text may be redistributed.")
 
 
 class Refused(SystemExit):

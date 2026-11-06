@@ -531,3 +531,28 @@ is recorded verbatim in
   reported so, never as unchanged.
 - Order: P-A1, then P-A3, then P-A7, released as **v0.3.0**, with nothing else from the
   BPOT findings unless a release-blocking dependency is identified.
+
+**33. "Adopt the current behaviour as my policy; I accept the risk"** (2026-11-06)
+
+In answer to the five questions of the T9 request
+(`communications/legal/outgoing/2026-10-28-t9-third-party-text.md`), which no Legal
+correspondent exists to answer, set beside what the tools already do. Recorded verbatim
+(SHA-256 `f1f4bff79aa0f2349136186dac85beb7db72f20a94b36c9f352c94fca7aa987d`). Effect:
+
+- T9's policy is the architect's, and is what the tools did when it was asked:
+  1. A declaration is the annotation property, the source, its release, the licence (an
+     SPDX identifier or `unknown`) and the attribution text.
+  2. The report's statement is the sentence proposed in the request, without its PENDING
+     LEGAL prefix: it records what the project declares and checks that the declared
+     source, release and attribution are present; it does not judge whether the text may
+     be redistributed.
+  3. Text whose licence is `unknown` is reported, and passes, when it is declared and its
+     module carries the declared attribution.
+  4. The attribution is checked on the module header only.
+  5. The template refuses nothing for publication by its licence.
+- The architect accepts the risk of adopting this without legal counsel. The policy is the
+  template's rule for what its checks require; it grants no project permission to
+  redistribute any text, which stays each project's own question (BPO's B2 stays BPO's).
+- Decision 15's open dependency is closed: T9 is done. The request is answered by
+  `communications/legal/outgoing/2026-11-06-t9-policy-adopted.md`, which closes its thread;
+  LEGAL has no repository, so no alert is posted.
