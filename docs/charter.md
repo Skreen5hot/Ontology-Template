@@ -49,5 +49,6 @@ not, with why (`config/stages.yaml`).
 ## Who holds which gate
 
 For each stage the project runs: who approves its standard and its gate, and in what
-capacity (ontologist, domain practitioner, architect, rights). Name the domain
-practitioners, or say that none has been found yet.
+capacity (ontologist, domain expert, proxy domain expert, architect, rights). Name the
+domain experts, or say that none has been found yet; and name any proxy domain expert
+standing in for one, with their experience in the domain and the reason a proxy is acting.

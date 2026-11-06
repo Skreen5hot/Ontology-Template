@@ -1,5 +1,5 @@
 {
-  "digest": "3e41eb78f5b7ea883aa26691bfcc69ddf7d9728d735dad5f96b4aefb2d525bf0",
+  "digest": "bd8f30ed35e65c60df8980c110791164d4ace314293ad95975a3d610cfec817f",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -16,9 +16,9 @@
     ".github/workflows/scale.yml": "85b603eac76c2fd405d866daffeea830a90e1c1fe09997f01bf851f4ef0b65eb",
     ".github/workflows/term-diff.yml": "07265575d738ee0f4c3a777d449865b8eef61cc0254d7fd49e12e4f4646fd9df",
     ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
-    "config/review.yaml": "8f3cb1ac2dbd97d9c7ee0892137b3f55cbd8ff53823300827c70deefb64d64f0",
+    "config/review.yaml": "16e48187ec36ccae1196ee27ab973a8538b3bff55fc6c6e9cba36d9a235979de",
     "config/tooling.yaml": "a106bb41f68541125b979d3aeb022fb5c85ad1ce318e4ed03f5d0a4194b039ec",
-    "docs/DEVELOPMENT.md": "6f852ea243705a09ca033e5e438c216303973975d12ad8ec8946fa60e5b9e280",
+    "docs/DEVELOPMENT.md": "9f2e475e8a56e0af31da600b3f694de25ebee648971db4d280613c7dea63bb52",
     "docs/PORTING.md": "f58802103aa3ee37dbfb939dc56a0c96297b2f2d1ede8d64497eed751ae164f7",
     "docs/porting/port-report.md": "9cd44e61b1ca19f2723283648cf8220ae53ecfa67d57a0535cd0404458d0bf4d",
     "docs/process/METHOD.md": "1e21ae6ed10fa8ea01d8f9c6d61b26c50359e88e94634c6a9a1d5d48b0e96d30",
@@ -66,7 +66,7 @@
     "tests/fixtures/reasoning/inconsistent-example.ttl": "8495583ac4788e65d99b2c8c9801c57a65f1f3cc6c2f713d64364d24058d10f9",
     "tests/fixtures/reasoning/unsatisfiable.ttl": "d521a5e5552e48b8e68cd2de34c72742d50557045e4ff17372c23375ef8bb636",
     "tests/test_authoring.py": "9e4fdb46dfca59a8f58905cb8e087a7af4c7d04e71f72fc874dc8b2030b85a41",
-    "tests/test_classification.py": "787cb2e7fcf807d6a71eda187d98a860a616e1c976ac53f9973199031fe06b63",
+    "tests/test_classification.py": "fd9a51a01ba12372aacb5111fc95124336c8f8993f73985ff038ff7713df2bd1",
     "tests/test_communications.py": "bb1d3369db8785f4a6a331bbdb2142f48823dcd43caec3c3a1ff5d5a573d4bab",
     "tests/test_competency.py": "f8dd5c32fec0dd54150dee8231bf7a42e9c80096b7a35a13eefb478bfc7b9dda",
     "tests/test_detection_gaps.py": "dcbd60ee6f8ed9c9a42893335382f0239f17ac1c21905e09313111f8005abe42",
@@ -91,7 +91,7 @@
     "tests/test_upstream_vendoring.py": "d69e1511158b51761b11e1395259ff59429b25763e0d888155ce2d09c07043c4",
     "tests/test_vocabulary.py": "a0b53c5d5a70a1b9f9d4d28194c93e215394c4f38714289fd3040f752e841ad7",
     "tools/communications.py": "601ad83160ebc69289f78030c62b14d537837f394d9e9e5e1236ae96e8958778",
-    "tools/findings.py": "f2d953f803242f7559ae6dbb662cb4c80819725604ccad08ba3805e44135d32c",
+    "tools/findings.py": "bf4ab14e46cf06726636c9e271a9350b818bdc2f185705691767c851e52d6882",
     "tools/hooks/claude_ttl_lint.py": "0e4351ddb4ec278857030434b505a97931fcefa49637b2c340b36129063c9258",
     "tools/init_project.py": "ecfd6410b88be90e07d5266133ffc37869010ac4b34606448fde2c26244d3ca9",
     "tools/layout.py": "6363c0f542e308d71276969a499184d74536abfa98842c6914c0cc10ac77613d",
@@ -145,6 +145,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "c16e22ed2547b37fdb7ac7767f3c670ddfd80302c3ad764029ffc0d21c84845a",
-  "template_commit": "fe21887e955e5b327c62b4133709ef6a7a1eaba4",
+  "template_commit": "1030cc75ef612b58a5cfeb9a9fa7b69fdf787849",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

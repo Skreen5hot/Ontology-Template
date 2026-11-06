@@ -94,7 +94,8 @@ def test_each_rule_of_decision_32_is_refused_by_name(register, fields, said):
     {"validity": "false-alarm", "resolution": "reported",
      "origin": "template", "reference": "https://example.invalid/issue/3"},
     {"validity": "unsure", "resolution": "deferred", "origin": "unknown"},
-    {"classified_by": "Jane Doe (domain-practitioner)"},
+    {"classified_by": "Jane Doe (domain-expert)"},
+    {"classified_by": "Jane Doe (proxy-domain-expert)"},
     {"classified_by": "Jane Doe (architect)"},
 ])
 def test_what_the_rules_allow_passes(register, fields):
@@ -226,6 +227,31 @@ def test_the_review_kinds_keep_the_template_four(register, repo, tmp_path):
     (tmp_path / "config/review.yaml").write_text(
         text + "  steward: >-\n    Keeps the vocabulary.\n", encoding="utf-8")
     assert "steward" in register.review_kinds(tmp_path)
+
+
+def test_the_renamed_kind_is_named_in_the_refusal(register, repo,
+                                                   tmp_path):
+    """Decision 35: domain-practitioner became domain-expert. A project's
+    older review.yaml, or an entry still naming the old kind, is refused
+    with the rename in the message."""
+    text = (repo / "config/review.yaml").read_text(encoding="utf-8")
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config/review.yaml").write_text(
+        text.replace("  domain-expert: >-", "  domain-practitioner: >-"),
+        encoding="utf-8")
+    with pytest.raises(register.RegisterError,
+                       match="domain-practitioner is now domain-expert"):
+        register.review_kinds(tmp_path)
+    got = problems(register, entry(
+        register, classified_by="Jane Doe (domain-practitioner)"))
+    assert any("renamed domain-expert" in p for p in got), got
+
+
+def test_the_review_roles_are_decision_35s(register, repo):
+    kinds = register.review_kinds(repo)
+    for kind in ("domain-expert", "proxy-domain-expert", "ontologist"):
+        assert kind in kinds, kind
+    assert "domain-practitioner" not in kinds
 
 
 def test_the_site_shows_the_classification(register):

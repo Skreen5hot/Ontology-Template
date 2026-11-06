@@ -36,7 +36,8 @@ raised there as an open issue, not settled here.
 ## 6. The gate
 
 The conditions under which the stage is done, stated before the stage starts. For each:
-who decides it, in what capacity (ontologist, domain practitioner, architect, rights), and
+who decides it, in what capacity (ontologist, domain expert, proxy domain expert,
+architect, rights), and
 the record that shows it was met. A condition only a person can state is recorded by that
 person, never ticked by a tool.
 

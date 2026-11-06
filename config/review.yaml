@@ -12,7 +12,12 @@
 # it waits for item 12, where the domain review it would hold is defined.
 #
 # A project may add kinds, with what each means for it. It may not remove
-# one of these four: tools/findings.py refuses a file without them.
+# one of the template's: tools/findings.py refuses a file without them.
+#
+# The roles that answer an ontology's review are Domain Expert, Proxy
+# Domain Expert and Ontologist (template decision 35); the architect and
+# the rights reviewer answer for decisions and rights. v0.4.0 renamed
+# domain-practitioner to domain-expert.
 
 version: 1
 
@@ -20,9 +25,16 @@ kinds:
   ontologist: >-
     An ontology engineer, judging the formal modelling: placement,
     definitions, axioms, alignment with BFO and CCO.
-  domain-practitioner: >-
-    Someone who does the work the ontology describes, judging whether it
-    says what that work is. The project says, in its charter, who counts.
+  domain-expert: >-
+    Someone with recognised expertise in the work the ontology describes,
+    judging whether it says what that work is. The charter names them.
+  proxy-domain-expert: >-
+    Someone the charter names as standing in for a domain expert while
+    none is available: experienced in the domain, without the expertise
+    the project would ask of an expert. A proxy's judgement is recorded
+    as a proxy's, never as an expert's, and the work goes forward on it.
+    When the charter names a domain expert, the proxy's answers are
+    theirs to review.
   architect: >-
     The project's decision holder, judging for the project.
   rights-reviewer: >-

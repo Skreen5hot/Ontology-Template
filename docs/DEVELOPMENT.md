@@ -793,7 +793,7 @@ concluded, as three separate answers and who gave them:
 | `validity` | Is the finding true of the ontology? | `real`, `false-alarm`, `unsure` |
 | `origin` | Where is its cause? | `project`, `upstream`, `template`, `unknown` |
 | `resolution` | Why is it here rather than fixed? | `accepted`, `deferred`, `reported`, `not-a-defect` |
-| `classified_by` | Who judged it, in what capacity | `Jane Doe (domain-practitioner)`, a kind from `config/review.yaml` |
+| `classified_by` | Who judged it, in what capacity | `Jane Doe (domain-expert)`, a kind from `config/review.yaml` |
 
 `accepted` requires `real`, and `not-a-defect` requires `false-alarm`. A false alarm is
 `not-a-defect`, or `reported` as a defect in the checker. `unsure` is `deferred` to the
@@ -809,9 +809,12 @@ prints the counts by field, and by validity for each check, shape set and rule.
 **The classification never changes what the gate passes**: a finding is accepted by its
 identity, whatever a person concluded about it.
 
-`config/review.yaml` holds the reviewer kinds: `ontologist`, `domain-practitioner`,
-`architect` and `rights-reviewer`. A project may add kinds, but may not remove these four.
-A rights reviewer records that a rights review was made, and implies no legal approval.
+`config/review.yaml` holds the reviewer kinds: `ontologist`, `domain-expert`,
+`proxy-domain-expert`, `architect` and `rights-reviewer`. A project may add kinds, but may
+not remove these. A proxy domain expert's judgement is recorded as a proxy's, never as an
+expert's. A rights reviewer records that a rights review was made, and implies no legal
+approval. (`domain-practitioner` was renamed `domain-expert` in v0.4.0; the findings tool
+names the rename when it refuses an older file.)
 
 `validate.py -o report.json` writes every finding, not a sample, and the validator says
 which shape set it is on, on stderr.

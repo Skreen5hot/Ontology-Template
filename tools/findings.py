@@ -121,7 +121,14 @@ VALUES = {
     "resolution": ("accepted", "deferred", "reported", "not-a-defect"),
 }
 #: The kinds config/review.yaml must keep: a project may add, not remove.
-KINDS = ("ontologist", "domain-practitioner", "architect", "rights-reviewer")
+#: The review roles are domain-expert, proxy-domain-expert and ontologist
+#: (decision 35); architect and rights-reviewer answer for decisions and
+#: rights (decision 32).
+KINDS = ("ontologist", "domain-expert", "proxy-domain-expert", "architect",
+         "rights-reviewer")
+#: A kind renamed, old -> new, named in the refusal so a project made
+#: before the rename knows what to change.
+RENAMED = {"domain-practitioner": "domain-expert"}
 CLASSIFIED_BY = re.compile(r"^(?P<name>\S.*\S|\S) \((?P<kind>[a-z][a-z-]*)\)$")
 DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
 
@@ -170,9 +177,14 @@ def review_kinds(root: Path | None = None) -> tuple:
         "kinds") or {}
     missing = [kind for kind in KINDS if kind not in kinds]
     if missing:
+        renamed = ["%s is now %s" % (old, new) for old, new in RENAMED.items()
+                   if old in kinds and new in missing]
         raise RegisterError("%s lacks the kind(s) %s; a project may add "
-                            "kinds, not remove the template's"
-                            % (REVIEW, ", ".join(missing)))
+                            "kinds, not remove the template's%s"
+                            % (REVIEW, ", ".join(missing),
+                               " (renamed in v0.4.0, decision 35: %s; rename "
+                               "it there and in every classified_by)"
+                               % "; ".join(renamed) if renamed else ""))
     return tuple(kinds)
 
 
@@ -237,9 +249,12 @@ def classification_problems(name: str, entry: dict, version: int,
             out.append("%s: classified_by %r is not '<name> (<kind>)'"
                        % (name, given["classified_by"]))
         elif match.group("kind") not in kinds:
+            kind = match.group("kind")
             out.append("%s: classified_by names the kind %r, which %s does "
-                       "not declare (%s)" % (name, match.group("kind"),
-                                             REVIEW, ", ".join(kinds)))
+                       "not declare (%s)%s" % (
+                           name, kind, REVIEW, ", ".join(kinds),
+                           "; it was renamed %s" % RENAMED[kind]
+                           if kind in RENAMED else ""))
     return out
 
 
