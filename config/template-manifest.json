@@ -1,5 +1,5 @@
 {
-  "digest": "7c4c557a6182bd3b05119b003d44c73196c300112640c3833b7c7423a67ef8c0",
+  "digest": "d49702f7adb2806afc4c9b80f745dee537c0f21f69f47515037833fe209036a3",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -8,13 +8,13 @@
     ".github/ISSUE_TEMPLATE/defect.yml": "e11ea8b87a6e680957feee05cc4cd9d73145f4f8e635274d14066edc5170c593",
     ".github/ISSUE_TEMPLATE/term-request.yml": "6e9fc70cb09f6838b1d35abcdbe9c365bd876845dd8701bf469fdc83cae15a60",
     ".github/pull_request_template.md": "8ef17ba107d2ec008b0f05953ca1108c97b5ff042c644418c22cb186d10084be",
-    ".github/workflows/checks.yml": "a24bcf04ae308d75438374fc6fdce2d12b276f1080d44c26cfc7d3ad52b43e4a",
+    ".github/workflows/checks.yml": "41ad6a961a4044d93abe526da66d1772bf672adb4b7c6c0c0b4bab532a001a33",
     ".github/workflows/install.yml": "6eb33c900d2375b8015ee61717c3b906a66e5cc5e598c10df107c48769dbb466",
-    ".github/workflows/pages.yml": "99d9c78f3dc720faf0ce47586b1f1cf4efd6dba7aad8584bc1b0091760a4ac35",
-    ".github/workflows/reasoning.yml": "9d7b6b2604a76d950bcbdc9295db1d95d4425f714b28e9f66d9aef15e1dc5158",
+    ".github/workflows/pages.yml": "4e4c31eecb7949290a09d09c3fa68061ed21b12c495b49c5a9081f921f8ca9b5",
+    ".github/workflows/reasoning.yml": "a19856a0ec1b3c07bd180bafc452f2977d7e4a5ac2681ae25d365c07033dca18",
     ".github/workflows/release.yml": "e83f44864b4551dfd01625aba0b4fcb09bb3ae5af5f70799f804f5ef2fff2cba",
-    ".github/workflows/scale.yml": "f8d5047521d2921d07838b889adbbf0ea7fec14aea1b69c881db1b7b009dcebf",
-    ".github/workflows/term-diff.yml": "9947342113d04f1a9bbf91f3e5d8e05b59ebac55e84bcc644017e10fe1e11827",
+    ".github/workflows/scale.yml": "85b603eac76c2fd405d866daffeea830a90e1c1fe09997f01bf851f4ef0b65eb",
+    ".github/workflows/term-diff.yml": "07265575d738ee0f4c3a777d449865b8eef61cc0254d7fd49e12e4f4646fd9df",
     ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
     "config/review.yaml": "8f3cb1ac2dbd97d9c7ee0892137b3f55cbd8ff53823300827c70deefb64d64f0",
     "config/tooling.yaml": "a106bb41f68541125b979d3aeb022fb5c85ad1ce318e4ed03f5d0a4194b039ec",
@@ -73,7 +73,7 @@
     "tests/test_findings.py": "706ddd8913fb3d0f7bc6c8e96588503973a0e9892907dfa6125fe0ac63e8f2d5",
     "tests/test_iri_lint.py": "428f002559c84da2c2929b2f9a1c964e8dfdf7bb8d1ef0b64deff755f87a8aa7",
     "tests/test_licensing.py": "605724138e7143e496ff86f9631f24e83ed62587e265b3f218e1e2ac946fe2c1",
-    "tests/test_lock.py": "17100fa9115a8db8c27cc574bc5a634d12e0a76eabf4b627c4d9ec85d03b8877",
+    "tests/test_lock.py": "436bc51ee8dd2658fa80a1f1bf8aff7eff49430f57735a1de9ff538b493e7e66",
     "tests/test_mappings.py": "8dbef7883d22bbff4f212abe34ecde717dfcb940bea9faf19ecf010d9fb6f56e",
     "tests/test_namespace.py": "299ce2961fe69a29b8db16cff69b4dafb5a2a22c4a57a377fd02d367d2a425d6",
     "tests/test_ontology_checks.py": "a1e2034d9e48f84b4238ec4f3867928ccb2fc4ec19ca5a854c591bd2a3d89df8",
@@ -130,7 +130,7 @@
     "prefix": "example",
     "title": "Example Ontology"
   },
-  "label": "v0.3.0",
+  "label": "unreleased",
   "note": "The digest of every template-owned and template-seeded file as the template shipped it, and the values init rewrites Turtle from (identity). A project keeps this as it arrived, with the block init adds (initialized): it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
   "seeded": {
     "config/annotation-profile.yaml": "22162f289468ef41edd97c3cd4c689215fc39177c5eba362a66da890440677dd",
@@ -145,6 +145,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "c16e22ed2547b37fdb7ac7767f3c670ddfd80302c3ad764029ffc0d21c84845a",
-  "template_commit": "7134b6f9ae653c3ba975ad1aec0c37377104b9cb",
+  "template_commit": "c4954b219cfc5c332509b815c0ad8a621ab05202",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

@@ -56,7 +56,7 @@ concurrency:
 jobs:
   build:
     name: Build and check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     # configure-pages reads the repository's Pages settings, which
     # contents: read does not cover: the BCO's first run failed with
     # "Resource not accessible by integration" at that step. Read only;
@@ -164,7 +164,7 @@ jobs:
     name: Deploy to Pages
     needs: build
     if: needs.build.outputs.publish == 'true' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       pages: write
       id-token: write

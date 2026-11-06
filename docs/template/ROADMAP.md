@@ -678,7 +678,9 @@ dependency, and none was identified.
   unclassified. A register that declares `format_version: 2` requires `validity`,
   `origin`, `resolution` and `classified_by` on every entry. Nothing a person records there
   changes what a check finds or what the gate passes.
-- The Release workflow runs on `ubuntu-24.04`, not `ubuntu-latest`.
+- The Release workflow runs on `ubuntu-24.04`, not `ubuntu-latest`. After the tag, the
+  other workflows were set to `ubuntu-24.04` too, the image `ubuntu-latest` already
+  ran ("After v0.3.0", below).
 
 | What | Why | Tests |
 |---|---|---|
@@ -688,12 +690,19 @@ dependency, and none was identified.
 | `6d8660a`: `actions/setup-java` v6.2.0 | Kept at v0.2.0 for being a day old, to be taken in this release | the Reasoning workflow |
 
 Not in it, and still open: the rest of the backlog, below, in its order; T9's licensing
-policy, awaiting Legal (decision 15); the move to CCO v2.2, the architect's to take
-(decision 18); P5's stage gates, which wait for item 12. The owned-file report lists a
-file changed on both sides as "merge by hand" even when the project's copy already equals
-the template's; that is v0.2.0's behaviour, found in this release's compatibility check
-and left for the architect. The other workflows still run on `ubuntu-latest`; decision 32
-pinned only Release.
+policy, awaiting Legal (decision 15); P5's stage gates, which wait for item 12. A known
+defect, for the next release: the owned-file report lists a file changed on both sides as
+"merge by hand" even when the project's copy already equals the template's. It is
+v0.2.0's behaviour, found in this release's compatibility check.
+
+Decided, and unchanged by this release: CCO stays at `v2.0-2024-11-06`, the template's pin
+since decision 3, kept when v2.2 was available (decision 18). `pins.py` reports v2.2 as
+newer on every run; that is a report, not an open question.
+
+After v0.3.0, on `main` (the tag is unchanged): every workflow names `ubuntu-24.04`. The
+others said `ubuntu-latest`, which GitHub resolved to the same image (the Checks run on
+the tagged commit: `Image: ubuntu-24.04`), so nothing that runs changed; the files now say
+what runs, and a move of `ubuntu-latest` changes nothing unannounced.
 
 Pins: item 1, every pin checked against its upstream at `6d5c04a` (2026-11-06). 29 pins,
 none failed; osv.dev scanned all 18 Python distributions, and none has an advisory. Five
@@ -705,7 +714,7 @@ had a newer release; one taken, four kept:
 | pip | 26.2.2 | 26.3 | Published 2026-11-02, after the lock's cutoff (2026-10-30). This release's subject is a lock that resolves again to the same bytes; moving the cutoff is a re-lock of its own, not a pin review's |
 | uv | 0.13.6 | 0.13.7 | Published 2026-11-03, after the cutoff; the tool that writes the lock moves with a re-lock, for the same reason |
 | Markdown | 3.11.2 | 3.11.3 | Published 2026-11-05, after the cutoff and a day before |
-| CCO | v2.0-2024-11-06 | v2.2 | A move is a decision (decision 18), and still the architect's |
+| CCO | v2.0-2024-11-06 | v2.2 | The template's pin (decision 3), kept when v2.2 was available (decision 18) |
 
 The rest of the checklist, with the release's three verifications (decision 32):
 

@@ -44,7 +44,7 @@ concurrency:
 jobs:
   checks:
     name: Contract, licensing, tests
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out the full history
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -222,7 +222,7 @@ jobs:
     # check people learn to re-run rather than read.
     name: Extracts still rebuild from the pinned sources
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 

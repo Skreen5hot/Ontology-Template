@@ -219,6 +219,15 @@ def test_the_release_workflow_runs_on_a_pinned_runner(repo):
     assert text.count("runs-on: ubuntu-24.04") == 2
 
 
+def test_no_workflow_runs_on_a_moving_runner(repo):
+    """Every workflow names the image it runs on, as Release does, so
+    the files say what runs and GitHub moving `-latest` changes
+    nothing unannounced."""
+    for path in sorted((repo / ".github/workflows").glob("*.yml")):
+        text = path.read_text(encoding="utf-8")
+        assert "-latest" not in text, path.name
+
+
 def test_a_pip_line_without_hashes_refuses_the_bootstrap(lock, copy,
                                                          installs):
     """The bootstrap installs pip only by its hashes: a pip line with

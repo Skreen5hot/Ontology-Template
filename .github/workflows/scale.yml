@@ -42,7 +42,7 @@ concurrency:
 jobs:
   scale:
     name: Ladder and release within budget on the benchmark
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 60
     steps:
       - name: Check out
