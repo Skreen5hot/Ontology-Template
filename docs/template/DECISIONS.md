@@ -651,3 +651,17 @@ Effect:
   measurement on BCO's register reports entries processed, invalid data, adequate and
   inadequate citations and exceptions, BCO's files unmodified.
 - "then push": the implementation is pushed when done.
+
+**37. "Send a short answer saying the request is accpeted but in backlog"** (2026-11-06)
+
+In answer to whether SDD's domain-and-range request
+(`SDD-EXAMPLE-2026-11-04-domain-range-register`) had been answered: it had not, and the
+thread stood open, because decision 28 deferred the answer until the file shipped.
+Recorded verbatim (SHA-256 `8afc859dca7ae954736349ab740ac63610c276dc4fee4f391f6fce57bab00f68`). Effect:
+
+- A short answer is sent now:
+  `communications/sdd/outgoing/2026-11-06-domain-range-accepted-in-backlog.md`. It says
+  the request is accepted as decision 28 describes and where it stands in the backlog,
+  and that a notice follows when the file ships. It asks nothing of SDD.
+- Decision 28's "the answer to SDD is sent when it ships" is replaced by this answer and a
+  later notice. The backlog's order is unchanged.
