@@ -495,3 +495,39 @@ drafted closing message to the BPO Testing Team, which said P-B1 was "next" when
 - The second template release is **v0.2.0**, prepared under `RELEASING.md`: the manifest
   recorded with the label `v0.2.0` in its own commit, and the release notes in `ROADMAP.md`,
   "Release v0.2.0". Tagging and pushing the tag wait for the architect (item 6).
+
+**32. "Ontology Template — Architectural Decision 30"** (2026-11-06)
+
+In answer to the five questions of `evaluations/2026-11-06-items-5-6-design.md` §5. Headed
+30 by the architect; numbered 32 here, since 30 and 31 were already recorded. The whole text
+is recorded verbatim in
+[`evaluations/2026-11-06-items-5-6-disposition.md`](evaluations/2026-11-06-items-5-6-disposition.md)
+(SHA-256 of the text below its rule `3e765528e2a727299e3d179bdf2ee73ccbd989a37a5faedae6e57916a33ec5df`). Effect:
+
+- The design is approved for implementation, amended; `f321ed0` is pushed.
+- Item 5: `validity` (`real`, `false-alarm`, `unsure`), `origin` (`project`, `upstream`,
+  `template`, and **`unknown`**, added), `resolution` (`accepted`, `deferred`, `reported`,
+  `not-a-defect`), `classified_by` with a capacity from `config/review.yaml`. `unknown`
+  requires `unsure`, `deferred` and a review date. `accepted` requires `real`;
+  `not-a-defect` requires `false-alarm`; a false alarm may be `reported` (a checker
+  defect); `unsure` requires `deferred`; `reported` requires a reference. `origin: upstream`
+  requires the `upstream` field, and **not the reverse**: an upstream IRI does not make the
+  upstream the cause. Classification never changes what a check finds or what the gate
+  passes.
+- Version 1 registers stay valid, unclassified entries reported as such; version 2 requires
+  all four fields. No tool fills in a judgement.
+- `config/review.yaml` with the four kinds; projects may add, not remove. A
+  `rights-reviewer` records a rights review and implies no legal approval or qualification.
+  P5's stage gates wait for item 12.
+- uv generates the lock, and only the lock. Before release: fresh installs from the one lock
+  on Linux, Windows and macOS; uv pinned with its checksum verified, and pip's bootstrap
+  version handled explicitly; every locked distribution scanned, a scan that could not run
+  told apart from a clean one. The Release workflow pinned to `ubuntu-24.04`. Python's
+  patch recorded, not pinned; 3.12 stays the declared baseline.
+- Seeded: the three shape sets, their three fixtures, the annotation-profile, naming,
+  reasoning and upstream-sources config; the generated profile shapes are not. A change to a
+  BFO or CCO pin is reported as a dependency change needing review, never as an upgrade
+  instruction; a project's pin stays authoritative. A comparison that cannot be made is
+  reported so, never as unchanged.
+- Order: P-A1, then P-A3, then P-A7, released as **v0.3.0**, with nothing else from the
+  BPOT findings unless a release-blocking dependency is identified.

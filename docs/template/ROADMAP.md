@@ -664,8 +664,8 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | First release | 2 | **P-B1**: each definition judged alone; the parent's label in genus position | approved (also decision 23) |
 | First release | 3 | A deprecated class keeps its definition and parent: a constraint and its negative example | approved |
 | First release | 4 | A warning for a realizable class with an existential `has realization` restriction (`obo:BFO_0000054` on a class under `obo:BFO_0000017`) | approved |
-| Next | 5 | **P-A7**: separate fields for a finding's validity, its origin and its resolution, designed with P5 | approved |
-| Next | 6 | **P-A1** transitive dependency locking; **P-A3** drift report sees shapes and config | approved |
+| v0.3.0 | 5 | **P-A7**: separate fields for a finding's validity, its origin and its resolution, designed with P5 | approved; designed, amended (decision 32) |
+| v0.3.0 | 6 | **P-A1** transitive dependency locking; **P-A3** drift report sees shapes and config | approved; designed, amended (decision 32) |
 | Next | -- | P4, P5, P7, P8, then P6 (decision 21); P-A2, P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
 | Governance cycle | 12 | Domain review as a named gate in METHOD, with WP6's misses as the worked example, with P5 | approved, raised |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | approved, controlled |

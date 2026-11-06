@@ -1,7 +1,9 @@
 # Backlog items 5 and 6: design
 
 **To:** the architect. **From:** the Ontology Template Team. **Date:** 2026-11-06.
-**Status:** proposed. Nothing in it is built. **Under:** decision 29, which approved item 5
+**Status:** approved with amendments, 2026-11-06 (decision 32,
+`2026-11-06-items-5-6-disposition.md`); where they differ, the amendments
+hold. **Under:** decision 29, which approved item 5
 "with separate finding-validity, origin, and resolution fields, coordinated with P5" and
 item 6 "for reproducibility improvements". §5 lists what is asked.
 
