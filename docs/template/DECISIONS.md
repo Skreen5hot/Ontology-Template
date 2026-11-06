@@ -618,3 +618,36 @@ text, which also says who holds the proxy role, is recorded verbatim in
 - Proposed for the v0.4.0 build, not decided: when a charter first names a Domain Expert,
   no proxy answer is invalidated; the dispositions given by a Proxy Domain Expert are
   listed as that expert's review queue.
+
+**36. "Architectural Decision 34 — P4 Source Adequacy"** (2026-11-06)
+
+In answer to the seven questions of `evaluations/2026-11-06-p4-design.md` section 7. The
+whole text is recorded verbatim in
+[`evaluations/2026-11-06-p4-disposition.md`](evaluations/2026-11-06-p4-disposition.md)
+(SHA-256 of the text below its rule `fe907de8ea5df4f74a0c816f5d5fb3b0cc2293faf355dd644ab8a0409b6998f3`). Its heading numbers it 34; it is filed as 36.
+Effect:
+
+- P4 is approved for implementation and release as **v0.5.0**, alone: not P7, P8, P6 or
+  other source-governance features. The release is authorized once its tests pass.
+- The seven answers: `research/sources.yaml`, seeded, with `research/sources.md`
+  generated; decisions are `docs/decisions/`, `docs/standards/` and `docs/charter.md` by
+  default, in seeded `config/sources.yaml`; the architect approves exceptions, and a
+  project may delegate to another reviewer kind; the quote limit is unset by default and
+  is not a legal determination; an inadequate citation fails Checks; a whole-source
+  citation needs at least one claim and every claim V or P.
+- Three refinements before implementation: **A.** each claim has an explicit, stable id
+  (`id: C1`), so a citation never depends on list position; BCO's positional claims may
+  be read only in the measurement. **B.** a V or P claim states the scope of the primary
+  text examined; the documentation warns that a whole-source citation does not certify the
+  register's coverage of the source, and prefers claim-level citation. **C.** an explicit
+  convention tells a non-evidentiary mention from a citation; an exception never changes a
+  grade, and records its reason, scope, approver and decision file.
+- With no citations, the check passes and reports zero evaluated, never as evidence that
+  decisions are well sourced. Stale exceptions are detected. Delegating exception
+  authority to another kind is recorded; adding a kind alone confers none. A rights
+  reviewer's judgement is distinct from source adequacy.
+- Tests: negative and mutation tests, with regression coverage for stable claim ids,
+  missing claims in whole-source citations, stale exceptions, and mentions. The read-only
+  measurement on BCO's register reports entries processed, invalid data, adequate and
+  inadequate citations and exceptions, BCO's files unmodified.
+- "then push": the implementation is pushed when done.
