@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6. See "Release v0.1.0", "Release v0.2.0" and "Release v0.3.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7. See "Release v0.1.0" to "Release v0.4.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -745,6 +745,83 @@ The rest of the checklist, with the release's three verifications (decision 32):
   and the suite passes (490).
 - Item 4: the manifest recorded with the label `v0.3.0` in its own commit.
 
+### Release v0.4.0 (2026-11-06)
+
+The fourth template release, made under `RELEASING.md`. Its scope is decision 34's: backlog
+item 12, review as a gate, built on the basis the architect set ("a machine candidates, a
+person owns"), with P5's gate half and item 7 folded in, and the "merge by hand" defect;
+decision 35 named the roles. Nothing else from the backlog is in it.
+
+**What changes for a project made from v0.3.0.**
+
+- The reviewer kind `domain-practitioner` is renamed `domain-expert`, and
+  `proxy-domain-expert` is added (decision 35). Take the new `config/review.yaml` with the new
+  tools; the findings tool refuses the old file, naming the rename, and rename the kind in
+  every `classified_by`.
+- New: `tools/ontology/candidates.py`, `tools/review.py`, `config/candidates.yaml` and
+  `config/review-register.yaml` (both seeded), `review/candidates/`. `--against` lists all of
+  them as added. The Checks job gains "The review register can be used".
+- Nothing is held until a project marks a stage `done` whose `config/stages.yaml` entry
+  names a `review`. The template's stages now name one on `conceptual-model` and
+  `formalization`; a project's own `stages.yaml` gains them only if it adds them. A stage
+  held needs the charter's role lines (`docs/charter.md`, "Who holds which gate").
+- `--against` lists a file changed on both sides to the same bytes as already taken, not as
+  a merge.
+
+| What | Why | Tests |
+|---|---|---|
+| `6fea1d1`: the review roles Domain Expert, Proxy Domain Expert and Ontologist; the refusal of an older `review.yaml` names the rename | Decision 35 | `tests/test_classification.py` |
+| `333250a`: `tools/ontology/candidates.py`, six rules (necessity wording without an axiom; an inverse with it; one IRI with different genera; one IRI with different definitions under one genus; same-label or near-identical classes, and a class with an upstream class's label; a class said to include, be made of or also be something from a disjoint BFO category, unaccounted for by any restriction); `config/candidates.yaml` | Item 12 (decision 34): WP6's four kinds of defect no check decides | `tests/test_candidates.py` |
+| `fbfc326`: `config/review-register.yaml` and `tools/review.py`: an answer per candidate, matched by rule and IRIs, with its rules; candidates from elsewhere in `review/candidates/`, with their provenance and an example prompt; no runner, nothing model-based in CI | Decision 34, questions 3 and 4 | `tests/test_review.py` |
+| `540eda6`: the review gate in `tools/stages.py`: a stage marked done is held while a candidate in its scope has no answer from a role it allows, by someone the charter names in that role | Decision 34, questions 1 and 2; P5's other half | `tests/test_stages.py` |
+| `86fb6e8`: METHOD §4 and §9; `docs/process/review-example.md`; the Checks step | Decision 34 | the layout and docs tests |
+| `6856d53`: `--against` tells an update already taken from a conflict | Found in v0.3.0's compatibility check; decision 34, question 6 | `tests/test_init_project.py` |
+| `190c77a`: the review register seeded and the import README owned, so an upgrading project is told of them | Found in this release's compatibility check | `tests/test_template.py` |
+
+Two departures from the approved design, made for the reasons given: the candidates'
+settings are in `config/candidates.yaml`, seeded, not `config/review.yaml`, which is owned
+and would collide with a project's tuning; and a sixth rule, `definitions-differ`, joins
+the domain rules, added after the measurement below showed `genus-differs` alone missed
+the commonest drift.
+
+**What it does not do.** Measured on BPO (decision 34, question 4; counts only,
+`evaluations/2026-11-06-item-12-measurement.md`), the candidates raised 2 of the 11 named
+defects WP6 found, at 131 candidates for 3,119 classes. They find drift well (47 candidates
+at S0, none at S2, as BPO's own reconciliation did); they did not raise the over-claiming
+relation or any of the five misclassifications. The gate makes sure the places found are
+answered by the right role; it does not make sure nothing else is wrong, and cannot check
+that a person is what their role says.
+
+Not in it, and still open: the rest of the backlog, below, in its order: P4, P7, P8, then
+P6; P-A2, P-A4 to P-A6, P-A8; SDD's domain and range file; items 8 to 11.
+
+Pins: item 1, every pin checked at `6856d53` (2026-11-06). 29 pins, none failed; osv.dev
+scanned all 18 Python distributions, none has an advisory. Four have a newer release, all
+kept for the reasons recorded at v0.3.0 the same day: pip 26.3, uv 0.13.7 and Markdown
+3.11.3 postdate the lock's cutoff, and a re-lock is a change of its own; CCO stays at
+`v2.0-2024-11-06` (decisions 3 and 18).
+
+The rest of the checklist, with decision 32's three verifications:
+
+- Item 2: the suite passes locally at `190c77a` (604 passed); CI green on the tagged commit,
+  confirmed before the tag is pushed.
+- Negative tests: every rule of the review register and of the gate has a planted case
+  refused by name; every candidate rule has a near miss it must not report.
+- Mutation tests: the candidate rules 23 of 23, the register 17 of 17, the gate 13 of 13,
+  the "already taken" fix 3 of 3. Each run found gaps, closed before its commit: four test
+  gaps and an equivalent mutant in the generators (whose dead code was removed), a compact
+  date in the register, the wiring of the gate.
+- Compatibility: a project made from tag v0.3.0. Its own `--against` the new template lists
+  the six owned and two seeded files added (after `190c77a`; before it, the register was
+  missing from the list), and every seeded file as the template left it. The new findings
+  tool on its old `review.yaml` refuses, naming the rename; with the new file, it loads.
+- Item 3: a fresh clone of `190c77a`, installed from the lock (`--bootstrap`, then pip,
+  `pip check` clean), initialized as a project with the network rebuild: init exit 0; in
+  the project every reference resolves, the gate passes, the review register, the stage
+  check and the candidates run clean, `--against` the template reports every owned and
+  seeded file as the template left it, and the suite passes (575).
+- Item 4: the manifest recorded with the label `v0.4.0` in its own commit.
+
 ### After WP6: the prioritized backlog (decision 29)
 
 From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
@@ -759,9 +836,9 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | First release | 4 | A warning for a realizable class with an existential `has realization` restriction (`obo:BFO_0000054` on a class under `obo:BFO_0000017`) | approved |
 | v0.3.0 | 5 | **P-A7**: separate fields for a finding's validity, its origin and its resolution, designed with P5 | approved; amended (decision 32); in v0.3.0 |
 | v0.3.0 | 6 | **P-A1** transitive dependency locking; **P-A3** drift report sees shapes and config | approved; amended (decision 32); in v0.3.0 |
-| v0.4.0 | 12 | Review as a gate: machine candidates for over-claiming, homonyms, duplicates and misclassification, each answered by a named reviewer in the role the stage requires (Domain Expert, Proxy Domain Expert or Ontologist, decision 35), checked by `stages.py`; P5's other half; item 7 folded in; the "merge by hand" defect fixed alongside | approved; designed (decision 34, `evaluations/2026-11-06-item-12-design.md`) |
+| v0.4.0 | 12 | Review as a gate: machine candidates for over-claiming, homonyms, duplicates and misclassification, each answered by a named reviewer in the role the stage requires (Domain Expert, Proxy Domain Expert or Ontologist, decision 35), checked by `stages.py`; P5's other half; item 7 folded in; the "merge by hand" defect fixed alongside | approved; designed (decision 34, `evaluations/2026-11-06-item-12-design.md`); in v0.4.0 |
 | Next | -- | P4, P7, P8, then P6 (decision 21; P5 is in v0.4.0); P-A2, P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
-| Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34) |
+| Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
 | Lower | 9 | Declared third-party label text exempt from the qualifier check; several comments in one module where a project says so | approved, controlled |
 | Lower | 10 | Definition provenance for a project's own definitions, documented; the project's authorship is not an external source | approved |
