@@ -717,3 +717,35 @@ Effect:
 - The fresh-init test commits after init and runs the communications check.
 - v0.6.0 carries the fix with P7. It is a defect fix, not a further governance feature
   (decision 38's limit).
+
+**40. "Architectural Decision 35 — P8 Approved"** (2026-11-07)
+
+In answer to the seven questions of `evaluations/2026-11-07-p8-design.md` section 7. The
+whole text is recorded verbatim in
+[`evaluations/2026-11-07-p8-disposition.md`](evaluations/2026-11-07-p8-disposition.md)
+(SHA-256 of the text below its rule `4e0ddae6668fd7c5072126788a153ccf82eaa702558ae8a5b3dbc6d17c6f97c7`).
+Its heading numbers it 35; this register's 35 is the review roles' decision, so it is
+entered as 40. Effect:
+
+- P8 is approved for implementation in **v0.7.0**. The seven proposed answers are
+  accepted, subject to four safeguards: a separate seeded `research/rights.yaml`, one
+  review per register source; release by a decision record, the architect's act unless a
+  recorded decision delegates it; withholding held at the stage gate and the release, never
+  in ordinary CI; url, repository and manual evidence, with `--confirm` refetching url
+  evidence; `required_from` for older work; the read-only BCO measurement; P8 alone as
+  v0.7.0.
+- **1.** A rights assessment identifies the specific edition and the intended use;
+  permission for one use does not imply permission for another. **2.** Evidence is
+  represented as it is: manual review without verifiable source bytes is never described
+  as digest-verified. **3.** The stage and release controls enforce that a recorded
+  authorization decision exists and what it covers, never an automated judgement about
+  licensing terms. **4.** Accepted decisions, BPO ADR-003 among them, remain authoritative
+  for the material and uses they cover; P8 does not reopen them.
+- The architect is the default release authority, with explicit delegation permitted. A
+  new covered use is withheld until a decision applies to it. Ordinary CI validates the
+  records and is not blocked because a rights-use decision is pending.
+- `919454d` was authorized for push, and pushed. "Proceed with implementation, negative and
+  mutation tests, documentation, and the v0.7.0 release checklist." P6 is the next
+  separately scoped improvement; neither it nor another rights-governance feature is added
+  to v0.7.0. No further design approval unless a material architectural contradiction is
+  found.
