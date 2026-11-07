@@ -1013,6 +1013,12 @@ The rest of the checklist, with decision 32's three verifications:
   without the seeded files, run on their defaults and pass.
 - Item 3: a project made as "Use this template" makes one: a fresh clone of `7021e86` reduced to one commit, installed from the lock (`--bootstrap`, then pip, `pip check` clean), initialized with the network rebuild, and init committed: init exit 0; nothing left unstaged; every check exits 0, `tools/rights.py` included; `--against` the template reports every owned and seeded file as the template left it; and the suite passes (792).
 - Item 4: the manifest recorded with the label `v0.7.0` in its own commit.
+- Items 5 and 6, under decision 41: `50e83fb` to `b48086c` pushed to `main`; on
+  `b48086c`, Checks, Reasoning and Pages green, and Install and Scale, dispatched, green;
+  `v0.7.0` tagged on `b48086c` and pushed. Its Release run passed, the release job skipped
+  as in the template it is: a template version is its tag and manifest, and no artefact
+  is published. The tagged manifest is the one recorded at item 4 (digest
+  `65bb1c43cc75a8be`). The release is complete.
 
 ### After WP6: the prioritized backlog (decision 29)
 
@@ -1031,7 +1037,7 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.4.0 | 12 | Review as a gate: machine candidates for over-claiming, homonyms, duplicates and misclassification, each answered by a named reviewer in the role the stage requires (Domain Expert, Proxy Domain Expert or Ontologist, decision 35), checked by `stages.py`; P5's other half; item 7 folded in; the "merge by hand" defect fixed alongside | approved; designed (decision 34, `evaluations/2026-11-06-item-12-design.md`); in v0.4.0 |
 | v0.5.0 | -- | **P4**, the source register and source adequacy | approved; amended (decision 36); in v0.5.0 |
 | v0.6.0 | -- | **P7**, decision propagation | approved with three safeguards (decision 38); in v0.6.0 |
-| v0.7.0 | -- | **P8**, a rights and provenance review | approved with four safeguards (decision 40); in v0.7.0 |
+| v0.7.0 | -- | **P8**, a rights and provenance review | approved with four safeguards (decision 40); in v0.7.0, released (decision 41) |
 | Next | -- | P6 (decision 21; P5 is in v0.4.0); P-A2, P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |

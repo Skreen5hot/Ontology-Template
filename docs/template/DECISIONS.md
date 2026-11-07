@@ -749,3 +749,21 @@ entered as 40. Effect:
   separately scoped improvement; neither it nor another rights-governance feature is added
   to v0.7.0. No further design approval unless a material architectural contradiction is
   found.
+
+**41. "Architectural Decision 41 — P8 v0.7.0 Release Approved"** (2026-11-07)
+
+In answer to the report of P8's implementation and the v0.7.0 checklist. The whole text is
+recorded verbatim in
+[`evaluations/2026-11-07-v070-release.md`](evaluations/2026-11-07-v070-release.md)
+(SHA-256 of the text below its rule `04afbcfa987b533498fa8877447950f05cce15d75ce77a503fead07770be8d50`). Effect:
+
+- P8 is accepted for v0.7.0: the review as one source and one edition, manual evidence
+  apart from digest-verified, the stage and release controls, and the treatment of older
+  work, as consistent with decision 40's four safeguards. The BCO measurement is accepted;
+  its findings do not block the release and do not reopen BCO's rights decisions.
+- The release was authorized: push the five commits through `b48086c` to `main`, confirm
+  every required CI check on that commit, tag and push `v0.7.0` on it, verify the
+  tag-triggered workflows and artefacts, and record the release as complete. Done, as
+  `ROADMAP.md`'s "Release v0.7.0" records.
+- v0.7.0 gains no further governance feature. P6's design follows, as a separately scoped
+  work item.
