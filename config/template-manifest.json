@@ -1,5 +1,5 @@
 {
-  "digest": "79aeb0d5104c9af8e3b1d7e860146489edb990f1bead44edb3b8d703813ee21e",
+  "digest": "4ffa7f4e6cd0db223bc62809b666e4f811729f6090c9819741d2c28f27b79bbc",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -70,7 +70,7 @@
     "tests/test_authoring.py": "9e4fdb46dfca59a8f58905cb8e087a7af4c7d04e71f72fc874dc8b2030b85a41",
     "tests/test_candidates.py": "80c7bc4485c3e360454ba821d5abd4fd83b2c63a45e37e7d0087518ca729c34c",
     "tests/test_classification.py": "fd9a51a01ba12372aacb5111fc95124336c8f8993f73985ff038ff7713df2bd1",
-    "tests/test_communications.py": "017e3c9122544f34243f65bb094164bdb0b7bd9db23ff8e55a1aebaed6f6e088",
+    "tests/test_communications.py": "d91461616c0ffca4db09c282a41e627f2995884db151e07c56744768be6104b1",
     "tests/test_competency.py": "f8dd5c32fec0dd54150dee8231bf7a42e9c80096b7a35a13eefb478bfc7b9dda",
     "tests/test_decisions.py": "8cf39a212a6f9bf151e67aa8db379954e2ffa175ba700ea0c96caf132cb42ce4",
     "tests/test_detection_gaps.py": "dcbd60ee6f8ed9c9a42893335382f0239f17ac1c21905e09313111f8005abe42",
@@ -96,11 +96,11 @@
     "tests/test_term_contract.py": "4c6394e578c0fce724c18acdb80651fc24751aad003388d817c3fbf63dbc8563",
     "tests/test_upstream_vendoring.py": "d69e1511158b51761b11e1395259ff59429b25763e0d888155ce2d09c07043c4",
     "tests/test_vocabulary.py": "a0b53c5d5a70a1b9f9d4d28194c93e215394c4f38714289fd3040f752e841ad7",
-    "tools/communications.py": "2926e783d788b79c53ff159cc128a751e3800db37cad0e8c5f550838ea2bebc3",
+    "tools/communications.py": "1e3383e48c41859ed8b580760abbd5485d0a86e18b12821185393c810b0329e6",
     "tools/decisions.py": "defa2dd67c12145e514f21f992b9bdbba81a435da340efb8b849bc7da76293ff",
     "tools/findings.py": "bf4ab14e46cf06726636c9e271a9350b818bdc2f185705691767c851e52d6882",
     "tools/hooks/claude_ttl_lint.py": "0e4351ddb4ec278857030434b505a97931fcefa49637b2c340b36129063c9258",
-    "tools/init_project.py": "ecfd6410b88be90e07d5266133ffc37869010ac4b34606448fde2c26244d3ca9",
+    "tools/init_project.py": "9c018bd867a850480f65e311d95a2e1c1b6583902352b7a9aed9a57d0cc2c70f",
     "tools/layout.py": "6363c0f542e308d71276969a499184d74536abfa98842c6914c0cc10ac77613d",
     "tools/licensing/disposition.py": "1cae1d21b8787cdb759a842a3902074ded1d33f540d8b885452cb5fc90dfc46e",
     "tools/licensing/third_party.py": "e69db849c00cfcf0427c7aa529122dd2b8c0e84ad641f91e80e9ff4efa364f34",
@@ -161,6 +161,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "2896a86150576d928d55ed000971cdf205f7f2710f9d9007b172bb122c4914bd",
-  "template_commit": "ef40bb828f27ea3626029aee4c08b41b429918a8",
+  "template_commit": "ee687bf11de2951c3d5e2557a5e84d337d3eb0a1",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

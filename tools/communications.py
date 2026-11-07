@@ -18,6 +18,14 @@ bytes; no committed message has had its bytes set by more than one
 commit, following renames, so a move is allowed and a move that edits is
 not; and no message has been deleted.
 
+One deletion is not one: init's (template decision 39). A project made
+from the template starts with the template's correspondence in its first
+commit, and init removes it, writing communications/removed-at-init.yaml,
+each removed message by path and SHA-256. A deleted message is accepted
+only in the commit that adds that file, and only if the file lists its
+path and the digest of the bytes deleted. An edit to the file later
+excuses nothing.
+
 `--alert` prints the alert the board takes for a committed message: the
 title, whether it opens a Discussion or comments on its thread's, and
 the YAML block, bound to the commit that set the file and its digest.
@@ -85,6 +93,14 @@ ATTRIBUTE = "communications/** -text"
 BOARD = ("Skreen5hot", "communications")
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 COMMIT = re.compile(r"^[0-9a-f]{40}$")
+#: What init removed of the template's correspondence (decision 39).
+REMOVED = ROOT_DIR + "/removed-at-init.yaml"
+REMOVED_HEADER = (
+    "# Written by tools/init_project.py (template decision 39): each message\n"
+    "# of the template's correspondence init removed, by path and the\n"
+    "# SHA-256 of its committed bytes. tools/communications.py accepts a\n"
+    "# deleted message only in the commit that adds this file, and only as\n"
+    "# listed here. Never edit it: an edit excuses nothing.\n")
 
 
 def repository_root() -> Path:
@@ -263,10 +279,50 @@ def edits(root: Path, relative: str) -> int:
     return count
 
 
+def removal_record(root: Path, folders: list[str]) -> bytes:
+    """communications/removed-at-init.yaml for init removing these team
+    folders: each message in them, by path and the digest of its committed
+    bytes (the file's, if it is not committed)."""
+    import yaml
+
+    rows = []
+    for folder in folders:
+        for path in sorted((root / folder).glob("*/*.md")):
+            relative = path.relative_to(root).as_posix()
+            if relative.split("/")[2] not in DIRECTIONS:
+                continue
+            code, data = git(root, "show", "HEAD:" + relative)
+            if code:
+                data = path.read_bytes()
+            if split(data)[0] is None:
+                continue
+            rows.append({"path": relative,
+                         "sha256": hashlib.sha256(data).hexdigest()})
+    return (REMOVED_HEADER + yaml.safe_dump(
+        {"removed": rows}, sort_keys=False)).encode("utf-8")
+
+
+def removed_at_init(root: Path, commit: str) -> set:
+    """{(path, sha256)} init's record lists, if this commit is the one
+    that adds it; otherwise nothing."""
+    import yaml
+
+    code, data = git(root, "show", "%s:%s" % (commit, REMOVED))
+    if code or git(root, "cat-file", "-e", "%s^:%s" % (commit, REMOVED))[0] == 0:
+        return set()
+    try:
+        raw = yaml.safe_load(data.decode("utf-8")) or {}
+    except Exception:  # yaml raises several types
+        return set()
+    return {(str(r.get("path")), str(r.get("sha256")))
+            for r in raw.get("removed") or [] if isinstance(r, dict)}
+
+
 def deleted_messages(root: Path) -> list[str]:
     """Message files history has deleted (Rule 1). A rename is not a
     deletion (`-M`), and a file that never had a header was never a
-    message, so removing it is allowed."""
+    message, so removing it is allowed. init's removal of the template's
+    correspondence is accepted as its record lists it (decision 39)."""
     code, out = git(root, "log", "-M", "--diff-filter=D", "--name-only",
                     "--format=%x01%H", "--", ROOT_DIR)
     if code:
@@ -275,12 +331,14 @@ def deleted_messages(root: Path) -> list[str]:
     for chunk in out.decode("utf-8", "replace").split("\x01")[1:]:
         lines = [line for line in chunk.splitlines() if line.strip()]
         commit, paths = lines[0], lines[1:]
+        excused = removed_at_init(root, commit)
         for relative in paths:
             parts = relative.split("/")
             if len(parts) != 4 or parts[2] not in DIRECTIONS:
                 continue
             code, data = git(root, "show", "%s^:%s" % (commit, relative))
-            if code == 0 and split(data)[0] is not None:
+            if code == 0 and split(data)[0] is not None and (
+                    relative, hashlib.sha256(data).hexdigest()) not in excused:
                 found.append("%s: deleted by %s. A message is never "
                              "deleted." % (relative, commit[:12]))
     return found

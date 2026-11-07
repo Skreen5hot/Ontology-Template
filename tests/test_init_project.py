@@ -337,6 +337,37 @@ def test_the_suite_passes_straight_after_init(initialized):
     assert (initialized / "_site/downloads/widget-works-ontology.zip").is_file()
 
 
+def test_init_records_each_message_it_removes(initialized, repo):
+    """Template decision 39: every message of the template's
+    correspondence, by path and the digest of its committed bytes."""
+    import hashlib
+
+    import yaml
+
+    raw = yaml.safe_load(read(initialized, "communications/removed-at-init.yaml"))
+    listed = {(r["path"], r["sha256"]) for r in raw["removed"]}
+    names = subprocess.run(["git", "ls-files", "communications/*/*/*.md"],
+                           cwd=str(repo), check=True, capture_output=True
+                           ).stdout.decode("utf-8").split()
+    expected = {(n, hashlib.sha256((repo / n).read_bytes()).hexdigest())
+                for n in names}
+    assert listed == expected and listed
+
+
+def test_committing_init_leaves_the_communications_record_clean(
+        initialized, tmp_path):
+    """The defect decision 39 fixed: a person commits what init did, and
+    the communications check refused every message init removed as
+    deleted. Run in a copy, so the shared project stays uncommitted for
+    the tests above."""
+    copy = tmp_path / "committed"
+    shutil.copytree(initialized, copy, ignore=shutil.ignore_patterns("_site"))
+    git(copy, "add", "-A")
+    git(copy, "commit", "-q", "-m", "init")
+    code, out = run(copy, "tools/communications.py")
+    assert code == 0, out
+
+
 # -------------------------------------------------------- refusals
 
 

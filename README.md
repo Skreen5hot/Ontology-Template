@@ -70,8 +70,10 @@ What it does not have yet (an end-to-end proof in CI) is in [`docs/template/ROAD
    This writes `config/project.yaml`, sets the namespace to
    `https://fandaws.com/ontology/widget#` in the module, the shapes and the fixtures,
    renames the module to `ontology/widget.ttl`, renders the project's README, CLAUDE.md and
-   HANDOFF, removes the template's own docs, regenerates every generated file (which
-   fetches BFO and CCO once), and stages all of it. `--dry-run` shows what it would change.
+   HANDOFF, removes the template's own docs and correspondence (listing each message it
+   removes, by digest, in `communications/removed-at-init.yaml`), regenerates every
+   generated file (which fetches BFO and CCO once), and stages all of it. `--dry-run`
+   shows what it would change.
 
 4. Run the suite, review `git diff --staged`, commit:
 

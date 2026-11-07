@@ -72,6 +72,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import communications  # noqa: E402
 import layout  # noqa: E402
 import project  # noqa: E402
 import template_status  # noqa: E402
@@ -352,9 +353,16 @@ def plan(root: Path, old: dict, new: dict) -> tuple[dict, list, list]:
     # project file names no correspondent, so a team folder left behind
     # is one the project's own communications check refuses.
     record = layout.component("communications").path
+    folders = []
     for team in sorted(old.get("correspondents") or []):
         if (root / record / team.lower()).is_dir():
-            removals.append("%s/%s" % (record, team.lower()))
+            folders.append("%s/%s" % (record, team.lower()))
+    removals.extend(folders)
+    # And says what it removed, by digest, so the deletions it commits
+    # are not read as a message deleted (template decision 39).
+    if folders:
+        writes[communications.REMOVED] = communications.removal_record(
+            root, folders)
 
     owned = {c.path for c in layout.components() if c.template == "owned"}
     for relative in writes:

@@ -335,6 +335,63 @@ def test_a_file_that_was_never_a_message_may_be_removed(comms, tree):
     assert comms.deleted_messages(tree) == []
 
 
+# ------------------------------------- init's removal (decision 39)
+
+MESSAGE = "communications/xyz/outgoing/" + FILENAME
+
+
+def init_removes(comms, tree, record=None):
+    """What init does to the template's correspondence: the record of
+    what it removes, written before the folder goes, committed with the
+    removal in one commit -- unless the test supplies another record."""
+    data = record if record is not None else comms.removal_record(
+        tree, ["communications/xyz"])
+    (tree / comms.REMOVED).write_bytes(data)
+    git_in(tree, "rm", "-q", "-r", "communications/xyz")
+    git_in(tree, "add", "-A")
+    git_in(tree, "commit", "-qm", "init")
+
+
+def test_inits_removal_as_its_record_lists_it_is_not_a_deletion(comms, tree):
+    init_removes(comms, tree)
+    assert comms.deleted_messages(tree) == []
+
+
+def test_the_record_lists_each_message_by_its_committed_digest(comms, tree):
+    import yaml
+
+    raw = yaml.safe_load(comms.removal_record(tree, ["communications/xyz"]))
+    data = (tree / MESSAGE).read_bytes()
+    assert raw["removed"] == [{"path": MESSAGE,
+                               "sha256": hashlib.sha256(data).hexdigest()}]
+
+
+def test_a_removal_the_record_lists_with_other_bytes_is_refused(comms, tree):
+    record = comms.removal_record(tree, ["communications/xyz"])
+    digest = hashlib.sha256((tree / MESSAGE).read_bytes()).hexdigest()
+    init_removes(comms, tree, record.replace(digest.encode(), b"0" * 64))
+    assert any(MESSAGE in f and "never deleted" in f
+               for f in comms.deleted_messages(tree))
+
+
+def test_a_removal_the_record_does_not_list_is_refused(comms, tree):
+    init_removes(comms, tree, comms.REMOVED_HEADER.encode() + b"removed: []\n")
+    assert any(MESSAGE in f for f in comms.deleted_messages(tree))
+
+
+def test_the_record_excuses_nothing_after_the_commit_that_adds_it(comms,
+                                                                 tree):
+    """A record committed first, or edited later, excuses no deletion in
+    a later commit: only the commit that adds it is init's."""
+    (tree / comms.REMOVED).write_bytes(
+        comms.removal_record(tree, ["communications/xyz"]))
+    git_in(tree, "add", "-A")
+    git_in(tree, "commit", "-qm", "the record alone")
+    git_in(tree, "rm", "-q", MESSAGE)
+    git_in(tree, "commit", "-qm", "delete later")
+    assert any(MESSAGE in f for f in comms.deleted_messages(tree))
+
+
 # --------------------------------------------------------------- alerts
 
 
