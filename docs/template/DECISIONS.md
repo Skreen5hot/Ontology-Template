@@ -692,3 +692,28 @@ whole text is recorded verbatim in
   release checklist." No other governance feature, and no later backlog item, without a
   separately approved need. No further design review unless implementation reveals a
   material contradiction.
+
+**39. "Fix in v0.6.0, init records"** (2026-11-07)
+
+Asked when the v0.6.0 checklist's fresh init, committed as a person would commit it, failed
+the communications check. The question and the option selected, with its description as
+shown, verbatim (SHA-256 of the text, as below without the quotation marks,
+`8029ba5dfc7ec29011fca93d63ffd7599683c2b606aced47ffceef4f0bc49f65`):
+
+> Question: The fresh-init check found a defect that predates P7. In a project made with "Use this template", the first commit holds the template's messages and init removes them. Once the user commits init, communications.py reports every one as "deleted. A message is never deleted" and the project's Checks job fails. Every release has it (the deletion rule is in v0.1.0); earlier checklists missed it because they never committed after init. How should it be handled?
+>
+> Selected: Fix in v0.6.0, init records (Recommended)
+>
+> Description as shown: init writes a list of each message it removes, with its digest. The deletion check accepts a deletion only when its path and bytes match an entry in that list. The protocol rule stays as written, and each removal can be audited. The fresh-init test gains a step that commits after init. Then v0.6.0 is released with the fix.
+
+Effect:
+
+- `tools/init_project.py` writes `communications/removed-at-init.yaml`: each message of the
+  template's correspondence it removes, by path and SHA-256 of its committed bytes.
+- `tools/communications.py` accepts a deleted message only when the commit that deletes it
+  is the commit that adds that file, and the file lists its path and the digest of the
+  bytes deleted. Any other deletion is refused, as before: the protocol's rule is
+  unchanged, and a later edit to the list excuses nothing.
+- The fresh-init test commits after init and runs the communications check.
+- v0.6.0 carries the fix with P7. It is a defect fix, not a further governance feature
+  (decision 38's limit).
