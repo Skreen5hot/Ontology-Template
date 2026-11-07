@@ -385,6 +385,7 @@ def test_stages_check_reaches_the_propagation_gate_for_a_done_stage(
     called = []
     monkeypatch.setattr(stages_tool, "propagation",
                         lambda r, s: called.append(r) or ["HELD"])
+    monkeypatch.setattr(stages_tool, "withholding", lambda r, s: [])
     monkeypatch.setattr(stages_tool, "problems_of", lambda *a: [])
     path = tmp_path / "stages.yaml"
     monkeypatch.setattr(stages_tool.layout, "path",

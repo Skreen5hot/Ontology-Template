@@ -21,6 +21,10 @@ what the checks hold the modules to:
                an SPDX identifier, or "unknown"
   attribution  the attribution or notice the project has been told is
                required, carried verbatim in the header's dcterms:rights
+  rights       optional: the source's rights review, by its register id
+               (P8, template decision 40). tools/rights.py holds a stage
+               marked done, and a release, while text with no review, or
+               whose use no decision has released, is in a module
 
 tools/ontology/validate.py fails a module that holds such text and whose
 header does not name the source and release, or does not carry the

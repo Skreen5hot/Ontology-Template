@@ -1,0 +1,38 @@
+# Rights and provenance reviews (P8, template decision 40): what each
+# source's terms were found to say, on what evidence, and which decision
+# released each use of its text. tools/rights.py states the fields and the
+# rules.
+#
+# One review per source of the register (research/sources.yaml) and
+# edition, made as rights-reviewer. Each evidence item is pinned by its
+# sha256 -- a url, or a file at a commit -- or is manual: read where its
+# bytes could not be kept, and never reported as digest-verified. Each
+# intended use is judged on its own, and stays withheld until a decision
+# record releases it; permission for one use implies none for another.
+#
+# The terms are the reviewer's assessment. A release is the architect's
+# act, recorded in docs/decisions/; the tool judges neither. Example, not
+# a recommendation:
+#
+#   - source: <its id in research/sources.yaml>
+#     rightsholder: Example Body
+#     work: Example Standard
+#     edition: "2021"
+#     status: evidence-complete
+#     terms: ambiguous
+#     open_questions:
+#       - Whether the annex is under the same notice as the body.
+#     evidence:
+#       - kind: url
+#         url: https://example.org/standard/licence.html
+#         sha256: <64 hex digits of the bytes retrieved>
+#         retrieved: 2026-11-07
+#         checked: The licence notice, and the terms page it links to.
+#     reviewed_by: A. Reviewer (rights-reviewer)
+#     uses:
+#       - intended: Definitions quoted in ontology/core.ttl, attributed.
+#         modules: [ontology/core.ttl]
+#         use: withheld
+
+format_version: 1
+reviews: []

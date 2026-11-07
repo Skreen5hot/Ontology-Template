@@ -134,6 +134,16 @@ jobs:
         continue-on-error: true
         run: python tools/decisions.py
 
+      # Rights and provenance (P8, decision 40): every review names its
+      # edition and each intended use, its evidence is pinned by digest or
+      # marked manual, and a released use names a decision that cites the
+      # source. A use still withheld is listed and fails nothing here --
+      # only a stage marked done, or a release, is held for it.
+      - name: Every rights review is well-formed
+        id: rights
+        continue-on-error: true
+        run: python tools/rights.py
+
       # The SHACL ladder, gated through config/findings-register.yaml: a
       # violation or warning no entry accepts fails, and so does an entry
       # that matches nothing. A rung that cannot be evaluated is exit 2,

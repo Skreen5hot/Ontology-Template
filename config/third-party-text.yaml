@@ -13,6 +13,11 @@
 #                or "unknown"
 #   attribution  the attribution you have been told is required, carried
 #                verbatim in the module header's dcterms:rights
+#   rights       optional: the register id of the source's rights review
+#                in research/rights.yaml (P8, decision 40). Text with no
+#                review, or whose use no decision has released, holds a
+#                stage marked done and a release; it fails nothing else
+#                (tools/rights.py)
 #
 # The values are the project's, from whoever advises it on licensing.
 # The template ships none and judges none of them: these checks say the
@@ -26,6 +31,7 @@
 #     release: v1.0
 #     licence: unknown
 #     attribution: Contains text from Example Framework v1.0.
+#     rights: <the source's id in research/sources.yaml>
 
 format_version: 1
 

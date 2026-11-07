@@ -71,6 +71,16 @@ components:
       exceptions, each excusing one citation in one decision file (P4,
       template decision 36).
 
+  - id: research.rights
+    path: research/rights.yaml
+    role: research
+    template: seeded
+    description: >-
+      The rights and provenance reviews: one per register source and
+      edition, with its evidence pinned by digest or marked manual, the
+      reviewer's assessment of the terms, and each intended use withheld
+      until a decision record releases it (P8, template decision 40).
+
   - id: generated.research-sources
     path: research/sources.md
     role: generated-artifact
@@ -353,6 +363,16 @@ components:
       files it changes, and each of those cites it, or is listed as owed;
       the stage gate and the release hold what is owed (P7, decision 38).
       Never judges whether a decision was carried faithfully.
+
+  - id: tool.rights
+    path: tools/rights.py
+    role: tool
+    template: owned
+    description: >-
+      Rights and provenance: each review's record and evidence, --confirm
+      refetching url evidence by digest, and the modules whose declared
+      third-party text no decision has released, held by the stage gate
+      and the release (P8, decision 40). Never judges what terms permit.
 
   - id: tool.candidates
     path: tools/ontology/candidates.py
@@ -712,6 +732,16 @@ components:
       Which files are decision records, the date before which a record
       need not declare what it changes, and the owed files no stage
       holds, each assigned to a stage or accounted for (P7, decision 38).
+
+  - id: config.rights
+    path: config/rights.yaml
+    role: configuration
+    template: seeded
+    description: >-
+      Which files may release a use, who may release (the architect, or a
+      kind delegated by a recorded decision), and the date before which a
+      declaration need not name a review and a decision stands as written
+      (P8, decision 40).
 
   - id: config.candidates
     path: config/candidates.yaml

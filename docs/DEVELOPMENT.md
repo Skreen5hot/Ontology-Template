@@ -97,6 +97,8 @@ python tools/review.py                        # the review register: answered, u
 python tools/sources.py                       # the source register; every cited source read, or excused
 python tools/sources.py --write               # regenerate research/sources.md from the register
 python tools/decisions.py                     # what each decision changes; every file still owed
+python tools/rights.py                        # rights reviews; every use still withheld
+python tools/rights.py --confirm              # also refetch url evidence by its digest (network)
 python tools/stages.py                        # every started stage has its standard, and a done
                                               # stage's review candidates are answered
 python tools/communications.py                # the communications record follows its protocol
@@ -123,9 +125,10 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `vocabulary.py --check` | `ontology/vocabulary.ttl` differing from what `vocabulary/terms.tsv` generates; an intake row with a bad status, an accepted row unsigned or unplaced, a local name off the class convention or used twice or already declared, a parent with no known prefix |
 | `protege.py --check` | `protege/edit.ttl` or its catalog differing from what the modules and the vendored files generate; a module with no ontology header, or two |
 | `normalize.py --check` | a module declared `format: canonical` that is not in canonical Turtle |
-| `release.py` | a version that is not MAJOR.MINOR.PATCH; a file that does not parse back to the graph it was written from; a file a decision owes that no stage holds and `config/decisions.yaml` does not account for |
+| `release.py` | a version that is not MAJOR.MINOR.PATCH; a file that does not parse back to the graph it was written from; a file a decision owes that no stage holds and `config/decisions.yaml` does not account for; a module holding declared third-party text whose use no decision has released |
 | `decisions.py` | a decision record not named `YYYY-MM-DD-<slug>.md`, or without its front matter (unless dated before `required_from`); a block with an unknown field, a target twice, neither or both of `carries_into` and `carries_nothing`; a target that is not a repository path to one file, or is the record itself; a citation written as a path to a record that names none; an `unscoped` entry malformed, naming nothing owed, or stale. A file still owed is listed, never refused |
-| `stages.py` | in `config/stages.yaml`: a started or finished stage with no standard, or one naming a file that does not exist or is the blank skeleton; a path stage done before an earlier stage the project runs; a lane done before a stage it joins; a stage not run with a status; an unknown status, layout component or joined stage; a stage listed twice; and, for a stage marked `done` that names a review, a candidate with no answer, an answer from a role the stage does not allow or from someone the charter does not name in it, a deferral past its date, or an import run on another corpus; and, for any stage marked `done`, a file a decision owes in its scope or assigned to it. It never reads a standard, judges a gate or reads what an answer concludes |
+| `rights.py` | in `research/rights.yaml`: an unknown field or value; a source the register does not hold, or one edition of a source reviewed twice; a gap or deferral without its reason, or a complete review with one, or with no evidence; ambiguous terms with no open question; an evidence item without its fields, a malformed digest, date or commit, a manual item carrying a digest; a quote over `max_quote_words`; a reviewer not `rights-reviewer`; a use without what it is for or its modules, a module two uses cover, a release naming no tracked decision record, one that does not cite the source (unless taken before `required_from`), or someone of a kind not allowed to release; a declaration's `rights` naming no register source; and, with `--confirm`, a url item whose digest moved or which cannot be fetched. A use still withheld is listed, never refused |
+| `stages.py` | in `config/stages.yaml`: a started or finished stage with no standard, or one naming a file that does not exist or is the blank skeleton; a path stage done before an earlier stage the project runs; a lane done before a stage it joins; a stage not run with a status; an unknown status, layout component or joined stage; a stage listed twice; and, for a stage marked `done` that names a review, a candidate with no answer, an answer from a role the stage does not allow or from someone the charter does not name in it, a deferral past its date, or an import run on another corpus; and, for any stage marked `done`, a file a decision owes in its scope or assigned to it, or a module in its scope holding declared third-party text whose use no decision has released. It never reads a standard, judges a gate or reads what an answer concludes |
 | `template_status.py --check` | in the template only: a manifest that does not describe the owned files. A project's divergence is reported, never refused |
 
 `validate.py` exits 2 when a rung could not be evaluated, in every mode, `-o` and
@@ -370,9 +373,13 @@ in `dcterms:rights`; `validate.py --gate` fails a module that does not, and
 `disposition.py` lists the text apart from the module's licence.
 
 The template ships no declaration and decides nothing: the values are whoever advises you
-on licensing. What these checks may say about the result is with Legal
-(`communications/legal/`), and the report says so until they answer. Nothing can find
-third-party text that is not declared.
+on licensing. Text whose licence is `unknown` passes when it is declared and attributed;
+nothing is refused for its licence (template decision 33, the architect's acceptance of the
+risk). Nothing can find third-party text that is not declared.
+
+A declaration may also name the source's rights review, `rights:` with its register id.
+That is the next section's: text with no review, or whose use no decision has released,
+holds a stage marked `done` and a release, never anything else.
 
 ## Competency questions and examples
 
@@ -669,6 +676,47 @@ listed as not declaring.
 
 A carried file cites the decision; it is not shown to say what the decision decided. The
 check also cannot find a file a decision changes but does not list.
+
+## Rights, and what may be used
+
+Before text is taken from a source, its rights are reviewed, and what is taken is withheld
+until a decision releases it. `research/rights.yaml` holds one review per source of the
+register and edition, made as `rights-reviewer`:
+
+- the rightsholder, the work and the **edition** reviewed: a review of one edition says
+  nothing of another, and two editions of one source are two reviews;
+- a status, `evidence-complete`, `gap` or `deferred` (with `gap_reason`), and the terms as
+  the reviewer assessed them, `unambiguous`, `ambiguous` (with `open_questions`) or
+  `not-established`;
+- the evidence: a `url` or a `repository` file at a commit, each pinned by the sha256 of
+  the bytes read, or `manual`, read where its bytes could not be kept, with why. A manual
+  item has no digest and is never counted as digest-verified;
+- each **intended use** on its own: what the text would be used for, the modules it would
+  be in, and `use: withheld` until a decision releases it, then `use: released` with
+  `released_by: {decision, by}`. Permission for one use is not permission for another.
+
+A release names a decision record (`config/rights.yaml` `decisions`, by default
+`docs/decisions/*.md`), and that record cites the source's id: they point at each other.
+`by` is `<name> (architect)`, unless a recorded decision delegates releasing to another
+kind (`releasers`, with `delegated_by`).
+
+Name the review in the declaration of the text (`rights:` in
+`config/third-party-text.yaml`). Then a module holding that text is held unless a review of
+that source exists, of the declaration's release, with a use listing the module, released.
+`python tools/stages.py` refuses a stage marked `done` with such a module in its scope, and
+`tools/release.py` refuses to build. `python tools/rights.py` lists each and fails only on a
+record it cannot accept: a use waiting for its decision is normal, and ordinary CI is never
+failed for one. `--confirm` refetches each `url` item; a digest that moved is a finding for
+the reviewer, and is never re-pinned.
+
+A project adopting this with third-party text already declared sets `required_from` in
+`config/rights.yaml` to the date it starts. A declaration made before it (by the commit that
+added it) that names no review is listed as unreviewed, never held; a decision taken before
+it stands as written for what it covers, and is not asked to cite a review made after it.
+
+It decides nothing: the terms are the reviewer's assessment and a release is the
+architect's act. It holds that a recorded decision exists and covers the use, not that the
+use is permitted, and it cannot see a use nobody declared.
 
 ## Naming, deprecation, and what changed
 

@@ -39,7 +39,10 @@ the date.
 It refuses to build while a decision owes a target that no stage holds
 and config/decisions.yaml does not account for (tools/decisions.py, P7,
 decision 38): debt outside every stage's scope is settled, or said to be
-outstanding, before a release.
+outstanding, before a release. And it refuses while a module holds
+declared third-party text whose use no decision has released
+(tools/rights.py, P8, decision 40): that a recorded decision exists and
+covers the use, never what the source's terms permit.
 """
 
 from __future__ import annotations
@@ -57,6 +60,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent / "ontology"))
 
 import decisions  # noqa: E402
+import rights  # noqa: E402
 import layout  # noqa: E402
 import project  # noqa: E402
 
@@ -338,6 +342,10 @@ def build(version: str, out: Path, modules: list[Path] | None = None,
     if owed:
         raise Refused("a decision is owed where no stage holds it (P7, "
                       "decision 38):\n  " + "\n  ".join(owed))
+    held = rights.release_problems(rights.check(root)["held"])
+    if held:
+        raise Refused("text no decision has released is in a module (P8, "
+                      "decision 40):\n  " + "\n  ".join(held))
     modules = list(modules if modules is not None else layout.ontology_files())
     vendored = list(vendored if vendored is not None
                     else layout.vendored_files())

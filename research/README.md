@@ -17,5 +17,10 @@ The suite enforces the second half: a file in `research/` with a suffix other th
 ones above is refused, and so is any file whose bytes are those of a file in
 `docs/Reference/` -- a copy is a copy whatever it is called.
 
+Two files here are records the checks read: `sources.yaml`, the source register, and
+`rights.yaml`, the rights and provenance review of each source, with each intended use
+withheld until a decision releases it (`docs/DEVELOPMENT.md`, "Rights, and what may be
+used").
+
 A note that settles something becomes a decision (`docs/decisions/`) or a change to the
 ontology; the note stays as the record of how it was reached.

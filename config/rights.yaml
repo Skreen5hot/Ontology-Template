@@ -1,0 +1,27 @@
+# How tools/rights.py checks rights and provenance reviews (P8, template
+# decision 40).
+#
+#   decisions      the files a release may name as the decision that
+#                  released a use: each must cite the source it releases
+#   releasers      the reviewer kinds (config/review.yaml) whose release
+#                  of a use counts. The architect by default. A project
+#                  may delegate to another kind, and records the
+#                  delegation: delegated_by names the decision file that
+#                  made it. Adding a kind confers no authority by itself.
+#   required_from  a date, or null. A project adopting P8 with third-party
+#                  text already declared sets it: a declaration made
+#                  before it that names no review is listed as unreviewed,
+#                  never held, and a decision taken before it stands as
+#                  written for what it covers, without citing a review
+#                  made after it (decision 40, safeguard 4). A new project
+#                  leaves it null.
+
+version: 1
+
+decisions:
+  - docs/decisions/*.md
+
+releasers:
+  - kind: architect
+
+required_from: null

@@ -43,6 +43,15 @@ tracked, or tracked without the decision's identifier
 (tools/decisions.py). A cited file is carried; whether it says what the
 decision decided is the reviewer's to judge.
 
+THE WITHHOLDING GATE (P8, template decision 40)
+
+A stage marked done is refused while a module in its `where` components
+holds declared third-party text whose use no decision has released: its
+declaration names no rights review, the review is of another edition,
+no intended use covers the module, or that use is withheld
+(tools/rights.py). It holds that a recorded decision exists and covers
+the use, never what the source's terms permit.
+
 A candidate is a place to look, never a defect: nothing fails because one
 exists. The gate checks that each has an answer from the right role on
 the current corpus. It cannot check that the person is what the role
@@ -282,6 +291,7 @@ def check(root: Path | None = None) -> tuple[list[dict], list[str]]:
         found.extend(gate(root, stages))
     if any(s.get("status") == "done" for s in stages):
         found.extend(propagation(root, stages))
+        found.extend(withholding(root, stages))
     return stages, found
 
 
@@ -292,6 +302,17 @@ def propagation(root: Path, stages: list[dict]) -> list[str]:
 
     return decisions.stage_problems(
         stages, decisions.check(root, stages)["owed"])
+
+
+def withholding(root: Path, stages: list[dict]) -> list[str]:
+    """The withholding gate (P8, decision 40): a stage marked done holds
+    every module in its scope with text no decision has released."""
+    import rights
+
+    if not rights.declarations(root):
+        return []
+    return rights.stage_problems(stages, rights.check(root)["held"],
+                                 rights.owner_of)
 
 
 def gate(root: Path, stages: list[dict]) -> list[str]:

@@ -106,7 +106,11 @@ Each was found by doing without it.
   rights are reviewed and recorded, and what is gathered is withheld until they are.
   Whether the text may be used is a legal decision, recorded as one, never a check's
   verdict. BCO harvested before its rights review and had to withhold the result; one
-  catalogue took three decisions and a re-sourcing to settle.
+  catalogue took three decisions and a re-sourcing to settle. Here the record is
+  `research/rights.yaml`: one review per source and edition, with its evidence pinned
+  by digest or marked manual, and each intended use withheld until a decision record
+  releases it. `tools/rights.py` holds a stage marked done, and a release, while a module
+  carries declared text no decision has released; it never judges what the terms permit.
 - **Review, by the right role.** Some defects no check decides: a definition that claims
   more than the axioms, one IRI used for two kinds, two IRIs for one, a class under the
   wrong category. Whether each is a defect is a fact about what the authors meant. So a
@@ -187,9 +191,9 @@ still unanswered, is a record rather than a memory. BCO re-pinned BPO five times
 ## 9. Not covered yet
 
 The gates in §4 are rules for people. The review gate is a check (template v0.4.0), and
-so are source adequacy (v0.5.0) and decision propagation (v0.6.0, §6). One more is planned
-as a check and not yet built: a rights and provenance record. Conceptual fidelity is
-last, because it should be designed against a real formalization. Until then those are
+so are source adequacy (v0.5.0), decision propagation (v0.6.0, §6) and the rights and
+provenance review (v0.7.0). Conceptual fidelity is planned as a check and not yet built:
+it is last, because it should be designed against a real formalization. Until then it is
 held by the gate's holder, and a standard can say what the holder checks by hand. The
 review candidates find only some kinds of defect, and few of the ones a careful reviewer
 would; the gate makes sure the places they find are answered, not that nothing else is
