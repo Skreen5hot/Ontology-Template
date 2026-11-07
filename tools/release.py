@@ -35,6 +35,11 @@ one process to the next for the same graph -- measured 2026-10-23 before
 this was written. Every file is parsed back and required to be the same
 graph as the one it was written from. Nothing in the output depends on
 the date.
+
+It refuses to build while a decision owes a target that no stage holds
+and config/decisions.yaml does not account for (tools/decisions.py, P7,
+decision 38): debt outside every stage's scope is settled, or said to be
+outstanding, before a release.
 """
 
 from __future__ import annotations
@@ -51,6 +56,7 @@ from xml.sax.saxutils import escape, quoteattr
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent / "ontology"))
 
+import decisions  # noqa: E402
 import layout  # noqa: E402
 import project  # noqa: E402
 
@@ -328,6 +334,10 @@ def build(version: str, out: Path, modules: list[Path] | None = None,
         raise Refused("version %r is not MAJOR.MINOR.PATCH (a tag v1.2.0 is "
                       "released as 1.2.0)" % version)
     root = layout.repository_root()
+    owed = decisions.release_problems(decisions.check(root)["owed"])
+    if owed:
+        raise Refused("a decision is owed where no stage holds it (P7, "
+                      "decision 38):\n  " + "\n  ".join(owed))
     modules = list(modules if modules is not None else layout.ontology_files())
     vendored = list(vendored if vendored is not None
                     else layout.vendored_files())

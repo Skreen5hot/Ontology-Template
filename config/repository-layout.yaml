@@ -344,6 +344,16 @@ components:
       source adequacy: each citation in a decision file graded V or P, or
       individually excused. Never grades or reads a source.
 
+  - id: tool.decisions
+    path: tools/decisions.py
+    role: tool
+    template: owned
+    description: >-
+      Decision propagation: each decision record's front matter names the
+      files it changes, and each of those cites it, or is listed as owed;
+      the stage gate and the release hold what is owed (P7, decision 38).
+      Never judges whether a decision was carried faithfully.
+
   - id: tool.candidates
     path: tools/ontology/candidates.py
     role: tool
@@ -362,6 +372,14 @@ components:
       The authored terms added, removed, deprecated or changed between two
       commits, each side read through its own layout contract. A comment on
       every pull request; CHANGES.md in every release.
+
+  - id: docs.decisions-readme
+    path: docs/decisions/README.md
+    role: documentation
+    template: seeded
+    description: >-
+      What a decision record carries, the front matter naming the files
+      it changes among it; the template's, kept improving.
 
   - id: docs.decisions
     path: docs/decisions
@@ -685,6 +703,15 @@ components:
       Which files record decisions, who may approve a source exception
       (the architect, or a kind delegated by a recorded decision), and the
       quote limit, unset by default (P4, decision 36).
+
+  - id: config.decisions
+    path: config/decisions.yaml
+    role: configuration
+    template: seeded
+    description: >-
+      Which files are decision records, the date before which a record
+      need not declare what it changes, and the owed files no stage
+      holds, each assigned to a stage or accounted for (P7, decision 38).
 
   - id: config.candidates
     path: config/candidates.yaml

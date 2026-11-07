@@ -1,0 +1,37 @@
+# How tools/decisions.py checks decision propagation (P7, template
+# decision 38).
+#
+#   records        the decision records: each declares, in front matter,
+#                  the files it changes (carries_into) or why it changes
+#                  none (carries_nothing)
+#   exclude        files under records that are not decisions
+#   required_from  a date, or null. A record dated before it may lack the
+#                  block: it is listed as not declaring, never refused. A
+#                  project adopting P7 with records already made sets it;
+#                  a new project leaves it null, and every record declares
+#   scan_exclude   tracked files whose citations of a record, written as a
+#                  path to a record's file under its folder, are not
+#                  checked to name one: the template's own record, and
+#                  messages that cite another team's records. A project
+#                  whose test fixtures cite invented records adds them
+#   unscoped       owed targets in no running stage's scope, each assigned
+#                  to a stage or accounted for: {decision, target, and one
+#                  of stage: <stage id> or reason: <why it is outstanding>}.
+#                  tools/release.py refuses to build while such a target is
+#                  neither. An entry no longer needed is stale and fails.
+
+version: 1
+
+records:
+  - docs/decisions/*.md
+
+exclude:
+  - docs/decisions/README.md
+
+required_from: null
+
+scan_exclude:
+  - docs/template/**
+  - communications/**
+
+unscoped: []

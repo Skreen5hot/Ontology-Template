@@ -34,6 +34,15 @@ Ontologist: config/review.yaml). Such a stage is refused as done while
 - an answer deferred is past its review date;
 - candidates imported from elsewhere were run on another corpus.
 
+THE PROPAGATION GATE (P7, template decision 38)
+
+A stage marked done is refused while a decision record says it changes a
+file in one of the stage's `where` components, or one config/decisions.yaml
+assigns to the stage, and the file does not yet cite it: not created, not
+tracked, or tracked without the decision's identifier
+(tools/decisions.py). A cited file is carried; whether it says what the
+decision decided is the reviewer's to judge.
+
 A candidate is a place to look, never a defect: nothing fails because one
 exists. The gate checks that each has an answer from the right role on
 the current corpus. It cannot check that the person is what the role
@@ -271,7 +280,18 @@ def check(root: Path | None = None) -> tuple[list[dict], list[str]]:
     found = problems_of(raw, root, components, skeleton)
     if any(s.get("status") == "done" and s.get("review") for s in stages):
         found.extend(gate(root, stages))
+    if any(s.get("status") == "done" for s in stages):
+        found.extend(propagation(root, stages))
     return stages, found
+
+
+def propagation(root: Path, stages: list[dict]) -> list[str]:
+    """The propagation gate (P7, decision 38): a stage marked done holds
+    every target a decision owes in its scope, or assigned to it."""
+    import decisions
+
+    return decisions.stage_problems(
+        stages, decisions.check(root, stages)["owed"])
 
 
 def gate(root: Path, stages: list[dict]) -> list[str]:

@@ -96,6 +96,7 @@ python tools/ontology/candidates.py           # review candidates: places a pers
 python tools/review.py                        # the review register: answered, unanswered, stale
 python tools/sources.py                       # the source register; every cited source read, or excused
 python tools/sources.py --write               # regenerate research/sources.md from the register
+python tools/decisions.py                     # what each decision changes; every file still owed
 python tools/stages.py                        # every started stage has its standard, and a done
                                               # stage's review candidates are answered
 python tools/communications.py                # the communications record follows its protocol
@@ -122,8 +123,9 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `vocabulary.py --check` | `ontology/vocabulary.ttl` differing from what `vocabulary/terms.tsv` generates; an intake row with a bad status, an accepted row unsigned or unplaced, a local name off the class convention or used twice or already declared, a parent with no known prefix |
 | `protege.py --check` | `protege/edit.ttl` or its catalog differing from what the modules and the vendored files generate; a module with no ontology header, or two |
 | `normalize.py --check` | a module declared `format: canonical` that is not in canonical Turtle |
-| `release.py` | a version that is not MAJOR.MINOR.PATCH; a file that does not parse back to the graph it was written from |
-| `stages.py` | in `config/stages.yaml`: a started or finished stage with no standard, or one naming a file that does not exist or is the blank skeleton; a path stage done before an earlier stage the project runs; a lane done before a stage it joins; a stage not run with a status; an unknown status, layout component or joined stage; a stage listed twice; and, for a stage marked `done` that names a review, a candidate with no answer, an answer from a role the stage does not allow or from someone the charter does not name in it, a deferral past its date, or an import run on another corpus. It never reads a standard, judges a gate or reads what an answer concludes |
+| `release.py` | a version that is not MAJOR.MINOR.PATCH; a file that does not parse back to the graph it was written from; a file a decision owes that no stage holds and `config/decisions.yaml` does not account for |
+| `decisions.py` | a decision record not named `YYYY-MM-DD-<slug>.md`, or without its front matter (unless dated before `required_from`); a block with an unknown field, a target twice, neither or both of `carries_into` and `carries_nothing`; a target that is not a repository path to one file, or is the record itself; a citation written as a path to a record that names none; an `unscoped` entry malformed, naming nothing owed, or stale. A file still owed is listed, never refused |
+| `stages.py` | in `config/stages.yaml`: a started or finished stage with no standard, or one naming a file that does not exist or is the blank skeleton; a path stage done before an earlier stage the project runs; a lane done before a stage it joins; a stage not run with a status; an unknown status, layout component or joined stage; a stage listed twice; and, for a stage marked `done` that names a review, a candidate with no answer, an answer from a role the stage does not allow or from someone the charter does not name in it, a deferral past its date, or an import run on another corpus; and, for any stage marked `done`, a file a decision owes in its scope or assigned to it. It never reads a standard, judges a gate or reads what an answer concludes |
 | `template_status.py --check` | in the template only: a manifest that does not describe the owned files. A project's divergence is reported, never refused |
 
 `validate.py` exits 2 when a rung could not be evaluated, in every mode, `-o` and
@@ -637,6 +639,36 @@ A whole-source citation that passes says every registered claim was read, not th
 register covers the whole source: where a decision rests on a passage, cite the claim. And
 the check cannot find a source a decision relies on but does not cite. With no citations
 it passes, and says that this proves nothing.
+
+## Decisions, and the files each one changes
+
+Each record in `docs/decisions/` begins with a front matter block saying what it changes:
+
+```markdown
+---
+carries_into:
+  - docs/charter.md
+  - ontology/core.ttl
+---
+```
+
+or, for a decision that changes no file, `carries_into: []` and `carries_nothing:` with the
+reason. Each file it lists carries it once its text holds the record's name without `.md`
+(`2026-11-10-placement`), exactly: `2026-11-10-placement-b` is another decision's. In a
+Turtle module, a comment line or an `rdfs:comment` will do. `python tools/decisions.py`
+lists every file still owed -- not yet created, not tracked, or not citing it -- oldest
+decision first, and fails only on a record or a citation it cannot read
+(`tools/decisions.py` states each refusal).
+
+The debt is held in two places. `python tools/stages.py` refuses a stage marked `done` while
+a file in its `where` components is owed. `tools/release.py` refuses to build while a file
+no running stage's scope holds is owed, unless `config/decisions.yaml`'s `unscoped` assigns
+it to a stage (`stage:`) or accounts for it (`reason:`). A project adopting this with
+records already made sets `required_from` to the date it starts; the records before it are
+listed as not declaring.
+
+A carried file cites the decision; it is not shown to say what the decision decided. The
+check also cannot find a file a decision changes but does not list.
 
 ## Naming, deprecation, and what changed
 

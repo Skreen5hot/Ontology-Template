@@ -147,6 +147,15 @@ carried into the next specification by hand. Say, in the decision's effect, whic
 documents it changes, and carry it into each of them by name, so that a decision nobody has
 carried is visible rather than remembered.
 
+Here each record in `docs/decisions/` begins with a front matter block, `carries_into`
+listing the files it changes or `carries_nothing` saying why it changes none, and each of
+those files cites the record by its name (`2026-11-10-placement`). `tools/decisions.py`
+lists every file that does not cite it yet, or does not exist yet: the decision's debt. The
+debt fails nothing on its own. A stage is not done while it owes a file in its scope, and a
+release is not built while a file no stage holds is owed and not accounted for. A citation
+shows that a file refers to the decision; whether it says what the decision decided is the
+reviewer's judgement.
+
 ## 7. Declaring the stages a project runs
 
 `config/stages.yaml` lists the path's stages and the lanes, each with whether the project
@@ -178,8 +187,8 @@ still unanswered, is a record rather than a memory. BCO re-pinned BPO five times
 ## 9. Not covered yet
 
 The gates in §4 are rules for people. The review gate is a check (template v0.4.0), and
-so is source adequacy (v0.5.0). Two more are planned as checks and not yet built: decision
-propagation, and a rights and provenance record. Conceptual fidelity is
+so are source adequacy (v0.5.0) and decision propagation (v0.6.0, §6). One more is planned
+as a check and not yet built: a rights and provenance record. Conceptual fidelity is
 last, because it should be designed against a real formalization. Until then those are
 held by the gate's holder, and a standard can say what the holder checks by hand. The
 review candidates find only some kinds of defect, and few of the ones a careful reviewer

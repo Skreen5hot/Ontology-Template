@@ -10,7 +10,27 @@ Each record carries:
 - **who, and when**;
 - **what it is about, bound by digest** — the commit, or the SHA-256 of the file at that
   commit, recomputed from the committed file before recording;
-- **its effect** — what changes because of it, and what it does not decide.
+- **its effect** — what changes because of it, and what it does not decide;
+- **what it carries into** — a front matter block at the top of the file, before its
+  heading, listing the files the decision changes, each of which then cites the record by
+  its name without `.md`; or, when it changes none, saying why:
+
+  ```markdown
+  ---
+  carries_into:
+    - docs/charter.md
+  ---
+  ```
+
+  ```markdown
+  ---
+  carries_into: []
+  carries_nothing: Records that the pin stays; no document changes.
+  ---
+  ```
+
+  `python tools/decisions.py` lists each file that does not cite its decision yet; a stage
+  is not done, and a release not built, while one in its keeping does.
 
 An agent may record an act. It never performs one. A decision that is *not* being made gets
 recorded too, with its evidence and what would close it, so the question is not rediscovered.

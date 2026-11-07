@@ -792,6 +792,16 @@ def gather() -> dict:
 # ------------------------------------------------------------ sections
 
 
+def decision_title(path: Path) -> str:
+    """A decision record's title: its first line after the front matter
+    that says what the decision carries into (P7, decision 38)."""
+    lines = path.read_text(encoding="utf-8").splitlines()
+    if lines and lines[0] == "---" and "---" in lines[1:]:
+        lines = lines[lines.index("---", 1) + 1:]
+    first = next((line for line in lines if line.strip()), path.stem)
+    return first.lstrip("# ").strip()
+
+
 def scheme_trees(graph, known) -> str:
     """Every authored concept scheme, as the tree its top concepts and
     skos:broader make."""
@@ -1217,9 +1227,8 @@ def build(out: Path) -> list[tuple[str, str]]:
 
     decision_rows = []
     for path in data["decisions"]:
-        first = path.read_text(encoding="utf-8").splitlines()[0]
         decision_rows.append("<li>%s</li>" % source_link(
-            ctx, relative(path), first.lstrip("# ").strip()))
+            ctx, relative(path), decision_title(path)))
     decisions = ("<ul>\n%s\n</ul>" % "\n".join(decision_rows)
                  if decision_rows else "<p>None recorded yet.</p>")
 

@@ -238,13 +238,16 @@ def test_against_names_what_both_sides_changed(status, monkeypatch,
 #: decision 34): how candidates are looked for, and the answers to them,
 #: start as the template's and are the project's to change -- seeded, so
 #: a project made earlier is told they exist. P4's (v0.5.0, decision 36):
-#: the source register and its settings, for the same reason.
+#: the source register and its settings, for the same reason. P7's
+#: (v0.6.0, decision 38): the decision records' settings and the README
+#: saying what a record carries.
 SEEDED = {"validation.wellformedness", "validation.realist",
           "validation.skos", "fixture.wellformedness-bad-examples",
           "fixture.realist-bad-examples", "fixture.skos-bad-examples",
           "config.annotation-profile", "config.naming", "config.reasoning",
           "config.upstream-sources", "config.candidates",
-          "config.review-register", "config.sources", "research.sources"}
+          "config.review-register", "config.sources", "research.sources",
+          "config.decisions", "docs.decisions-readme"}
 
 
 def test_the_seeded_set_is_the_one_decided(layout):

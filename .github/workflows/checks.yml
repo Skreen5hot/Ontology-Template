@@ -124,6 +124,16 @@ jobs:
         continue-on-error: true
         run: python tools/sources.py
 
+      # Decision propagation (P7, decision 38): every decision record says
+      # which files it changes, or that it changes none. A malformed block,
+      # a target that is no file path, or a citation of a record that does
+      # not exist fails here; a target not yet citing its decision is owed,
+      # and listed -- only a stage marked done, or a release, is held for it.
+      - name: Every decision says what it changes
+        id: decisions
+        continue-on-error: true
+        run: python tools/decisions.py
+
       # The SHACL ladder, gated through config/findings-register.yaml: a
       # violation or warning no entry accepts fails, and so does an entry
       # that matches nothing. A rung that cannot be evaluated is exit 2,
