@@ -415,19 +415,21 @@ def test_the_inbox_lists_what_the_record_does_not_hold(comms, tree):
     assert [w["id"] for w in waiting] == ["XYZ-ABC-new", "XYZ-OLD-alias"]
 
 
-def test_an_alert_prints_on_a_console_that_cannot_encode_its_arrow(repo):
+def test_an_alert_prints_on_a_console_that_cannot_encode_its_arrow(
+        comms, tree, monkeypatch):
     """An alert's title is "[A→B] ...". On a Windows console (cp1252)
     printing it raised UnicodeEncodeError before anything was posted; the
-    tool writes UTF-8 whatever the console. Run on a committed message of
-    this record, as a person would."""
-    import os
+    tool writes UTF-8 whatever the console. Run through main, on a cp1252
+    stream, for the throwaway tree's committed message: a project made by
+    init holds none of the template's messages."""
+    import io
 
-    message = sorted((repo / "communications/sdd/outgoing").glob("*.md"))[-1]
-    env = dict(os.environ, PYTHONIOENCODING="cp1252")
-    result = subprocess.run(
-        [sys.executable, "tools/communications.py", "--alert",
-         message.relative_to(repo).as_posix()],
-        cwd=str(repo), capture_output=True, env=env)
-    assert result.returncode == 0, result.stderr.decode("utf-8", "replace")
-    assert "→" in result.stdout.decode("utf-8")
+    raw = io.BytesIO()
+    console = io.TextIOWrapper(raw, encoding="cp1252")
+    monkeypatch.setattr(sys, "stdout", console)
+    monkeypatch.setattr(comms, "repository_root", lambda: tree)
+    assert comms.main(["--alert",
+                       "communications/xyz/outgoing/" + FILENAME]) == 0
+    console.flush()
+    assert "→" in raw.getvalue().decode("utf-8")
 
