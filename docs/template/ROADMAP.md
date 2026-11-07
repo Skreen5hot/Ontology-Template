@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix. See "Release v0.1.0" to "Release v0.6.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8. See "Release v0.1.0" to "Release v0.7.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -950,6 +950,70 @@ The rest of the checklist, with decision 32's three verifications:
 - Item 3: a project made as "Use this template" makes one: a fresh clone of `71367ad` reduced to one commit, installed from the lock (`--bootstrap`, then pip, `pip check` clean), initialized with the network rebuild, and init committed: init exit 0; nothing left unstaged; every check exits 0, the communications check included, which before decision 39 refused every removed message; `--against` the template reports every owned and seeded file as the template left it; and the suite passes (689). Earlier releases' item 3 never committed after init, which is why the defect was not seen.
 - Item 4: the manifest recorded with the label `v0.6.0` in its own commit.
 
+### Release v0.7.0 (2026-11-07)
+
+The seventh template release, made under `RELEASING.md`: P8 as decision 40 approved it, with
+its four safeguards. Not P6, and no other rights-governance feature (decision 40's limit).
+
+**What changes for a project made from v0.6.0.**
+
+- New: `tools/rights.py`, with `research/rights.yaml` and `config/rights.yaml` seeded.
+  `--against` lists the tool, its tests and the two seeded files as added. Without them the
+  tool runs on its defaults: no review, nothing held.
+- The Checks job gains "Every rights review is well-formed". It fails only on a record it
+  cannot accept; a use still withheld is listed, and fails nothing there.
+- A declaration in `config/third-party-text.yaml` may name its review, `rights:` with the
+  source's register id. Declared third-party text in a module whose use no decision has
+  released then holds a stage marked done (`tools/stages.py`) and stops `tools/release.py`.
+  A project with text already declared sets `required_from` in `config/rights.yaml` to the
+  date it adopts P8: a declaration committed before it that names no review is listed as
+  unreviewed, not held, and a decision taken before it stands as written. Without that
+  date, every declared text is held until a decision releases its use.
+
+| What | Why | Tests |
+|---|---|---|
+| `9278a76`: `tools/rights.py`: one review per register source and edition, made as rights-reviewer; evidence as url or repository, pinned by sha256, or manual, which carries no digest and is counted apart; each intended use names its modules and is withheld until a decision record releases it, the record citing the source, released by the architect unless a recorded decision delegates; `--confirm` refetches url evidence and reports a moved digest, never re-pinning it; the stage gate and the release hold a module whose declared text no decision has released | P8 (decisions 21 and 40): METHOD section 4's rights review, which said it in prose and nothing held | `tests/test_rights.py` |
+| `7021e86`: the read-only measurement on BCO | Decision 40 | -- |
+
+**What it does not do.** It decides nothing: the terms are the reviewer's assessment, a
+release is the architect's act, and the holds ask only that a recorded decision exists and
+covers the use (safeguard 3). It never reads what a licence grants. It cannot see a use
+nobody declared, and a digest shows the document is the one reviewed, not that it was read
+rightly. Measured on BCO (`evaluations/2026-11-07-p8-measurement.md`, counts only): 4
+reviews, 76 evidence items, 71 pinned by digest and 5 manual; 22 findings, each a field BCO
+records per record or per source rather than per review and per use, and two browser-read
+items carrying a digest of rendered text; with `required_from` set, BCO's four decisions
+stand as written and 18 remain. The measurement found two editions of one work under one
+register id, which the design's one-review-per-source rule refused; a review is now one
+source and one edition, as safeguard 1 asks.
+
+Not in it, and still open: the rest of the backlog, below, in its order: P6; P-A2, P-A4 to
+P-A6, P-A8; SDD's domain and range file; items 8 to 11.
+
+Pins: item 1, every pin checked at `7021e86` (2026-11-07). 29 pins, none failed; osv.dev
+scanned all 18 Python distributions, none has an advisory. The same four have a newer
+release and are kept for the reasons recorded at v0.3.0: pip 26.3, uv 0.13.7 and Markdown
+3.11.3 postdate the lock's cutoff, and a re-lock is a change of its own; CCO stays at
+`v2.0-2024-11-06` (decisions 3 and 18).
+
+The rest of the checklist, with decision 32's three verifications:
+
+- Item 2: the suite passes locally at `9278a76` (824 passed), every check tool exits 0, and the site checks clean; CI green on the tagged commit, confirmed before the tag is pushed.
+- Negative tests: every refusal of `tools/rights.py` has a planted case refused by name and
+  a near miss that passes, with decision 40's safeguards among them: a review of another
+  edition, and a use released for another module, releasing nothing; two editions of one
+  source as two reviews; a manual item with a digest refused, and the report never calling
+  manual evidence digest-verified; a release whose decision does not cite the source
+  releasing nothing, a longer identifier not counting as a citation; a decision taken
+  before `required_from` standing as written, one after it asked to cite; and a hold that
+  fails no ordinary check, only a stage marked done and a release.
+- Mutation tests: 48 of 48 for P8.
+- Compatibility: a project made at v0.6.0's checklist. `--against` the new template lists
+  the tool, its tests and the two seeded files as added; the new tool and the stage gate,
+  without the seeded files, run on their defaults and pass.
+- Item 3: a project made as "Use this template" makes one: a fresh clone of `7021e86` reduced to one commit, installed from the lock (`--bootstrap`, then pip, `pip check` clean), initialized with the network rebuild, and init committed: init exit 0; nothing left unstaged; every check exits 0, `tools/rights.py` included; `--against` the template reports every owned and seeded file as the template left it; and the suite passes (792).
+- Item 4: the manifest recorded with the label `v0.7.0` in its own commit.
+
 ### After WP6: the prioritized backlog (decision 29)
 
 From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
@@ -967,7 +1031,7 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.4.0 | 12 | Review as a gate: machine candidates for over-claiming, homonyms, duplicates and misclassification, each answered by a named reviewer in the role the stage requires (Domain Expert, Proxy Domain Expert or Ontologist, decision 35), checked by `stages.py`; P5's other half; item 7 folded in; the "merge by hand" defect fixed alongside | approved; designed (decision 34, `evaluations/2026-11-06-item-12-design.md`); in v0.4.0 |
 | v0.5.0 | -- | **P4**, the source register and source adequacy | approved; amended (decision 36); in v0.5.0 |
 | v0.6.0 | -- | **P7**, decision propagation | approved with three safeguards (decision 38); in v0.6.0 |
-| v0.7.0 | -- | **P8**, a rights and provenance review | approved with four safeguards (decision 40) |
+| v0.7.0 | -- | **P8**, a rights and provenance review | approved with four safeguards (decision 40); in v0.7.0 |
 | Next | -- | P6 (decision 21; P5 is in v0.4.0); P-A2, P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
