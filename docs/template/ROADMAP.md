@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4. See "Release v0.1.0" to "Release v0.5.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix. See "Release v0.1.0" to "Release v0.6.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -886,6 +886,70 @@ The rest of the checklist, with decision 32's three verifications:
   seeded file as the template left it, and the suite passes (612).
 - Item 4: the manifest recorded with the label `v0.5.0` in its own commit.
 
+### Release v0.6.0 (2026-11-07)
+
+The sixth template release, made under `RELEASING.md`: P7 as decision 38 approved it, with
+its three safeguards, and the defect its checklist found, fixed as decision 39 chose. Not
+P8, P6 or other governance features (decision 38's limit).
+
+**What changes for a project made from v0.5.0.**
+
+- New: `tools/decisions.py`, with `config/decisions.yaml` seeded, and
+  `docs/decisions/README.md` now seeded too. `--against` lists the tool, its tests and the
+  two seeded files as added. Without `config/decisions.yaml` the tool runs on its defaults.
+- The Checks job gains "Every decision says what it changes". It fails on a decision record
+  in `docs/decisions/` without its front matter, `carries_into` or `carries_nothing`. A
+  project with records already made sets `required_from` to the date it adopts P7, and its
+  older records are listed, not refused.
+- `tools/stages.py` holds a stage marked done while a decision owes a file in its scope.
+  `tools/release.py` refuses to build while a file no stage holds is owed and not assigned
+  or accounted for in `config/decisions.yaml`.
+- A project made from v0.5.0 or earlier and already committed has the communications
+  defect below in its history. The fix is for projects made from now on; such a project's
+  maintainer decides what to do about the findings.
+
+| What | Why | Tests |
+|---|---|---|
+| `e760db0`: `tools/decisions.py`: each record's front matter names the files it changes, or says why none; a target carries a decision when it holds the record's name exactly, never as part of a longer one, and a record is never its own target; an owed target says why (not yet created, not tracked, not citing it) and fails nothing in ordinary CI; the stage gate and the release hold what is owed; the site titles a record after its front matter | P7 (decisions 21 and 38): METHOD section 6, which said it in prose and nothing held | `tests/test_decisions.py` |
+| `74e9bf1`: the read-only measurement on BCO | Decision 38 | -- |
+| `730d013`: the alert encoding test runs in a project made by init | It read the template's own messages, which init removes: it failed in every project made from `4230dcf` on | `tests/test_communications.py` |
+| `71367ad`: init lists each message of the template's correspondence it removes, by digest, in `communications/removed-at-init.yaml`; the deletion check accepts a deleted message only in the commit that adds that list, as listed | Decision 39: once committed, init's removal was refused as deleted messages, and every new project's Checks job failed; every release had it | `tests/test_communications.py`, `tests/test_init_project.py` |
+
+**What it does not do.** It never judges whether a decision was carried faithfully: a
+citation shows that a file refers to the decision, not that it says what the decision
+decided, and that judgement is the reviewer's. It does not find a file a decision changes
+but does not list. Only a citation written as a path to a record is checked to resolve: a
+bare dated name is as often an evaluation's or a message's file name. Measured on BCO
+(`evaluations/2026-11-06-p7-measurement.md`, counts only): the check lists DP-1 and DP-2 as
+owed by specification v0.4.0-draft.1 and carried from v0.5.0-draft.1 on; `required_from`
+turns 42 refusals of BCO's records into 42 listings; 16 of 18 citations of a record that
+does not exist are in trial fixtures, which `scan_exclude` is for.
+
+Not in it, and still open: the rest of the backlog, below, in its order: P8, then P6;
+P-A2, P-A4 to P-A6, P-A8; SDD's domain and range file; items 8 to 11.
+
+Pins: item 1, every pin checked at `e760db0` (2026-11-06), and no pin changed after it. 29 pins, none failed; osv.dev
+scanned all 18 Python distributions, none has an advisory. The same four have a newer
+release and are kept for the reasons recorded at v0.3.0: pip 26.3, uv 0.13.7 and Markdown
+3.11.3 postdate the lock's cutoff, and a re-lock is a change of its own; CCO stays at
+`v2.0-2024-11-06` (decisions 3 and 18).
+
+The rest of the checklist, with decision 32's three verifications:
+
+- Item 2: the suite passes locally at `71367ad` (720 passed), every check tool exits 0, and the site checks clean; CI green on the tagged commit, confirmed before the tag is pushed.
+- Negative tests: every refusal of `tools/decisions.py` has a planted case refused by name
+  and a near miss that passes, with decision 38's safeguards among them: a target walked
+  from not created, to untracked, to uncited, to carried, holding its stage until the last;
+  an owed target in no stage's scope stopping a release until assigned or accounted for;
+  a longer identifier, a word containing it, and the record itself never carrying it.
+- Mutation tests: 41 of 41 for P7, 7 of 7 for decision 39's fix, and 2 of 2 for the fixes
+  the fresh init found.
+- Compatibility: a project made at v0.5.0's checklist. `--against` the new template lists
+  the tool, its tests and the two seeded files as added; the new tool, without the seeded
+  config, runs on its defaults and passes.
+- Item 3: a project made as "Use this template" makes one: a fresh clone of `71367ad` reduced to one commit, installed from the lock (`--bootstrap`, then pip, `pip check` clean), initialized with the network rebuild, and init committed: init exit 0; nothing left unstaged; every check exits 0, the communications check included, which before decision 39 refused every removed message; `--against` the template reports every owned and seeded file as the template left it; and the suite passes (689). Earlier releases' item 3 never committed after init, which is why the defect was not seen.
+- Item 4: the manifest recorded with the label `v0.6.0` in its own commit.
+
 ### After WP6: the prioritized backlog (decision 29)
 
 From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
@@ -902,7 +966,7 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.3.0 | 6 | **P-A1** transitive dependency locking; **P-A3** drift report sees shapes and config | approved; amended (decision 32); in v0.3.0 |
 | v0.4.0 | 12 | Review as a gate: machine candidates for over-claiming, homonyms, duplicates and misclassification, each answered by a named reviewer in the role the stage requires (Domain Expert, Proxy Domain Expert or Ontologist, decision 35), checked by `stages.py`; P5's other half; item 7 folded in; the "merge by hand" defect fixed alongside | approved; designed (decision 34, `evaluations/2026-11-06-item-12-design.md`); in v0.4.0 |
 | v0.5.0 | -- | **P4**, the source register and source adequacy | approved; amended (decision 36); in v0.5.0 |
-| v0.6.0 | -- | **P7**, decision propagation | approved with three safeguards (decision 38) |
+| v0.6.0 | -- | **P7**, decision propagation | approved with three safeguards (decision 38); in v0.6.0 |
 | Next | -- | P8, then P6 (decision 21; P5 is in v0.4.0); P-A2, P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
