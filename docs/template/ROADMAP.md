@@ -902,7 +902,8 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.3.0 | 6 | **P-A1** transitive dependency locking; **P-A3** drift report sees shapes and config | approved; amended (decision 32); in v0.3.0 |
 | v0.4.0 | 12 | Review as a gate: machine candidates for over-claiming, homonyms, duplicates and misclassification, each answered by a named reviewer in the role the stage requires (Domain Expert, Proxy Domain Expert or Ontologist, decision 35), checked by `stages.py`; P5's other half; item 7 folded in; the "merge by hand" defect fixed alongside | approved; designed (decision 34, `evaluations/2026-11-06-item-12-design.md`); in v0.4.0 |
 | v0.5.0 | -- | **P4**, the source register and source adequacy | approved; amended (decision 36); in v0.5.0 |
-| Next | -- | P7, P8, then P6 (decision 21; P5 is in v0.4.0); P-A2, P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
+| v0.6.0 | -- | **P7**, decision propagation | approved with three safeguards (decision 38) |
+| Next | -- | P8, then P6 (decision 21; P5 is in v0.4.0); P-A2, P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
 | Lower | 9 | Declared third-party label text exempt from the qualifier check; several comments in one module where a project says so | approved, controlled |

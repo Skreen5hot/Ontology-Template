@@ -665,3 +665,30 @@ Recorded verbatim (SHA-256 `8afc859dca7ae954736349ab740ac63610c276dc4fee4f391f6f
   and that a notice follows when the file ships. It asks nothing of SDD.
 - Decision 28's "the answer to SDD is sent when it ships" is replaced by this answer and a
   later notice. The backlog's order is unchanged.
+
+**38. "Architectural Decision — P7 Approved"** (2026-11-06)
+
+In answer to the seven questions of `evaluations/2026-11-06-p7-design.md` section 7. The
+whole text is recorded verbatim in
+[`evaluations/2026-11-06-p7-disposition.md`](evaluations/2026-11-06-p7-disposition.md)
+(SHA-256 of the text below its rule `a1ab35fba6000bac5e9424a84723565193a299b53d6463ab412be31b52cdd636`). Effect:
+
+- P7 is approved for implementation in **v0.6.0**. The seven proposed answers are
+  accepted: YAML front matter with `carries_into` or `carries_nothing`; the records are
+  `docs/decisions/*.md` in seeded `config/decisions.yaml`; older records are covered by
+  `required_from`; a target is a file; owed targets are reported always and held by the
+  stage gate, never failing ordinary CI; the read-only BCO DP-1 and DP-2 measurement; P7
+  as v0.6.0.
+- Three safeguards: **1.** a valid target not yet created is reported as owed, not
+  refused; its stage cannot close until it is created, tracked and cites the decision.
+  **2.** an owed target outside every configured stage scope stays visible, and is
+  assigned or explicitly accounted for before the project releases. **3.** a decision is
+  cited by exact identifier matching: no false matches, and no decision satisfied by
+  itself.
+- The tool establishes whether a declared obligation is referenced in its target, not
+  whether the decision was carried faithfully; that judgement stays with the appropriate
+  human reviewer.
+- "Proceed with implementation, negative and mutation tests, documentation, and the v0.6.0
+  release checklist." No other governance feature, and no later backlog item, without a
+  separately approved need. No further design review unless implementation reveals a
+  material contradiction.
