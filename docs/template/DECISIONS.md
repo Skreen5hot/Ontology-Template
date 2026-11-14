@@ -817,3 +817,17 @@ replaced. The question and the option selected, with its description as shown, v
 Effect: a `preserves` row is signed by a kind `config/review.yaml` declares; by default
 `ontologist`, `domain-expert` or `proxy-domain-expert`, the list in `config/fidelity.yaml`,
 which a project may change. No kind is added or restored.
+
+**44. "push to man  and proceed the tag and push on v0.8"** (2026-11-14)
+
+In answer to the v0.8.0 report, which asked to push `a3eacd8` to `20f5c81`, confirm CI on
+`20f5c81`, and tag and push v0.8.0. Recorded verbatim, the typing as given (SHA-256 of the
+text `fc3d1798b317ac1aea715a4c4d52191056a531c9db5a2d47104bedc9dd3764d1`). Its recording was asked for
+and given: "yes on decision 44" (SHA-256 of that whole message,
+`49414bf46defbad7b312e430bd9334a2278df0f3fe806bf4b12fd2ad06e27ebf`). Effect:
+
+- `a3eacd8` to `20f5c81` pushed to `main`; Checks, Reasoning, Pages, Install and Scale green
+  on `20f5c81`; `v0.8.0` tagged on it and pushed, its Release run passed with the release
+  job skipped, as in the template it is. `ROADMAP.md`'s "Release v0.8.0" records it.
+- The same message asked that the next backlog item proceed: P-A2, designed before it is
+  built, as P4 to P8 were.
