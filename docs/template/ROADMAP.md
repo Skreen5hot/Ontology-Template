@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8. See "Release v0.1.0" to "Release v0.7.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6. See "Release v0.1.0" to "Release v0.8.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -1020,6 +1020,82 @@ The rest of the checklist, with decision 32's three verifications:
   is published. The tagged manifest is the one recorded at item 4 (digest
   `65bb1c43cc75a8be`). The release is complete.
 
+### Release v0.8.0 (2026-11-14)
+
+The eighth template release, made under `RELEASING.md`: P6 as decision 42 approved it,
+with its amendments, and decision 43's reviewer kinds. No automated semantic
+interpretation, no annotation property for traceability, and no further governance feature
+(decision 42's limits).
+
+**What changes for a project made from v0.7.0.**
+
+- New: `tools/fidelity.py`, with `config/fidelity.yaml` and `ontology/trace.yaml` seeded.
+  `--against` lists the tool, its tests and the two seeded files as added. Without them
+  the tool runs on its defaults: no model registered, and the report says conceptual
+  fidelity is not yet established.
+- The Checks job gains "Every conceptual-fidelity trace is well-formed". It fails only on a
+  record it cannot accept; untraced terms and stale reviews are listed, and fail nothing
+  there.
+- Once a project registers an approved model, the stage `config/fidelity.yaml` names
+  (`formalization`) cannot be marked done, and `tools/release.py` will not build, while
+  fidelity is owed: an authored term or a covered element with no row, a row whose model,
+  upstream pins or axioms changed since its review, or a term whose age cannot be told. A
+  project with terms already authored sets `required_from` and `baseline_commit`: a term
+  declared at that snapshot is listed as predating adoption, not held.
+
+| What | Why | Tests |
+|---|---|---|
+| `92ea125`: `tools/fidelity.py`: approved models registered with their approval and `cover`; element references `<model>#<anchor>`, resolved in Markdown by heading, table row or bold item, unique or refused until qualified, declared anchors for other formats reported as declared; rows with `preserves` (signed in a kind `config/review.yaml` declares), `changes` or `not-formalized` (each citing a decision that cites every element); axiom digests over a canonical graph, blind to serialization order, with the model and upstream pins; guards for prohibiting elements; the debt held by the stage gate and the release; a reproducible adoption baseline, and uncertainty held, never exempted | P6 (decisions 21, 42 and 43): METHOD section 4's formalization gate, which said it in prose and nothing held | `tests/test_fidelity.py` |
+| `d779d96`: the read-only CM-01 measurement, as conceptual-model reference coverage | Decision 42, decision 8 | -- |
+
+**What it does not do.** It judges no meaning: `preserves` is a reviewer's claim, a
+departure is the architect's decision, and a matching digest shows that what was reviewed
+has not changed, not that it represents the model. Demonstrated, as decision 42 asks it to
+be stated: trace completeness, model-element references, axiom-change detection, recorded
+review and decision requirements, and the stage and release holds. **Not yet
+demonstrated**: that the mechanism supports the faithful formalization of a substantial
+real ontology. It was shown on fixtures and on CM-01's structure, and is to be measured
+again on BCO's first substantive Stage 05 module. Measured on CM-01
+(`evaluations/2026-11-14-p6-measurement.md`, counts only): the cover patterns select the
+approved inventory, 5 patterns, 33 concepts, 39 relationships, 2 decision points and 22
+boundary-section rows; each of the 101 resolves once; 9 names recur in 193 places, each
+resolvable once when qualified; 0 traced, as expected with no Stage 05.
+
+Not in it, and still open: the rest of the backlog, below, in its order: P-A2, P-A4 to
+P-A6, P-A8; SDD's domain and range file; items 8 to 11. And the follow-up P6 evaluation on
+BCO's first Stage 05 module (decision 42, decision 7).
+
+Pins: item 1, every pin checked at `d779d96` (2026-11-14). 29 pins, none failed; osv.dev
+scanned all 18 Python distributions, none has an advisory. Five have a newer release and
+are kept. pip 26.3 and Markdown 3.11.3 postdate the lock's cutoff, and a re-lock is a
+change of its own, as recorded at v0.3.0; uv 0.13.8 likewise. CCO stays at
+`v2.0-2024-11-06` (decisions 3 and 18). `actions/setup-java` v6.3.0 was published on
+2026-11-14, the day of this check: an action pin moves in a change of its own, after the
+release has stood, not on its release day.
+
+The rest of the checklist, with decision 32's three verifications:
+
+- Item 2: the suite passes locally at `92ea125` (965 passed before the manifest was
+  recorded; the manifest tests, and all 137 of `tests/test_fidelity.py`, pass after),
+  every check tool exits 0, and the site checks clean; CI green on the tagged commit,
+  confirmed before the tag is pushed.
+- Negative tests: every refusal of `tools/fidelity.py` has a planted case refused by name
+  and a near miss that passes, with decision 42's amendments among them: an ambiguous
+  anchor refused and its qualified form accepted, a qualifier out of order resolving
+  nothing; declared anchors reported as declared; a departure whose decision does not cite
+  every element, a longer reference not counting; `domain-practitioner`, `architect` and
+  `rights-reviewer` refused as signers by default; the fingerprint unmoved by reordering,
+  relabelling, an axiom annotation or a move between modules, and moved by each kind of
+  axiom; a stale row for a changed model, upstream pin or axiom; a missing baseline commit
+  and a shallow clone uncertain, never exempt; with no model, "not yet established"; and
+  debt that fails no ordinary check, only a stage marked done and a release. BCO's three
+  expected changes are fixtures.
+- Mutation tests: 62 of 62 for P6 (61 at first; the miss, a qualifier matched out of
+  order, now has its test).
+- Compatibility: a project made at v0.7.0 and initialized. `--against` the new template lists the tool, its tests and the two seeded files as added, and six owned files as changed; the new tool and the stage gate, without the seeded files, run on their defaults: not yet established, no stage finding, nothing holding a release.
+- Item 3: a project made as "Use this template" makes one: a fresh clone of `d779d96` reduced to one commit, installed from the lock (`--bootstrap`, then pip, `pip check` clean), initialized with the network rebuild, and init committed: init exit 0; nothing left unstaged; every check exits 0, `tools/fidelity.py` included, which reports conceptual fidelity not yet established; `--against` the template reports every owned and seeded file as the template left it; and the suite passes (929).
+- Item 4: the manifest recorded with the label `v0.8.0` in its own commit.
+
 ### After WP6: the prioritized backlog (decision 29)
 
 From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
@@ -1038,7 +1114,7 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.5.0 | -- | **P4**, the source register and source adequacy | approved; amended (decision 36); in v0.5.0 |
 | v0.6.0 | -- | **P7**, decision propagation | approved with three safeguards (decision 38); in v0.6.0 |
 | v0.7.0 | -- | **P8**, a rights and provenance review | approved with four safeguards (decision 40); in v0.7.0, released (decision 41) |
-| v0.8.0 | -- | **P6**, conceptual fidelity | approved with amendments (decisions 42 and 43) |
+| v0.8.0 | -- | **P6**, conceptual fidelity | approved with amendments (decisions 42 and 43); in v0.8.0 |
 | Next | -- | P-A2, P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
