@@ -767,3 +767,53 @@ recorded verbatim in
   `ROADMAP.md`'s "Release v0.7.0" records.
 - v0.7.0 gains no further governance feature. P6's design follows, as a separately scoped
   work item.
+
+**42. "Architectural Decision — P6 Conceptual Fidelity"** (2026-11-14)
+
+In answer to the eight questions of `evaluations/2026-11-07-p6-design.md` section 7. The
+whole text is recorded verbatim in
+[`evaluations/2026-11-14-p6-disposition.md`](evaluations/2026-11-14-p6-disposition.md)
+(SHA-256 of the text below its rule `0482fac26bc8408b8acbd561cadd595be3fbcd9c19410f2c25b6f80e0df90f41`).
+Its heading carries no number; it is entered as 42. Effect:
+
+- P6 is approved for **v0.8.0**, with amendments. It enforces traceability and review
+  completeness, and claims no semantic fidelity of its own.
+- **1.** `config/fidelity.yaml` and `ontology/trace.yaml`, both seeded; no annotation
+  property for traceability. **2.** `<model-id>#<anchor>`, unique within its model,
+  ambiguous anchors refused until qualified, deterministic; declared anchors for other
+  formats, never reported as verified; no model format prescribed. **3.** `preserves`,
+  `changes`, `not-formalized`; the last two need a decision referencing every element, the
+  first a named reviewer and capacity from `config/review.yaml`'s kinds (decision 43);
+  `not-formalized` means not in OWL, possibly in a shape or a question; decision citation
+  is P7's mechanism, not P8's. **4.** Axiom digests over a canonical form of the asserted
+  axioms, blind to serialization order; the pinned upstream context recorded; a guard, or
+  why none, for an element that prohibits an inference; digests never regenerated
+  silently. **5.** Ordinary CI validates; debt is reported, and held only at
+  `formalization` marked done and at release; `required_from` with a reproducible
+  adoption baseline, and uncertainty reported, never exempted; with no approved model, the
+  report says "not applicable" or "not yet established", never passed. **6.** Both sides
+  of coverage reported; `cover` is the architect's selection, and the tool never treats it
+  as complete. **7.** Built now, its demonstrated capability stated as five things, and
+  not as faithful formalization of a real ontology; a follow-up evaluation on BCO's first
+  Stage 05 module. **8.** The CM-01 inventory recorded as conceptual-model reference
+  coverage, BCO unchanged.
+- Not in v0.8.0: ontology properties or per-term annotations for traceability; automated
+  semantic interpretation; any automatic decision on fidelity. No further design round
+  unless implementation finds a material contradiction.
+
+**43. "Current kinds (Recommended)"** (2026-11-14)
+
+Asked when decision 42's decision 3 named `domain-practitioner`, which decision 35 had
+replaced. The question and the option selected, with its description as shown, verbatim
+(SHA-256 of the text, as below without the quotation marks,
+`af5a622bab8d48d8bb9fd45663082c37ad6131d3a984e85320c0f333517a64ed`):
+
+> Question: Decision 3 names `domain-practitioner`, but decision 35 renamed it to `domain-expert` in v0.4.0, and `config/review.yaml` has no `domain-practitioner` today. Which reviewer kinds may sign a `preserves` row?
+>
+> Selected: Current kinds (Recommended)
+>
+> Description as shown: Follow decision 3's rule (draw kinds from the existing review.yaml vocabulary, add no new fixed kind). By default a `preserves` row may be signed by `ontologist`, `domain-expert` or `proxy-domain-expert`, the decision 35 roles. Each kind is checked against review.yaml, and a project may change the allowed list in config/fidelity.yaml.
+
+Effect: a `preserves` row is signed by a kind `config/review.yaml` declares; by default
+`ontologist`, `domain-expert` or `proxy-domain-expert`, the list in `config/fidelity.yaml`,
+which a project may change. No kind is added or restored.
