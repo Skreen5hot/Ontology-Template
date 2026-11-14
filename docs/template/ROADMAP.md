@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6. See "Release v0.1.0" to "Release v0.8.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix. See "Release v0.1.0" to "Release v0.9.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -1102,6 +1102,83 @@ The rest of the checklist, with decision 32's three verifications:
   is published. The tagged manifest is the one recorded at item 4 (digest
   `82ac5dd69207dd30`). The release is complete.
 
+### Release v0.9.0 (2026-11-14)
+
+The ninth template release, made under `RELEASING.md`: P-A2 as decision 45 approved it,
+with its four safeguards, and the alert defect the same message asked to be fixed first. No
+other feature (decision 45's limit); P-A4 to P-A6 and P-A8 stay separate.
+
+**What changes for a project made from v0.8.0.**
+
+- New: `tools/upgrade.py`. Run the **release's** copy from its checkout against the
+  project (`python ../Ontology-Template/tools/upgrade.py --project .`), so a project made
+  from any release plans without changing itself first. `--take` copies only the files the
+  project never changed; `--adopt` writes the release's record. `docs/DEVELOPMENT.md`,
+  "Upgrading to a new template release", is the procedure. Moving to this release is the
+  first time it can be used: from v0.8.0, the plan lists `tools/upgrade.py` itself as added.
+- `config/template-manifest.json` may now carry `adopted`, `made_from` and `upgrades`,
+  written by `--adopt`; `tools/template_status.py` takes `adopted` as its seeded base when
+  it is there. A manifest without them reads as before.
+- `tools/communications.py --alert`: a reply in a thread that began before the board opened
+  (2026-11-04) opens its own Discussion, titled with its own id, as the protocol's Alerts 1
+  says. It said to comment on a Discussion that did not exist.
+
+| What | Why | Tests |
+|---|---|---|
+| `4096a68`: `--alert` and a thread from before the board | Found posting the P6 notice to BCO (decision 45's message asked it fixed first) | `tests/test_communications.py` |
+| `3ec76b3`, `bde1354`, `13def77`, `15ccaa0`: `tools/upgrade.py`: the plan's classes (take, merge, already taken, added, collision, removed, removed and changed here, deleted here, kept, pins), seeded files through init's rewrite on both template sides; layout entries added, changed and removed, each added one with what its file needs; skeleton and starting-file changes as diffs; init's generators; every release's notes since the project's; `--out` merge bases; `--take` and `--adopt` under the four safeguards | P-A2 (decisions 23 and 45): no procedure for upgrading, and nothing moved a project's record forward | `tests/test_upgrade.py` (template-only) |
+| `bcf072e`: the two throwaway-project upgrades | Decision 45 | -- |
+
+**What it does not do.** It merges nothing: a file changed on both sides is a person's,
+with the base and the release's version written for `git merge-file`. It never moves a BFO
+or CCO pin without `--accept-pins`, never writes a file the project changed, a path in the
+way or a symbolic link, and never removes a file or edits the layout contract. It touches
+no ontology, and migrates no project data: a starting file the release changed is shown as
+a diff, and a format change is the release notes' to describe. Measured
+(`evaluations/2026-11-14-pa2-measurement.md`, counts only): a project made at v0.7.0 took
+14 files, adopted with nothing unresolved, and passes every check and its suite (930). One
+made at v0.1.0 took 70, copied 4 starter files, carried 4 starting files over and adopted
+with nothing unresolved; every check but `communications.py` exits 0 and the suite has 2
+failures, both on the plan's own lists (decision 39's deletion in the history of a project
+made before v0.6.0, and a README rendered from a skeleton since changed). Neither project
+had changes of its own; the tests plant those.
+
+Not in it, and still open: the rest of the backlog, below, in its order: P-A4 to P-A6,
+P-A8; SDD's domain and range file; items 8 to 11. And the follow-up P6 evaluation on BCO's
+first Stage 05 module (decision 42), which BCO was asked to announce
+(`communications/bco/outgoing/2026-11-14-p6-stage05-request.md`).
+
+Pins: item 1, every pin checked at `3ec76b3` (2026-11-14). 29 pins, none failed; osv.dev
+scanned all 18 Python distributions, none has an advisory. The same five have a newer
+release as at v0.8.0, kept for the same reasons: pip 26.3, Markdown 3.11.3 and uv 0.13.8
+postdate the lock's cutoff, and a re-lock is a change of its own; CCO stays at
+`v2.0-2024-11-06` (decisions 3 and 18); `actions/setup-java` v6.3.0 was published on
+2026-11-14, and an action pin moves in a change of its own, after the release has stood.
+
+The rest of the checklist, with decision 32's three verifications:
+
+- Item 2: the suite passes locally at `bcf072e` (1038 passed), every check tool exits 0, and the
+  site checks clean; CI green on the tagged commit, confirmed before the tag is pushed.
+- Negative tests: every class and refusal of `tools/upgrade.py` has a planted case on a
+  world of two releases and an initialized project, with decision 45's safeguards among
+  them: the planner run on a project that never had it; the pins moved only with
+  `--accept-pins`, never when the project changed them, and a non-pin change to the file
+  an ordinary take; `--adopt` keeping `initialized` and `made_from`, recording the exact
+  commit, and listing retained, unresolved and review; nothing written over a moved file, a
+  file in the way or through a symbolic link; uncommitted changes, an unreleased or
+  unrecorded checkout, a release not newer and undeclared files refused; removals and
+  layout changes reported, never applied.
+- Mutation tests: 52 of 52 for P-A2 (43, then 3 and 6 for the measurement's fixes; 5
+  missed at first, each now with its test), and 4 of 4 for the alert fix.
+- Compatibility: the measurement's project made at v0.7.0, upgraded by the procedure: 14
+  files taken, nothing unresolved, every check exits 0, the suite passes (930).
+- Item 3: a project made as "Use this template" makes one: a fresh clone of `15ccaa0`
+  reduced to one commit, installed from the lock (`--bootstrap`, then pip, `pip check`
+  clean), initialized with the network rebuild, and init committed: init exit 0; nothing
+  left unstaged; every check exits 0; `--against` the template reports every owned and
+  seeded file as the template left it; and the suite passes (930).
+- Item 4: the manifest recorded with the label `v0.9.0` in its own commit.
+
 ### After WP6: the prioritized backlog (decision 29)
 
 From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
@@ -1121,7 +1198,7 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.6.0 | -- | **P7**, decision propagation | approved with three safeguards (decision 38); in v0.6.0 |
 | v0.7.0 | -- | **P8**, a rights and provenance review | approved with four safeguards (decision 40); in v0.7.0, released (decision 41) |
 | v0.8.0 | -- | **P6**, conceptual fidelity | approved with amendments (decisions 42 and 43); in v0.8.0, released (decision 44) |
-| v0.9.0 | -- | **P-A2**, upgrading a project to a new release | approved with four safeguards (decision 45) |
+| v0.9.0 | -- | **P-A2**, upgrading a project to a new release | approved with four safeguards (decision 45); in v0.9.0 |
 | Next | -- | P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
