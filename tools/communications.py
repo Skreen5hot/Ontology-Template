@@ -91,6 +91,10 @@ ADOPTION = re.compile(
 ATTRIBUTE = "communications/** -text"
 #: Where the board is, and the link an alert gives.
 BOARD = ("Skreen5hot", "communications")
+#: The day the board opened. A message dated before it was never
+#: announced, so a reply to its thread opens a Discussion of its own
+#: (PROTOCOL.md, Alerts 1).
+BOARD_FROM = "2026-11-04"
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
 COMMIT = re.compile(r"^[0-9a-f]{40}$")
 #: What init removed of the template's correspondence (decision 39).
@@ -480,8 +484,10 @@ def alert(relative: str, root: Path | None = None) -> dict:
     Bound to the latest commit that has the file at this path, read with
     `git show`, so the digest is of committed bytes (Rule 7). A message
     that opens a thread opens a Discussion; a reply comments on its
-    root's, unless the root was never announced, which the caller knows
-    and this does not."""
+    root's. A root dated before the board opened was never announced, so
+    a reply to its thread opens a Discussion of its own, titled with the
+    reply's id (Alerts 1; tools/alert.py --new-thread posts it). A root
+    announced later, by hand, is not seen here: the board says so."""
     import yaml
 
     root = root or repository_root()
@@ -503,11 +509,15 @@ def alert(relative: str, root: Path | None = None) -> dict:
                        "sha256": hashlib.sha256(data).hexdigest()}
     block["link"] = "https://github.com/%s/blob/%s/%s" % (THIS_REPO, commit,
                                                           relative)
+    unannounced = top is not header and \
+        (as_date(top.get("date")) or "") < BOARD_FROM
+    thread = header if unannounced else top
     return {
-        "title": "[%s\u2192%s] %s \u2014 %s" % (top["from"], top["to"],
-                                                 top["id"], top["subject"]),
+        "title": "[%s\u2192%s] %s \u2014 %s" % (
+            thread["from"], thread["to"], thread["id"], thread["subject"]),
         "root": top["id"],
-        "opens_discussion": top is header,
+        "opens_discussion": thread is header,
+        "new_thread": unannounced,
         "yaml": yaml.safe_dump(block, sort_keys=False, allow_unicode=True,
                                width=1000),
     }
@@ -589,7 +599,12 @@ def main(argv=None) -> int:
             stream.reconfigure(encoding="utf-8")
     if args.alert:
         found = alert(args.alert)
-        if found["opens_discussion"]:
+        if found["new_thread"]:
+            print("  a new Discussion in Alerts: it replies in a thread "
+                  "that began before the board (%s), never announced "
+                  "(PROTOCOL.md, Alerts 1; tools/alert.py --new-thread), "
+                  "titled:" % found["root"])
+        elif found["opens_discussion"]:
             print("  a new Discussion in Alerts, titled:")
         else:
             print("  a comment on the Discussion for %s, titled:"

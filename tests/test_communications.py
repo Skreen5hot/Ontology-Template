@@ -434,13 +434,39 @@ def test_an_alert_is_bound_to_the_committed_bytes(comms, tree):
                                                             "link"]
 
 
-def test_a_reply_alert_comments_on_its_root(comms, tree):
+def test_a_reply_alert_comments_on_its_root(comms, tree, monkeypatch):
+    """A thread the board announced: the reply comments on its root's
+    Discussion, titled with the root's id."""
+    monkeypatch.setattr(comms, "BOARD_FROM", "2026-10-01")
     reply_in(tree)
     found = comms.alert("communications/xyz/incoming/2026-10-24-ack.md",
                         tree)
     assert found["opens_discussion"] is False
+    assert found["new_thread"] is False
     assert found["root"] == GOOD["id"]
     assert GOOD["id"] in found["title"]
+
+
+def test_a_reply_in_a_thread_from_before_the_board_opens_its_own(
+        comms, tree, monkeypatch, capsys):
+    """PROTOCOL.md, Alerts 1: a reply to a message never announced -- one
+    sent before the board existed -- opens its own Discussion. The tool
+    said to comment on a Discussion that did not exist (the P6 notice to
+    BCO, 2026-11-14, replying in a thread of 2026-10-30)."""
+    reply = reply_in(tree)
+    relative = "communications/xyz/incoming/2026-10-24-ack.md"
+    found = comms.alert(relative, tree)
+    assert found["opens_discussion"] is True
+    assert found["new_thread"] is True
+    assert found["root"] == GOOD["id"]
+    assert found["title"] == ("[XYZ→ABC] %s — %s"
+                              % (reply["id"], reply["subject"]))
+    monkeypatch.setattr(comms, "repository_root", lambda: tree)
+    assert comms.main(["--alert", relative]) == 0
+    out = capsys.readouterr().out
+    assert "a new Discussion in Alerts: it replies in a thread that " \
+           "began before the board (%s)" % GOOD["id"] in out
+    assert "a comment on the Discussion" not in out
 
 
 def test_an_uncommitted_message_has_no_alert(comms, tree):
