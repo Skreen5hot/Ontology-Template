@@ -130,6 +130,16 @@ components:
       with its SPARQL and the answer it must give.
       tools/ontology/competency.py runs every answerable one.
 
+  - id: ontology.trace
+    path: ontology/trace.yaml
+    role: configuration
+    template: seeded
+    description: >-
+      The trace from each approved conceptual model's elements to the
+      authored terms, shapes and competency questions that formalize them,
+      each row reviewed or decided, with the digests in force at its review
+      (P6, template decisions 42 and 43). Not Turtle, and not ontology.
+
   - id: ontology.vocabulary
     path: ontology/vocabulary.ttl
     role: ontology-module
@@ -363,6 +373,17 @@ components:
       files it changes, and each of those cites it, or is listed as owed;
       the stage gate and the release hold what is owed (P7, decision 38).
       Never judges whether a decision was carried faithfully.
+
+  - id: tool.fidelity
+    path: tools/fidelity.py
+    role: tool
+    template: owned
+    description: >-
+      Conceptual fidelity: the trace's references, targets, reviews and
+      decisions, the axiom digests, and the debt -- untraced terms and
+      covered elements, stale reviews, terms whose age cannot be told --
+      held by the stage gate and the release (P6, decisions 42 and 43).
+      Never judges whether a formalization is faithful.
 
   - id: tool.rights
     path: tools/rights.py
@@ -732,6 +753,16 @@ components:
       Which files are decision records, the date before which a record
       need not declare what it changes, and the owed files no stage
       holds, each assigned to a stage or accounted for (P7, decision 38).
+
+  - id: config.fidelity
+    path: config/fidelity.yaml
+    role: configuration
+    template: seeded
+    description: >-
+      Which conceptual models are approved, what of each must be traced,
+      the kinds that may sign a trace, the stage the debt holds, the
+      adoption baseline, and whether fidelity applies (P6, decisions 42
+      and 43).
 
   - id: config.rights
     path: config/rights.yaml

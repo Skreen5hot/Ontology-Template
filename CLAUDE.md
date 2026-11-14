@@ -57,6 +57,7 @@ the checks, `docs/process/METHOD.md` for the method of building an ontology.
 .venv/Scripts/python tools/sources.py
 .venv/Scripts/python tools/decisions.py
 .venv/Scripts/python tools/rights.py
+.venv/Scripts/python tools/fidelity.py
 .venv/Scripts/python tools/stages.py
 .venv/Scripts/python tools/communications.py
 .venv/Scripts/python tools/template_status.py --check

@@ -126,7 +126,12 @@ Each was found by doing without it.
 - **Conceptual fidelity at formalization.** Each formal choice preserves the approved
   conceptual model's meaning, or documents why it changes it, in a decision. Meaning
   changes in axioms as well as in terms: an axiom that infers adequacy from components can
-  break a model that forbids exactly that, with every term faithful.
+  break a model that forbids exactly that, with every term faithful. Here the record is
+  `ontology/trace.yaml`: each approved model's elements traced to the terms, shapes and
+  questions that formalize them, each row reviewed or, for a departure, decided, and the
+  axioms digested so that a change reopens the review. `tools/fidelity.py` holds
+  formalization marked done, and a release, while any is owed; it never judges whether
+  the formalization is faithful.
 - **Closure, before the next phase opens.** Every open decision is closed, or carried
   forward by name, and the list of them is a record. BCO's closure set of 2026-10-30 is
   the example.
@@ -191,10 +196,10 @@ still unanswered, is a record rather than a memory. BCO re-pinned BPO five times
 ## 9. Not covered yet
 
 The gates in §4 are rules for people. The review gate is a check (template v0.4.0), and
-so are source adequacy (v0.5.0), decision propagation (v0.6.0, §6) and the rights and
-provenance review (v0.7.0). Conceptual fidelity is planned as a check and not yet built:
-it is last, because it should be designed against a real formalization. Until then it is
-held by the gate's holder, and a standard can say what the holder checks by hand. The
-review candidates find only some kinds of defect, and few of the ones a careful reviewer
+so are source adequacy (v0.5.0), decision propagation (v0.6.0, §6), the rights and
+provenance review (v0.7.0) and conceptual fidelity (v0.8.0). The fidelity check holds the
+trace and its reviews; it was designed against fixtures and a model's structure, before
+any real formalization of an approved model existed, and is to be measured again on the
+first one. The review candidates find only some kinds of defect, and few of the ones a careful reviewer
 would; the gate makes sure the places they find are answered, not that nothing else is
 wrong.

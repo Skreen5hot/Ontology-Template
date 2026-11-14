@@ -241,7 +241,8 @@ def test_against_names_what_both_sides_changed(status, monkeypatch,
 #: the source register and its settings, for the same reason. P7's
 #: (v0.6.0, decision 38): the decision records' settings and the README
 #: saying what a record carries. P8's (v0.7.0, decision 40): the rights
-#: record and its settings.
+#: record and its settings. P6's (v0.8.0, decisions 42 and 43): the trace
+#: and its settings.
 SEEDED = {"validation.wellformedness", "validation.realist",
           "validation.skos", "fixture.wellformedness-bad-examples",
           "fixture.realist-bad-examples", "fixture.skos-bad-examples",
@@ -249,7 +250,7 @@ SEEDED = {"validation.wellformedness", "validation.realist",
           "config.upstream-sources", "config.candidates",
           "config.review-register", "config.sources", "research.sources",
           "config.decisions", "docs.decisions-readme", "config.rights",
-          "research.rights"}
+          "research.rights", "config.fidelity", "ontology.trace"}
 
 
 def test_the_seeded_set_is_the_one_decided(layout):

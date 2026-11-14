@@ -52,6 +52,17 @@ no intended use covers the module, or that use is withheld
 (tools/rights.py). It holds that a recorded decision exists and covers
 the use, never what the source's terms permit.
 
+THE FIDELITY GATE (P6, template decisions 42 and 43)
+
+The stage config/fidelity.yaml names (formalization by default), marked
+done, is refused while conceptual fidelity is owed: an authored term or
+a covered model element no trace row names, a row whose model, upstream
+context or axioms changed since its review, or a term whose age against
+the adoption baseline cannot be established (tools/fidelity.py). It
+holds that a trace was recorded, reviewed and, for a departure,
+decided; never that the formalization is faithful. With no approved
+model registered, nothing is held, and nothing says fidelity passed.
+
 A candidate is a place to look, never a defect: nothing fails because one
 exists. The gate checks that each has an answer from the right role on
 the current corpus. It cannot check that the person is what the role
@@ -292,6 +303,7 @@ def check(root: Path | None = None) -> tuple[list[dict], list[str]]:
     if any(s.get("status") == "done" for s in stages):
         found.extend(propagation(root, stages))
         found.extend(withholding(root, stages))
+        found.extend(fidelity(root, stages))
     return stages, found
 
 
@@ -313,6 +325,19 @@ def withholding(root: Path, stages: list[dict]) -> list[str]:
         return []
     return rights.stage_problems(stages, rights.check(root)["held"],
                                  rights.owner_of)
+
+
+def fidelity(root: Path, stages: list[dict]) -> list[str]:
+    """The fidelity gate (P6, decisions 42 and 43): the stage
+    config/fidelity.yaml names, marked done, holds every piece of
+    conceptual-fidelity debt."""
+    import fidelity as tool
+
+    settings = tool.configuration(root)
+    if not settings["models"]:
+        return []
+    result = tool.check(root)
+    return tool.stage_problems(stages, result["debt"], result["stage"])
 
 
 def gate(root: Path, stages: list[dict]) -> list[str]:

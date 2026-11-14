@@ -1,0 +1,29 @@
+# The trace from each approved conceptual model's elements to what
+# formalizes them (P6, template decisions 42 and 43). tools/fidelity.py
+# states the fields and the rules; config/fidelity.yaml registers the
+# models.
+#
+# A row names one or more elements, <model id>#<anchor>, and the authored
+# terms, shapes and competency questions that formalize them. Its fidelity
+# is the reviewer's claim (preserves) or the architect's decision (changes,
+# not-formalized: not in OWL), never the tool's. Each digest is the one in
+# force when the row was reviewed: tools/fidelity.py --digest and --pins
+# print them, and nothing writes them but a person. A row whose model,
+# upstream context or axioms have moved since is stale. Example, not a
+# recommendation:
+#
+#   models:
+#     CM-01: <64 hex digits: the model file when the trace was reviewed>
+#   upstream_sha256: <64 hex digits, from --pins>
+#   rows:
+#     - elements: [CM-01#RL-01]
+#       formalized_as:
+#         terms: [<prefix>:bears]
+#       fidelity: preserves
+#       reviewed_by: A. Reviewer (ontologist)
+#       axioms_sha256: <64 hex digits, from --digest>
+
+format_version: 1
+models: {}
+upstream_sha256: null
+rows: []

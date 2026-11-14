@@ -1,0 +1,47 @@
+# Which conceptual models are approved, what of each must be traced, and
+# who may sign a trace (P6, template decisions 42 and 43).
+# tools/fidelity.py states the fields and the rules.
+#
+#   applicable       null, or false with decided_by: the decision record
+#                    saying conceptual fidelity does not apply to this
+#                    project. With no model registered and no such
+#                    decision, the report says "not yet established",
+#                    never that fidelity passed
+#   models           each approved model: id, file, approved_by (the
+#                    decision record that approved it, citing its id),
+#                    cover (the anchors that must each be traced),
+#                    prohibits (elements forbidding an inference, whose
+#                    rows name a guard or say why there is none) and, for
+#                    a model not in Markdown, anchors. `cover` is the
+#                    architect's selection, never taken for the whole model
+#   reviewers        the kinds that may sign a `preserves` row, each one a
+#                    kind config/review.yaml declares (decision 43)
+#   stage            the stage the fidelity debt holds when marked done
+#   required_from,   for a project adopting P6 with terms already
+#   baseline_commit  authored: a date, and the commit that is the adoption
+#                    snapshot (else the last commit before the date). A
+#                    term declared there predates adoption and is not
+#                    held; one whose age cannot be established is held
+#
+# Example, not a recommendation:
+#
+#   models:
+#     - id: CM-01
+#       file: <the model, e.g. docs/models/CM-01-example.md>
+#       approved_by: <the decision record in docs/decisions/ approving it>
+#       cover: ["heading:§3/P*", "row:§5/RL-*", "heading:§7/DP-*"]
+#       prohibits: [CM-01#<an element that forbids an inference>]
+
+version: 1
+
+applicable: null
+decided_by: null
+
+models: []
+
+reviewers: [ontologist, domain-expert, proxy-domain-expert]
+
+stage: formalization
+
+required_from: null
+baseline_commit: null

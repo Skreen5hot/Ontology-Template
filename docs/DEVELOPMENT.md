@@ -99,6 +99,9 @@ python tools/sources.py --write               # regenerate research/sources.md f
 python tools/decisions.py                     # what each decision changes; every file still owed
 python tools/rights.py                        # rights reviews; every use still withheld
 python tools/rights.py --confirm              # also refetch url evidence by its digest (network)
+python tools/fidelity.py                      # the conceptual-fidelity trace; what is still owed
+python tools/fidelity.py --digest TERM ...    # the axiom digest a reviewer writes into a row
+python tools/fidelity.py --pins               # the model and upstream digests, for the same
 python tools/stages.py                        # every started stage has its standard, and a done
                                               # stage's review candidates are answered
 python tools/communications.py                # the communications record follows its protocol
@@ -128,6 +131,7 @@ python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsi
 | `release.py` | a version that is not MAJOR.MINOR.PATCH; a file that does not parse back to the graph it was written from; a file a decision owes that no stage holds and `config/decisions.yaml` does not account for; a module holding declared third-party text whose use no decision has released |
 | `decisions.py` | a decision record not named `YYYY-MM-DD-<slug>.md`, or without its front matter (unless dated before `required_from`); a block with an unknown field, a target twice, neither or both of `carries_into` and `carries_nothing`; a target that is not a repository path to one file, or is the record itself; a citation written as a path to a record that names none; an `unscoped` entry malformed, naming nothing owed, or stale. A file still owed is listed, never refused |
 | `rights.py` | in `research/rights.yaml`: an unknown field or value; a source the register does not hold, or one edition of a source reviewed twice; a gap or deferral without its reason, or a complete review with one, or with no evidence; ambiguous terms with no open question; an evidence item without its fields, a malformed digest, date or commit, a manual item carrying a digest; a quote over `max_quote_words`; a reviewer not `rights-reviewer`; a use without what it is for or its modules, a module two uses cover, a release naming no tracked decision record, one that does not cite the source (unless taken before `required_from`), or someone of a kind not allowed to release; a declaration's `rights` naming no register source; and, with `--confirm`, a url item whose digest moved or which cannot be fetched. A use still withheld is listed, never refused |
+| `fidelity.py` | in `config/fidelity.yaml`: an unknown field; a model whose file is missing, whose approval is not a tracked decision record citing its id, or which is neither Markdown nor declares its anchors; an anchor declared twice; a prohibition that names no single element of its own model; `applicable: false` without its decision, or with models; a reviewer kind `config/review.yaml` does not declare; a malformed baseline. In `ontology/trace.yaml`: an unknown field; a reference that resolves to nothing or to more than one place; a term outside the authored namespace or declared in no module, a shape no shape set declares, a competency question that does not exist; an unknown fidelity; `changes` or `not-formalized` without a decision that is tracked and cites every element; `not-formalized` naming a term; `preserves` without a reviewer of an allowed kind, or naming nothing; a missing or malformed digest, or one for a model not registered; a guard that is not an answerable question or a declared shape, or a prohibiting element's row with neither a guard nor `no_guard`. Untraced terms and elements, stale rows and uncertain terms are listed, never refused |
 | `stages.py` | in `config/stages.yaml`: a started or finished stage with no standard, or one naming a file that does not exist or is the blank skeleton; a path stage done before an earlier stage the project runs; a lane done before a stage it joins; a stage not run with a status; an unknown status, layout component or joined stage; a stage listed twice; and, for a stage marked `done` that names a review, a candidate with no answer, an answer from a role the stage does not allow or from someone the charter does not name in it, a deferral past its date, or an import run on another corpus; and, for any stage marked `done`, a file a decision owes in its scope or assigned to it, or a module in its scope holding declared third-party text whose use no decision has released. It never reads a standard, judges a gate or reads what an answer concludes |
 | `template_status.py --check` | in the template only: a manifest that does not describe the owned files. A project's divergence is reported, never refused |
 
@@ -717,6 +721,66 @@ it stands as written for what it covers, and is not asked to cite a review made 
 It decides nothing: the terms are the reviewer's assessment and a release is the
 architect's act. It holds that a recorded decision exists and covers the use, not that the
 use is permitted, and it cannot see a use nobody declared.
+
+## Conceptual fidelity, from the model to the OWL
+
+Formalization preserves the approved conceptual model's meaning, or documents why it
+changes it, in a decision (`docs/process/METHOD.md` section 4). `ontology/trace.yaml`
+records which element each formal choice formalizes, and `config/fidelity.yaml` registers
+the approved models.
+
+A **model** is registered with its file, the decision record that approved it (citing its
+id), and `cover`: the anchors that must each be traced. `cover` is the architect's
+selection; the tool reports what it selects and never takes it for the whole model. An
+**element reference** is `<model id>#<anchor>`. In a Markdown model an anchor is a
+heading's text up to an em dash (`P1`, `DP-1`, `Organization`), `§6` for a numbered
+section, the first cell of a table row (`RL-01`), or a list item's leading bold text
+(`A-01`). A reference must resolve to exactly one place; one that recurs is qualified by
+the headings that enclose it, `§7/DP-1/Options`. A model in another format lists its
+anchors, and they are reported as declared, never as read from the file. No model format is
+prescribed.
+
+Each **row** names one or more elements, and the authored terms, shapes and competency
+questions that formalize them, with its fidelity:
+
+- `preserves`: signed `<name> (<kind>)` by a kind in `reviewers`, by default ontologist,
+  domain-expert or proxy-domain-expert (decision 43);
+- `changes`: the formalization departs from the model, and `decision` names the record
+  that authorized it, citing each of the row's references;
+- `not-formalized`: deliberately not in OWL, with its decision. It names no term, and may
+  name the shape or question that represents the element instead.
+
+A row naming terms carries `axioms_sha256`, the digest of their asserted axioms; the trace
+pins each model's file digest and `upstream_sha256`, the pinned BFO and CCO context. `python
+tools/fidelity.py --digest ex:bears ex:bornBy` and `--pins` print them; a person writes them
+into the trace with the review. The axiom digest is over a canonical form of each term's
+RDF, RDFS and OWL triples with the anonymous structures they reach, the disjointness,
+equivalence and inverse axioms naming it, the anonymous axioms mentioning it, and its
+`skos:definition`. Reordering a file, moving an axiom to another module or editing a label
+does not move it; changing any of those axioms does.
+
+An element in a model's `prohibits` forbids an inference. Its row names a **guard**, an
+answerable competency question or a shape that fails if the inference is made, or says in
+`no_guard` why there is none. The guard is checked to exist and to run, not to be enough.
+
+`python tools/fidelity.py` fails only on a record it cannot accept. It lists **the debt**:
+an authored class or property no row names, a covered or prohibiting element no row names,
+a row whose model, upstream pins or axioms changed since its review, and a term whose age
+cannot be established. `python tools/stages.py` refuses `formalization` (or the stage
+`stage` names) marked `done` while there is any, and `tools/release.py` refuses to build.
+
+A project adopting this with terms already authored sets `required_from`, and
+`baseline_commit`, the adoption snapshot (otherwise the last commit before the date). A term
+the modules declared there is listed as predating adoption, not held. If the history cannot
+say -- the commit is not in it, or a shallow clone cannot find the date -- the term is
+uncertain, and held. With no model registered the report says fidelity is **not yet
+established**; `applicable: false` with `decided_by`, a decision record, says it does not
+apply. Neither is a pass.
+
+It decides nothing. `preserves` is the reviewer's claim, and a departure is the architect's
+decision. A matching digest shows that what was reviewed has not changed, not that it
+represents the model. The template has shown this on fixtures and on a model's structure
+only, not on the faithful formalization of a real ontology (decision 42).
 
 ## Naming, deprecation, and what changed
 

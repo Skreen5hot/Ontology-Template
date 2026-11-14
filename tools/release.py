@@ -42,7 +42,12 @@ decision 38): debt outside every stage's scope is settled, or said to be
 outstanding, before a release. And it refuses while a module holds
 declared third-party text whose use no decision has released
 (tools/rights.py, P8, decision 40): that a recorded decision exists and
-covers the use, never what the source's terms permit.
+covers the use, never what the source's terms permit. And it refuses
+while conceptual fidelity is owed (tools/fidelity.py, P6, decisions 42
+and 43): a term or covered model element untraced, a stale review, or a
+term whose age against the adoption baseline cannot be established. It
+holds that the trace was recorded and reviewed, never that the
+formalization is faithful.
 """
 
 from __future__ import annotations
@@ -60,6 +65,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 sys.path.insert(0, str(Path(__file__).resolve().parent / "ontology"))
 
 import decisions  # noqa: E402
+import fidelity  # noqa: E402
 import rights  # noqa: E402
 import layout  # noqa: E402
 import project  # noqa: E402
@@ -346,6 +352,10 @@ def build(version: str, out: Path, modules: list[Path] | None = None,
     if held:
         raise Refused("text no decision has released is in a module (P8, "
                       "decision 40):\n  " + "\n  ".join(held))
+    owed = fidelity.release_problems(fidelity.check(root)["debt"])
+    if owed:
+        raise Refused("conceptual fidelity is owed (P6, decisions 42 and "
+                      "43):\n  " + "\n  ".join(owed))
     modules = list(modules if modules is not None else layout.ontology_files())
     vendored = list(vendored if vendored is not None
                     else layout.vendored_files())
