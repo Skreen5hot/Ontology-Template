@@ -831,3 +831,28 @@ and given: "yes on decision 44" (SHA-256 of that whole message,
   job skipped, as in the template it is. `ROADMAP.md`'s "Release v0.8.0" records it.
 - The same message asked that the next backlog item proceed: P-A2, designed before it is
   built, as P4 to P8 were.
+
+**45. "Architectural Decision — P-A2 Template Upgrade Procedure"** (2026-11-14)
+
+In answer to the nine questions of `evaluations/2026-11-14-pa2-design.md` section 7. The
+whole text is recorded verbatim in
+[`evaluations/2026-11-14-pa2-disposition.md`](evaluations/2026-11-14-pa2-disposition.md)
+(SHA-256 of the text below its rule `394076ad3732a700bebbfe70ce7ac836636a571e31195c4d4215165505351682`).
+Its heading carries no number; it is entered as 45. The same message began "Fix the message defect. Then:":
+`tools/communications.py --alert` now opens a Discussion of its own for a reply in a thread
+from before the board, as PROTOCOL.md's Alerts 1 says (`4096a68`). Effect:
+
+- P-A2 is approved for **v0.9.0**: the procedure, `--plan`, `--take` and `--adopt`;
+  merging by hand; the project's layout contract kept as the project's; rendered-file
+  changes reported; every intervening release's notes printed. The two throwaway-project
+  measurements, from v0.1.0 and from v0.7.0, are approved.
+- **1.** An older project runs the new planner without first changing itself to get it.
+  **2.** A BFO or CCO pin change needs explicit acceptance; `--take` never upgrades an
+  upstream silently. **3.** `--adopt` keeps the original initialization provenance,
+  records the exact release and commit adopted, and shows each difference kept on purpose
+  and each manual obligation still open. **4.** Nothing overwrites a project's change, an
+  untracked file in the way, or an unexpected symlink; removed files and layout
+  declaration changes are reported, never applied.
+- It carries template improvements into a project, and is never an ontology migration or
+  semantic repair. No other feature in v0.9.0; P-A4 to P-A6 and P-A8 stay separate. No
+  further design round unless implementation finds a material conflict.
