@@ -107,6 +107,7 @@ python tools/stages.py                        # every started stage has its stan
 python tools/communications.py                # the communications record follows its protocol
 python tools/communications.py --inbox        # alerts on the board this record does not hold (gh)
 python tools/template_status.py               # where this has diverged from the template
+python ../Ontology-Template/tools/upgrade.py --project .   # the plan for moving to that release
 python tools/site/build_site.py && python tools/site/check_site.py   # the public site builds and holds
 python -m pytest tests/ -q -p no:randomly     # all of the above, plus the falsifications
 ```
@@ -510,9 +511,9 @@ each change.
 ## The template
 
 `config/template-manifest.json` is the digest of every template-owned and template-seeded
-file as the template shipped it. In a project it is never rewritten: it is the record of
-what the project was made from, with the block init adds (`initialized`) saying what init
-left in each seeded file.
+file as the template shipped it. In a project it is the record of the release the project
+was made from, with the block init adds (`initialized`) saying what init left in each
+seeded file, until an upgrade adopts a newer release (below). Nothing else rewrites it.
 
 A **seeded** file (`template: seeded` in the layout contract) is one the template keeps
 improving and a project is expected to change: the shapes and their fixtures, and the
@@ -538,6 +539,71 @@ python tools/template_status.py --against ../Ontology-Template  # what the templ
 The manifest's `template_commit` is the template commit it was recorded on, and `label` the
 template release (or `unreleased`). Porting an existing ontology into a project is
 `docs/PORTING.md`, with its report form in `docs/porting/`.
+
+### Upgrading to a new template release
+
+Check out the release the project moves to beside the project, at its tag, with nothing
+uncommitted in either. Every step below runs the **release's** `tools/upgrade.py` against
+the project, so a project made from any earlier release runs it without first changing
+itself to get it.
+
+1. **Plan.** `python ../Ontology-Template/tools/upgrade.py --project .` writes nothing.
+   It puts each template-owned and template-seeded file in a class:
+   - **take**: the release changed it and the project did not;
+   - **merge**: both changed it, differently;
+   - **already taken**: the project has the release's bytes;
+   - **added**: new in the release, with nothing in its way;
+   - **collision**: new in the release, with a file already at its path;
+   - **removed**, and **removed, changed here**: removed in the release;
+   - **deleted here**: the release changed it and the project removed it;
+   - **kept**: only the project changed it;
+   - **pins**: the BFO and CCO pins in `config/upstream-sources.yaml` changed.
+
+   Seeded files are compared on both template sides through init's own rewrite with the
+   project's values, so an unchanged shape matches exactly. Beside the files, the plan
+   lists:
+   - the layout entries the release adds, changes or removes, each with its text;
+   - each skeleton the project's `README.md`, `CLAUDE.md`, `docs/HANDOFF.md` and
+     `CITATION.cff` were rendered from that the release changed, as a diff;
+   - the generators to run;
+   - the release notes of every release since the project's.
+
+   Without the base commit in the checkout's history, the skeletons, removed layout entries
+   and merge bases are **not compared**, it exits 2, and `--take` and `--adopt` refuse.
+2. **Take.** `--take` copies the take and added files, and nothing else. It reads each file
+   again before writing it and skips one that moved since the plan, a file that appeared at
+   an added path, and any path through a symbolic link. It never takes the pins; with
+   `--accept-pins` it takes them only if the project never changed them, and the project
+   then rebuilds its extracts (`vendor_upstream.py --rebuild`). A move of BFO or CCO is a
+   decision for the project, not part of taking files.
+3. **Merge** each merge file by hand. `--out DIR` writes its base and the release's version
+   into `DIR`, and `git merge-file <file> DIR/<file>.base DIR/<file>.release` does the
+   three-way merge, for a person to resolve. Nothing merges automatically.
+4. **Declare** the new layout entries in `config/repository-layout.yaml`, from the plan. The
+   contract is the project's, and nothing writes it. Removed files and layout entries are
+   reported; a person removes them, or keeps them.
+5. **Regenerate**, with the commands the plan lists (the vendoring rebuild needs the
+   network, and changes the extracts only if the pins moved).
+6. **Adopt.** `--adopt [--retain PATH ...]` writes the project's manifest as the release's
+   record:
+   - it keeps the original init's block (`initialized`) and `made_from` as they were;
+   - it adds `adopted`: the release's seeded files through init's rewrite, the values, the
+     label and the exact commit;
+   - it appends to `upgrades` what remains, under three headings:
+     - **retained**: files the project keeps its own version of, named with `--retain`,
+       and the pins, when not accepted;
+     - **unresolved**: other files still differing from the release, removed files still
+       here, and layout entries not declared;
+     - **review**: rendered files whose skeleton changed.
+
+   It refuses a release not newer than the project's record, and a project whose tracked
+   files its contract does not all declare.
+7. **Check and commit**: every check, the suite, and one commit naming both releases.
+
+From then on `template_status.py` compares against the release adopted, and the next plan
+starts from it. It carries template improvements into a project and nothing else: modules,
+vocabulary, research, decisions and communications are never in a class, and nothing here
+migrates or repairs an ontology.
 
 ---
 

@@ -55,6 +55,10 @@ A change to the upstream pins is reported as a dependency change for a
 person to review, with both sides' releases. Nothing here upgrades
 anything: the project's pin holds until the project adopts another.
 
+After an upgrade (tools/upgrade.py --adopt, P-A2, decision 45) the
+record is the release adopted: its `adopted` block is the seeded base,
+and the original init's block stays beside it as provenance.
+
 This reports. It does not merge, and a project changing a template file
 is not an error -- it is information the next update needs.
 """
@@ -363,7 +367,10 @@ def seeded_report(root: Path, template: Path | None = None) -> dict:
     current = digests(root, seeded_files(root))
     out = {"template_changed": None, "configured_here": None, "both": [],
            "taken": [], "not_compared": [], "dependencies": []}
-    initialized = record.get("initialized")
+    # After an upgrade (tools/upgrade.py --adopt), the base is the release
+    # adopted, through init's rewrite; the original init's block is kept
+    # beside it as provenance, and no longer the base.
+    initialized = record.get("adopted") or record.get("initialized")
 
     base = record.get("seeded")           # template-form digests
     if initialized:

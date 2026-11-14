@@ -60,7 +60,9 @@ them by itself. `python tools/pins.py` checks them all (`docs/DEVELOPMENT.md`, "
 Made from the [ontology template]({{template_url}}), which carries the tooling and method of
 the Application Requirement Ontology and the Business Capability Ontology.
 `python tools/template_status.py` reports where this repository has diverged from the
-template version it was made from.
+template version it was made from. To move to a newer release, run that release's
+`tools/upgrade.py --project .` from its checkout (`docs/DEVELOPMENT.md`, "Upgrading to a new
+template release").
 
 ## Licence
 

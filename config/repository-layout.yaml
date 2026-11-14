@@ -385,6 +385,17 @@ components:
       held by the stage gate and the release (P6, decisions 42 and 43).
       Never judges whether a formalization is faithful.
 
+  - id: tool.upgrade
+    path: tools/upgrade.py
+    role: tool
+    template: owned
+    description: >-
+      Upgrading a project to this release, run from the release's checkout
+      against the project: the plan, --take for files the project never
+      changed, --adopt for the release's record with what is retained and
+      unresolved. Never merges, never moves an upstream pin without
+      --accept-pins, never touches the ontology (P-A2, decision 45).
+
   - id: tool.rights
     path: tools/rights.py
     role: tool
@@ -468,6 +479,15 @@ components:
       Runs init in throwaway copies of the template and checks each
       describes itself. Meaningless in a project, where there is no
       template left to initialize, so init removes it.
+
+  - id: template.upgrade-tests
+    path: tests/test_upgrade.py
+    role: tool
+    template: only
+    description: >-
+      Builds a template recorded as two releases and a project made by init
+      from the first, and upgrades it to the second (P-A2, decision 45).
+      Needs the template to initialize, so it is the template's only.
   # <<< template-only
 
   # ---- Vendored upstream ontology ------------------------------------

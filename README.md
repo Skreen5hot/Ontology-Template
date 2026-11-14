@@ -120,6 +120,15 @@ python tools/template_status.py --against ../Ontology-Template # what the templa
 ```
 
 A file in both lists is where an update needs a person. Nothing merges automatically.
+To move to a new release, run the release's own planner against the project, then take,
+merge, declare, regenerate and adopt, as `docs/DEVELOPMENT.md`, "Upgrading to a new
+template release", says:
+
+```bash
+python ../Ontology-Template/tools/upgrade.py --project .           # the plan; writes nothing
+python ../Ontology-Template/tools/upgrade.py --project . --take    # what the project never changed
+python ../Ontology-Template/tools/upgrade.py --project . --adopt   # the release's record
+```
 
 ## Working on the template itself
 
