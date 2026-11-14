@@ -610,3 +610,35 @@ def test_adopt_writes_only_the_manifest(world, mine):
 def test_each_file_falls_in_one_class(tool, base, theirs, here, in_release,
                                       expected):
     assert tool.classify(base, theirs, here, in_release) == expected
+
+
+# ------------------------------------------- what an added entry needs
+
+
+@pytest.mark.parametrize("entry, expected", [
+    ({"path": "tools/pins.py"}, "present"),
+    ({"path": "tools/not-here.py", "template": "owned"}, "taken by --take"),
+    ({"path": "research/out.md", "generator": "tool.pins"},
+     "generated: run python tools/pins.py"),
+    ({"path": "docs/template/ROADMAP.md"},
+     "absent: copy it from the release (docs/template/ROADMAP.md); it is "
+     "the project's from then on"),
+    ({"path": "docs/nowhere.md"},
+     "absent: the release has no file there either"),
+])
+def test_an_added_entry_says_what_its_file_needs(tool, world, mine, entry,
+                                                 expected):
+    """Found upgrading a project made at v0.1.0: the release adds entries
+    for files neither owned nor seeded -- a stage config, a charter, a
+    generated register -- and the plan said nothing of their absence, so
+    --adopt refused on the layout check with no step that led there."""
+    upgrade = tool.Upgrade(mine, world[0])
+    contract = tool.contract_of((world[0] / tool.CONTRACT).read_bytes())
+    assert upgrade.state_of(entry, contract) == expected
+
+
+def test_the_plan_says_each_added_entrys_state(world, mine):
+    added = {a["id"]: a["state"] for a in plan_of(world, mine)["layout"][
+        "added"]}
+    assert added == {"tool.newtool": "taken by --take",
+                     "tool.collide": "present"}

@@ -278,12 +278,15 @@ class Upgrade:
         module = "ontology/%s.ttl" % status.yaml_of(status.read_file(
             self.project, status.PROJECT)).get("id")
         out = {"added": [], "changed": [], "removed": []}
+        everything = contract_of(status.read_file(self.template, CONTRACT))
         for ident, entry in sorted(release.items()):
             entry = dict(entry)
             if ident == "ontology.main":
                 entry["path"] = module
             if ident not in here:
-                out["added"].append({"id": ident, "entry": entry})
+                out["added"].append({"id": ident, "entry": entry,
+                                     "state": self.state_of(entry,
+                                                            everything)})
                 continue
             differs = [f for f in LAYOUT_FIELDS
                        if here[ident].get(f) != entry.get(f)]
@@ -298,6 +301,25 @@ class Upgrade:
                 if ident in here and base[ident].get("template") != "only":
                     out["removed"].append({"id": ident})
         return out
+
+    def state_of(self, entry: dict, contract: dict) -> str:
+        """What a person does for a layout entry the release adds, once its
+        declaration is in: nothing if its file is here; else take it (an
+        owned or seeded file --take writes), run the generator that writes
+        it, or copy the release's starting file, which is the project's
+        from then on."""
+        path = str(entry.get("path") or "")
+        if path and (self.project / path).exists():
+            return "present"
+        if entry.get("template") in ("owned", "seeded"):
+            return "taken by --take"
+        tool = contract.get(str(entry.get("generator")))
+        if tool:
+            return "generated: run python %s" % tool.get("path")
+        if path and (self.template / path).exists():
+            return ("absent: copy it from the release (%s); it is the "
+                    "project's from then on" % path)
+        return "absent: the release has no file there either"
 
     def skeleton_changes(self) -> list[dict]:
         if self.base is None:
@@ -321,7 +343,9 @@ class Upgrade:
     def generators(self) -> list[str]:
         """What init runs to regenerate every generated file, the same
         commands, in the same order. The vendoring rebuild needs the
-        network; it changes the extracts only when the pins moved."""
+        network, and is needed when the pins, the vendoring tool or its
+        outputs changed: a release adding an output (the hierarchies in
+        v0.4.0) needs it with the pins unmoved."""
         import init_project
 
         return [" ".join(command) for command in init_project.GENERATORS]
@@ -614,7 +638,7 @@ def print_plan(plan: dict) -> None:
         print("\n  layout entries (config/repository-layout.yaml is yours; "
               "nothing here writes it)")
         for item in changes["added"]:
-            print("    add      %s" % item["id"])
+            print("    add      %s  (%s)" % (item["id"], item["state"]))
             for field in LAYOUT_FIELDS + ("description",):
                 if item["entry"].get(field) is not None:
                     print("               %s: %s" % (

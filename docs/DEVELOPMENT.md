@@ -579,11 +579,19 @@ itself to get it.
 3. **Merge** each merge file by hand. `--out DIR` writes its base and the release's version
    into `DIR`, and `git merge-file <file> DIR/<file>.base DIR/<file>.release` does the
    three-way merge, for a person to resolve. Nothing merges automatically.
-4. **Declare** the new layout entries in `config/repository-layout.yaml`, from the plan. The
-   contract is the project's, and nothing writes it. Removed files and layout entries are
-   reported; a person removes them, or keeps them.
-5. **Regenerate**, with the commands the plan lists (the vendoring rebuild needs the
-   network, and changes the extracts only if the pins moved).
+4. **Declare** the new layout entries in `config/repository-layout.yaml`, from the plan, and
+   bring each changed entry's fields to the release's. The contract is the project's, and
+   nothing writes it. Each added entry says what its file needs:
+   - `present`: nothing;
+   - `taken by --take`: an owned or seeded file;
+   - `generated`: run the tool named;
+   - `absent: copy it from the release`: a file every project starts with, such as a stage
+     config or the charter, which is the project's from then on.
+
+   Removed files and layout entries are reported; a person removes them, or keeps them.
+5. **Regenerate**, with the commands the plan lists. The vendoring rebuild needs the
+   network. It is needed when the pins, the vendoring tool or its outputs changed, not only
+   when the pins moved.
 6. **Adopt.** `--adopt [--retain PATH ...]` writes the project's manifest as the release's
    record:
    - it keeps the original init's block (`initialized`) and `made_from` as they were;
