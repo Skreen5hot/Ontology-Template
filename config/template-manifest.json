@@ -1,5 +1,5 @@
 {
-  "digest": "33e7451ded0ad1deb737fdc77b240dafb88b4634d0e4b906f448bd595b51de67",
+  "digest": "3ec7ba3d34213d104009e03e7ae8fdea7863e52255028ee2140382c60f8920fb",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -18,7 +18,7 @@
     ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
     "config/review.yaml": "cb38aac49ee963e2249f14bf96e152f4333359b23cd4d5d6b627cd3b87dc15f8",
     "config/tooling.yaml": "a106bb41f68541125b979d3aeb022fb5c85ad1ce318e4ed03f5d0a4194b039ec",
-    "docs/DEVELOPMENT.md": "df03ce0fac9762c248793c510d665ca7fe9d766653a1af1cfbd8336154d2e718",
+    "docs/DEVELOPMENT.md": "675f858b14c97c4bae98ff270379384b6d5b21353fe9e62aef914279dfcfdd3f",
     "docs/PORTING.md": "f58802103aa3ee37dbfb939dc56a0c96297b2f2d1ede8d64497eed751ae164f7",
     "docs/porting/port-report.md": "9cd44e61b1ca19f2723283648cf8220ae53ecfa67d57a0535cd0404458d0bf4d",
     "docs/process/METHOD.md": "c8c41e635b571ee1f066c38460c6da3ea1df4269919a1b7ab2da30eafaf5e4f4",
@@ -134,7 +134,7 @@
     "tools/sources.py": "3119c65b51b311a4b69f11ae23c9f77bc511406f57d4bc006f922c3c1371df8e",
     "tools/stages.py": "79471ddf2a61c185cd8fb20792439d6dd4f53d9fa4fc8ac232c9043fdd3a6a25",
     "tools/template_status.py": "68589c8933fbe1fad77ce7452aa400c49773b5cde3ab8b7de929cfcb0a24f70d",
-    "tools/upgrade.py": "1c5ffcef3a4a5d3b30513399f895c51749dd9ad6767e407cd4172b763f1d1479"
+    "tools/upgrade.py": "7b8b137ecd3cb54fa0ecf65e7751efce9b4aea373285e9657f61f86b8f2b3ac5"
   },
   "format_version": 2,
   "generated_by": "tools/template_status.py",
@@ -170,6 +170,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "a70856dc9d33c0b5b8b4557f9196e7d78aaa39a22059c4b71f244cb8fdc68a07",
-  "template_commit": "bde135440fa5a3bab44e6a5a71475ecbced920e2",
+  "template_commit": "13def77678cd7a4c51e95c1d7a116289c05a0828",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

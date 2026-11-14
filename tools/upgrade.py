@@ -34,15 +34,22 @@ matches exactly. Each falls in one class:
                    removed in the release, changed here: a person decides
   deleted here     the release changed it, and the project removed it
   kept             changed here only
-  pins             config/upstream-sources.yaml changed in the release:
-                   a BFO or CCO pin is the ontology's dependency, and moves
-                   only by explicit acceptance (safeguard 2)
+  pins             the release moves a BFO or CCO pin in
+                   config/upstream-sources.yaml -- a release, commit,
+                   digest or url, or a source added or dropped. A pin is
+                   the ontology's dependency, and moves only by explicit
+                   acceptance (safeguard 2). A change to the file's other
+                   fields, with every pin where it was, is an ordinary
+                   take or merge
 
 and beside them: the layout entries the release adds, changes or removes
 (config/repository-layout.yaml is the project's, and is never written
-here); the skeletons the project's README.md, CLAUDE.md, docs/HANDOFF.md
-and CITATION.cff were rendered from, where the release changed them, as
-diffs; the generators to run after taking; and the release notes of
+here), each added one with what its file needs; the skeletons the
+project's README.md, CLAUDE.md, docs/HANDOFF.md and CITATION.cff were
+rendered from, where the release changed them, as diffs; the files every
+project starts with and then owns (the communications README, the stage
+config, the charter) that the release changed, as diffs, never written:
+their data is the project's, and nothing here migrates it; the generators to run after taking; and the release notes of
 every release since the project's, read from this checkout's ROADMAP.
 
 A comparison that cannot be made -- the project's base commit is not in
@@ -72,7 +79,8 @@ record to the other with what remains (safeguard 3):
   unresolved   files that differ and were not named, files the release
                removed that are still here, layout entries the release
                adds that the contract does not declare
-  review       rendered files whose skeleton changed, for a person
+  review       rendered files whose skeleton changed, and starting
+               files the release changed, for a person
 
 It refuses a checkout whose release is not newer than the project's
 record, and a project whose own layout check fails. It never edits a
@@ -253,11 +261,12 @@ class Upgrade:
             row = {"path": name, "kind": "seeded" if seeded else "owned",
                    "class": classify(base, sha(theirs), sha(here),
                                      in_release)}
-            if name == UPSTREAMS and row["class"] in ("take", "merge"):
+            release_pins = status.read_file(self.template, name)
+            if name == UPSTREAMS and row["class"] in ("take", "merge") and \
+                    pins_moved(here, release_pins):
                 row["changed_here"] = row["class"] == "merge"
                 row["class"] = "pins"
-                row["pins"] = status.dependency_changes(
-                    here, status.read_file(self.template, name))
+                row["pins"] = status.dependency_changes(here, release_pins)
             if row["class"] is not None:
                 rows.append(row)
         return rows
@@ -340,6 +349,50 @@ class Upgrade:
             out.append({"skeleton": name, "rendered": target, "diff": diff})
         return out
 
+    def starting_changes(self) -> list[dict]:
+        """Files every project starts with and then owns -- neither owned,
+        seeded, generated nor the template's only -- that the release
+        changed since the project's base, and that the project has: the
+        communications README, the stage config, the charter. Reported as
+        diffs for a person, never written: they are the project's, and
+        its data in them is never migrated here."""
+        if self.base is None:
+            return []
+        managed = set(self.release.get("files") or {}) | set(
+            self.release.get("seeded") or {}) | set(
+            self.record.get("files") or {})
+        contract = contract_of(status.read_file(self.template, CONTRACT))
+        listed = git(self.template, "diff", "--name-only", self.base, "HEAD")
+        out = []
+        for name in listed.stdout.decode("utf-8").splitlines():
+            if name in managed or name in INIT_WRITES:
+                continue
+            owner = None
+            for entry in contract.values():
+                path = str(entry.get("path") or "").rstrip("/")
+                if path and (name == path or name.startswith(path + "/")) \
+                        and (owner is None or len(path) > len(str(
+                            owner.get("path")))):
+                    owner = entry
+            if owner is None or owner.get("template") in ("only", "owned",
+                                                          "seeded") \
+                    or owner.get("generator") \
+                    or owner.get("role") == "ontology-module":
+                continue
+            if not (self.project / name).is_file():
+                continue
+            before = status.git_bytes(self.template, "show",
+                                      "%s:%s" % (self.base, name)) or b""
+            after = status.read_file(self.template, name) or b""
+            diff = "".join(difflib.unified_diff(
+                before.decode("utf-8", "replace").splitlines(True),
+                after.decode("utf-8", "replace").splitlines(True),
+                fromfile="%s (%s)" % (name, self.base[:12]),
+                tofile="%s (this release)" % name))
+            out.append({"path": name, "component": owner.get("id"),
+                        "diff": diff})
+        return out
+
     def generators(self) -> list[str]:
         """What init runs to regenerate every generated file, the same
         commands, in the same order. The vendoring rebuild needs the
@@ -383,6 +436,7 @@ class Upgrade:
                            "template_commit"), "commit": self.head},
                 "files": self.rows, "layout": self.layout_changes(),
                 "skeletons": self.skeleton_changes(),
+                "starting": self.starting_changes(),
                 "generators": self.generators(), "notes": self.notes(),
                 "not_compared": self.not_compared}
 
@@ -536,6 +590,10 @@ class Upgrade:
             review.append({"path": change["rendered"], "why": "rendered "
                            "from %s, which the release changed"
                            % change["skeleton"]})
+        for change in self.starting_changes():
+            review.append({"path": change["path"], "why": "a file the "
+                           "project started with, which the release "
+                           "changed"})
         record = dict(self.release)
         record.pop("initialized", None)
         if "initialized" in self.record:
@@ -564,6 +622,28 @@ class Upgrade:
         record["upgrades"] = list(self.record.get("upgrades") or []) + [entry]
         status.write_manifest(self.project, record)
         return entry
+
+
+#: What pins an upstream: a change to any of these moves the ontology's
+#: dependency, and needs --accept-pins (decision 45, safeguard 2).
+PIN_FIELDS = ("release", "commit", "sha256", "url")
+
+
+def pins_moved(here: bytes | None, release: bytes | None) -> bool:
+    """Whether the release moves a BFO or CCO pin, or adds or drops a
+    source: not whether the file changed. Its other fields (what is
+    extracted, where to) are vendoring configuration, taken or merged as
+    any seeded file is."""
+    def pins(data):
+        return {s.get("id"): tuple(str(s.get(f)) for f in PIN_FIELDS)
+                for s in status.yaml_of(data).get("sources") or []}
+    return pins(here) != pins(release)
+
+
+#: Files init writes or renders in every project, or that the plan reports
+#: on its own terms: never "starting files".
+INIT_WRITES = {status.PROJECT, CONTRACT, "LICENSE", status.MANIFEST,
+               *RENDERED.values()}
 
 
 def undeclared(root: Path) -> list[str]:
@@ -654,6 +734,12 @@ def print_plan(plan: dict) -> None:
         print("\n  skeleton changed: %s, from which %s was rendered; carry "
               "what you want by hand\n" % (change["skeleton"],
                                            change["rendered"]))
+        print("\n".join("    " + line
+                        for line in change["diff"].splitlines()))
+    for change in plan["starting"]:
+        print("\n  a file the project started with changed in the release: "
+              "%s; it is yours, so carry what you want by hand, as the "
+              "release notes say\n" % change["path"])
         print("\n".join("    " + line
                         for line in change["diff"].splitlines()))
     if plan["generators"]:

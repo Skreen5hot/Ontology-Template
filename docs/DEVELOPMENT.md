@@ -557,7 +557,9 @@ itself to get it.
    - **removed**, and **removed, changed here**: removed in the release;
    - **deleted here**: the release changed it and the project removed it;
    - **kept**: only the project changed it;
-   - **pins**: the BFO and CCO pins in `config/upstream-sources.yaml` changed.
+   - **pins**: the release moves a BFO or CCO pin in `config/upstream-sources.yaml` (its
+     release, commit, digest or url, or a source added or dropped). A change to the file's
+     other fields, with every pin where it was, is an ordinary take or merge.
 
    Seeded files are compared on both template sides through init's own rewrite with the
    project's values, so an unchanged shape matches exactly. Beside the files, the plan
@@ -565,6 +567,10 @@ itself to get it.
    - the layout entries the release adds, changes or removes, each with its text;
    - each skeleton the project's `README.md`, `CLAUDE.md`, `docs/HANDOFF.md` and
      `CITATION.cff` were rendered from that the release changed, as a diff;
+   - each file every project starts with and then owns (the communications README, the
+     stage config, the charter, the findings register) that the release changed, as a
+     diff. The project's data in it is never migrated: the release notes say what a
+     format change asks of it;
    - the generators to run;
    - the release notes of every release since the project's.
 
@@ -602,7 +608,8 @@ itself to get it.
        and the pins, when not accepted;
      - **unresolved**: other files still differing from the release, removed files still
        here, and layout entries not declared;
-     - **review**: rendered files whose skeleton changed.
+     - **review**: rendered files whose skeleton changed, and starting files the
+       release changed.
 
    It refuses a release not newer than the project's record, and a project whose tracked
    files its contract does not all declare.

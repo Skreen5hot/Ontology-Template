@@ -48,6 +48,7 @@ ADDED = "tools/newtool.py"
 COLLIDE = "tools/collide.py"
 REMOVED = "tools/ontology/normalize.py"
 SKELETON = "docs/template/skeletons/CLAUDE.md"
+STARTING = "config/stages.yaml"
 
 
 @pytest.fixture(scope="module")
@@ -134,6 +135,7 @@ def world(tmp_path_factory):
                         + entry("tool.collide", COLLIDE) + "  - id: tool.pins\n")
     contract.write_bytes(text.encode("utf-8"))
     append(template / SKELETON, "\nA line added to the skeleton.\n")
+    append(template / STARTING, "\n# v9.9.0: a stage note\n")
     roadmap = template / "docs/template/ROADMAP.md"
     text = roadmap.read_bytes().decode("utf-8")
     text = text.replace(
@@ -491,7 +493,7 @@ def test_adopt_shows_what_is_retained_unresolved_and_for_review(world, mine):
     retained = {(r["path"], r["why"]) for r in move["retained"]}
     assert (PINS, "upstream pins not accepted: BFO and CCO stay as the "
                   "project pins them") in retained
-    assert [r["path"] for r in move["review"]] == ["CLAUDE.md"]
+    assert [r["path"] for r in move["review"]] == ["CLAUDE.md", STARTING]
     assert "unresolved docs/DEVELOPMENT.md" in " ".join(result.stdout.split())
 
 
@@ -642,3 +644,72 @@ def test_the_plan_says_each_added_entrys_state(world, mine):
         "added"]}
     assert added == {"tool.newtool": "taken by --take",
                      "tool.collide": "present"}
+
+
+# ------------------------------------- starting files, and what a pin is
+
+
+def test_a_starting_file_the_release_changed_is_shown_never_written(world,
+                                                                    mine):
+    """config/stages.yaml is the project's from init on: the plan shows
+    the release's change as a diff, and --take leaves it."""
+    plan = plan_of(world, mine)
+    [change] = plan["starting"]
+    assert change["path"] == STARTING
+    assert "+# v9.9.0: a stage note" in change["diff"]
+    assert STARTING not in classes(plan)
+    before = (mine / STARTING).read_bytes()
+    upgrade_cmd(world, mine, "--take")
+    assert (mine / STARTING).read_bytes() == before
+
+
+def test_files_init_writes_are_not_starting_files(world, mine):
+    paths = {c["path"] for c in plan_of(world, mine)["starting"]}
+    assert not paths & {"config/project.yaml", "README.md", "CLAUDE.md",
+                        "config/repository-layout.yaml", "LICENSE"}
+
+
+PINNED = b"""sources:
+  - id: bfo
+    release: r1
+    commit: aaaa
+    sha256: s1
+    url: u1
+    select: all
+"""
+
+
+@pytest.mark.parametrize("change, moved", [
+    ((b"select: all", b"select: some"), False),
+    ((b"url: u1", b"url: u1\n    hierarchy: h.json"), False),
+    ((b"release: r1", b"release: r2"), True),
+    ((b"commit: aaaa", b"commit: bbbb"), True),
+    ((b"sha256: s1", b"sha256: s2"), True),
+    ((b"url: u1", b"url: u2"), True),
+    ((b"  - id: bfo", b"  - id: cco"), True),
+])
+def test_a_pin_moves_only_when_a_pin_field_does(tool, change, moved):
+    """Found upgrading a project made at v0.1.0: its BFO and CCO pins
+    were the release's, and the file had gained the hierarchy outputs.
+    Held back as a pin change, the outputs the layout declares could not
+    be written."""
+    assert tool.pins_moved(PINNED, PINNED.replace(*change)) is moved
+
+
+def test_pins_already_matching_are_an_ordinary_merge(world, mine):
+    """The project moved its CCO pin to the release's on its own, and its
+    file still differs: nothing moves the ontology's dependency, so it is
+    merged like any file."""
+    path = mine / PINS
+    path.write_bytes((world[0] / PINS).read_bytes().replace(
+        b"\n# v9.9.0 note\n", b"\n# the project's note\n"))
+    commit(mine, "pins already the release's")
+    assert classes(plan_of(world, mine))[PINS] == "merge"
+
+
+def test_a_starting_file_the_project_lacks_is_not_a_change(world, mine):
+    """Absent here, it is no change to review: the layout entry's state
+    says what it needs."""
+    (mine / STARTING).unlink()
+    commit(mine, "no stage config")
+    assert plan_of(world, mine)["starting"] == []
