@@ -6,12 +6,17 @@
     python tools/ontology/iri_lint.py --output json
     python tools/ontology/iri_lint.py --propose         # register entries for
                                                         # the new findings
+    python tools/ontology/iri_lint.py --propose --rule R ...
+                                                        # for some of them,
+                                                        # class by class
+                                                        # (P-A6)
 
 Exit codes: 0 no findings but accepted ones; 1 a new finding, or (over
 the whole authored scope) an entry that matches nothing; 2 the lint could
 not be run -- a file that does not parse, a file that cannot be read, a
 register that is missing. A file that cannot be read is never a file with
-no findings.
+no findings. `--propose` also exits 2 when it refuses a selection or
+classification, saying why (see tools/findings.py).
 
 ACCEPTED FINDINGS
 
@@ -570,11 +575,7 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("files", nargs="*")
     ap.add_argument("--output", choices=("text", "json"), default="text")
-    ap.add_argument("--propose", action="store_true",
-                    help="print register entries for the new findings")
-    ap.add_argument("--reason", help="with --propose: the reason to write")
-    ap.add_argument("--owner", help="with --propose: the owner to write")
-    ap.add_argument("--review", help="with --propose: the review date")
+    findings.add_proposal_arguments(ap)
     args = ap.parse_args(argv)
 
     root = layout.repository_root()
@@ -594,9 +595,13 @@ def main(argv=None) -> int:
         return 2
 
     if args.propose:
-        print(findings.propose(verdict["new"], args.reason, args.owner,
-                               args.review)
-              or "# no new findings: nothing to propose")
+        try:
+            text = findings.proposal(verdict["new"], verdict["accepted"],
+                                     args, root)
+        except findings.ProposalError as error:
+            print("  CANNOT PROPOSE: %s" % error, file=sys.stderr)
+            return 2
+        print(text or "# no new findings: nothing to propose")
         return 0
     new = [f["record"] for f in verdict["new"]]
     if args.output == "json":

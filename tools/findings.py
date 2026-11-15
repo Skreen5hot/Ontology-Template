@@ -89,6 +89,22 @@ extract is never filed as one in this ontology.
 Entries are written by a person. `--propose` on each check prints entries
 for its new findings, with the reason, owner and review left for whoever
 accepts them; an entry without them is refused.
+
+CLASS BY CLASS (P-A6, decision 50)
+
+  --rule, --where, --focus and --focus-file select which new findings are
+  proposed: the values of one are alternatives, and every one given must
+  hold. A value matching no new finding is refused, and so is a selection
+  left empty. The rest stay new, and the gate still fails on them.
+  --focus selects every finding about a term, so two sharing a rule, a
+  location and a term are not told apart; enter those one by one.
+
+  --validity, --origin, --resolution and --classified-by, given together
+  with --reason, --owner and --review, record one person's judgement of
+  every selected finding. Nothing is inferred: no field has a default.
+  The entries are checked by the register's rules before any is printed,
+  and if one would be refused, none is. origin upstream is refused, since
+  each such entry names its own upstream term.
 """
 
 from __future__ import annotations
@@ -408,12 +424,12 @@ def report(check: str, verdict: dict, out=sys.stdout) -> None:
               "prints the entries." % REGISTER, file=out)
 
 
-def propose(records: list, reason: str | None = None,
-            owner: str | None = None, review: str | None = None) -> str:
-    """Register entries for `records`, as YAML to paste under `entries:`.
-    What is not given is left as a placeholder the register refuses."""
-    import yaml
-
+def entries_for(records: list, reason: str | None = None,
+                owner: str | None = None, review: str | None = None,
+                classification: dict | None = None) -> list[dict]:
+    """One entry per distinct finding in `records`. What is not given is
+    left as a placeholder the register refuses; `classification` is a
+    person's, given whole (see `judgement`), or the placeholders."""
     out, seen = [], set()
     for record in records:
         if identity(record) in seen:
@@ -424,10 +440,216 @@ def propose(records: list, reason: str | None = None,
         entry["reason"] = reason or "TODO why this is accepted, not fixed"
         entry["owner"] = owner or "TODO who answers for it"
         entry["review"] = review or "TODO YYYY-MM-DD"
-        entry.update(placeholders())
+        entry.update(dict(classification) if classification
+                     else placeholders())
         out.append(entry)
-    return yaml.safe_dump(out, sort_keys=False, allow_unicode=True,
-                          width=100) if out else ""
+    return out
+
+
+def dump(entries: list) -> str:
+    import yaml
+
+    return yaml.safe_dump(entries, sort_keys=False, allow_unicode=True,
+                          width=100) if entries else ""
+
+
+def propose(records: list, reason: str | None = None,
+            owner: str | None = None, review: str | None = None) -> str:
+    """Register entries for `records`, as YAML to paste under `entries:`.
+    What is not given is left as a placeholder the register refuses."""
+    return dump(entries_for(records, reason, owner, review))
+
+
+# --propose class by class (P-A6, template decision 50) ----------------
+#
+# BPO disposed of 4,323 findings in 17 classes, each with one reason,
+# owner and classification, and --propose could only write one for every
+# new finding of a check. A selection narrows what is proposed; findings
+# left out stay new, and the gate still fails on them. A classification
+# typed once by a named person is copied into the selected entries, as
+# --reason is: the tool chooses nothing (decision 32 stands), and what it
+# prints is checked by the register's own rules first.
+
+#: option -> the finding's field it selects on
+SELECTORS = (("rule", "rule"), ("where", "where"), ("focus", "focus"))
+IRI = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*:[^\s<>\"{}|\\^`]+$")
+
+
+class ProposalError(ValueError):
+    """What was asked of --propose cannot be printed as entries."""
+
+
+def add_proposal_arguments(ap: argparse.ArgumentParser) -> None:
+    """The --propose options both checks share."""
+    ap.add_argument("--propose", action="store_true",
+                    help="print register entries for the new findings")
+    ap.add_argument("--reason", help="with --propose: the reason to write")
+    ap.add_argument("--owner", help="with --propose: the owner to write")
+    ap.add_argument("--review", help="with --propose: the review date")
+    group = ap.add_argument_group(
+        "selection (with --propose)",
+        "Only the new findings that match: values of one option are "
+        "alternatives, and every option given must hold. A finding left "
+        "out stays new. --focus selects every finding about a term, so it "
+        "cannot tell apart two sharing a rule, location and term.")
+    group.add_argument("--rule", action="append", default=[],
+                       help="the shape or lint rule")
+    group.add_argument("--where", action="append", default=[],
+                       help="the shape set or file")
+    group.add_argument("--focus", action="append", default=[],
+                       help="the term's IRI")
+    group.add_argument("--focus-file", action="append", default=[],
+                       help="a file of term IRIs, one per line; blank lines "
+                            "and lines starting with # are ignored")
+    group = ap.add_argument_group(
+        "classification (with --propose)",
+        "A person's judgement of every selected finding, given whole: all "
+        "four, with --reason, --owner and --review. Nothing is inferred. "
+        "origin upstream is entered one by one, with its upstream field.")
+    group.add_argument("--validity", help="real | false-alarm | unsure")
+    group.add_argument("--origin", help="project | template | unknown")
+    group.add_argument("--resolution",
+                       help="accepted | deferred | reported | not-a-defect")
+    group.add_argument("--classified-by", dest="classified_by",
+                       help="'<name> (<kind>)', a kind from " + REVIEW)
+    group.add_argument("--reference",
+                       help="where it was reported; with reported")
+
+
+def focus_file(path: str) -> list[str]:
+    """The IRIs in a focus file, refused whole on a line that is not one."""
+    try:
+        lines = Path(path).read_text(encoding="utf-8").splitlines()
+    except (OSError, UnicodeDecodeError) as error:
+        raise ProposalError("--focus-file %s cannot be read: %s"
+                            % (path, error))
+    out, bad = [], []
+    for number, line in enumerate(lines, 1):
+        line = line.strip()
+        if not line or line.startswith("#"):
+            continue
+        if IRI.match(line):
+            out.append(line)
+        else:
+            bad.append("line %d, %r" % (number, line[:80]))
+    if bad:
+        raise ProposalError("--focus-file %s: not an absolute IRI at %s"
+                            % (path, "; ".join(bad)))
+    if not out:
+        raise ProposalError("--focus-file %s lists no IRI" % path)
+    return out
+
+
+def chosen(args) -> dict:
+    """field -> the values given for it, in order, without repeats."""
+    out = {}
+    for option, field in SELECTORS:
+        values = list(getattr(args, option, None) or [])
+        if field == "focus":
+            for path in getattr(args, "focus_file", None) or []:
+                values.extend(focus_file(path))
+        if values:
+            out[field] = list(dict.fromkeys(values))
+    return out
+
+
+def select(new: list, accepted: list = (), chosen: dict | None = None
+           ) -> list:
+    """The new findings that every selector matches. A value that matches
+    no new finding is refused, and so is a selection left empty: either
+    would print nothing and look like nothing to do."""
+    if not chosen:
+        return list(new)
+    problems = []
+    for field, values in chosen.items():
+        for value in values:
+            if any(record.get(field) == value for record in new):
+                continue
+            if any(record.get(field) == value for record in accepted):
+                problems.append("--%s %s matches only findings already in "
+                                "the register" % (field, value))
+            else:
+                problems.append("--%s %s matches no new finding of this "
+                                "check" % (field, value))
+    if problems:
+        raise ProposalError("; ".join(problems))
+    out = [record for record in new
+           if all(record.get(field) in values
+                  for field, values in chosen.items())]
+    if not out:
+        raise ProposalError(
+            "no new finding matches %s together: each matches some, none "
+            "matches all" % " and ".join(
+                "--%s %s" % (field, " | ".join(values))
+                for field, values in chosen.items()))
+    return out
+
+
+def judgement(args) -> dict | None:
+    """The classification a person gave, whole, or None if none was. What
+    is refused here is refused before anything is measured against it."""
+    given = {key: (getattr(args, key, None) or "").strip()
+             for key in CLASSIFICATION + ("reference",)}
+    if not any(given.values()):
+        return None
+    missing = [key for key in CLASSIFICATION if not given[key]]
+    if missing:
+        raise ProposalError(
+            "a classification is given whole or not at all: %s %s missing"
+            % (", ".join("--" + key.replace("_", "-") for key in missing),
+               "is" if len(missing) == 1 else "are"))
+    if given["origin"] == "upstream":
+        raise ProposalError(
+            "origin upstream is not given for a group: each such entry names "
+            "its own upstream term (upstream: <SOURCE> <IRI>), so enter them "
+            "one by one")
+    absent = [key for key in REQUIRED
+              if not (getattr(args, key, None) or "").strip()]
+    if absent:
+        raise ProposalError(
+            "a classified entry is a complete one: %s also required with a "
+            "classification" % ", ".join("--" + key for key in absent))
+    return {key: value for key, value in given.items() if value}
+
+
+def proposal(new: list, accepted: list, args, root: Path | None = None,
+             err=None) -> str:
+    """--propose's entries for one check, as YAML, with what it did on
+    `err` (stderr). Raises ProposalError for anything it will not print."""
+    err = err or sys.stderr
+    selectors = chosen(args)
+    classification = judgement(args)
+    picked = select(new, accepted, selectors)
+    entries = entries_for(picked, args.reason, args.owner, args.review,
+                          classification)
+    if classification:
+        kinds = review_kinds(root)
+        sources = upstream_ids(root)
+        problems = []
+        for entry in entries:
+            name = "the finding %s %s %s" % (entry["rule"], entry["focus"],
+                                             entry["digest"])
+            problems.extend(
+                problem.replace("entry 1", name, 1) for problem in
+                problems_of([entry], sources=sources, version=2, kinds=kinds))
+        if problems:
+            raise ProposalError(
+                "%d problem(s); no entry is printed, since the register "
+                "would refuse them:\n    %s" % (
+                    len(problems), "\n    ".join(problems)))
+    if selectors:
+        # Distinct, as the entries are: a finding reported twice is one.
+        total = len({identity(record) for record in new})
+        print("  %d of %d distinct new finding(s) selected; %d not "
+              "selected, still new" % (len(entries), total,
+                                       total - len(entries)), file=err)
+    if classification:
+        print("  %d entr%s given the classification %s, by %s" % (
+            len(entries), "y" if len(entries) == 1 else "ies",
+            ", ".join("%s %s" % (key, classification[key])
+                      for key in ("validity", "origin", "resolution")),
+            classification["classified_by"]), file=err)
+    return dump(entries)
 
 
 def placeholders() -> dict:

@@ -9,12 +9,17 @@
                                                  # nothing
     python tools/ontology/validate.py --propose  # register entries for the
                                                  # new findings
+    python tools/ontology/validate.py --propose --rule R ...
+                                                 # for some of them, class
+                                                 # by class (P-A6; see
+                                                 # tools/findings.py)
 
 Exit 0 when the ladder passed, 1 on findings or a shape set that cannot
 fail, and 2 when a rung could not be evaluated -- whatever else it found.
 A blocked rung's findings are not counted, so any count beside it is
 smaller than the ontology's; 2 says the measurement is incomplete rather
-than letting it pass as a result with fewer findings (P-B2).
+than letting it pass as a result with fewer findings (P-B2). `--propose`
+also exits 2 when it refuses a selection or classification, saying why.
 
 Two rungs, and the second is the one that makes the first mean anything.
 
@@ -769,11 +774,7 @@ def main(argv=None) -> int:
     ap.add_argument("--gate", action="store_true",
                     help="exit 1 on a finding the register does not "
                          "accept, or an entry that matches nothing")
-    ap.add_argument("--propose", action="store_true",
-                    help="print register entries for the new findings")
-    ap.add_argument("--reason", help="with --propose: the reason to write")
-    ap.add_argument("--owner", help="with --propose: the owner to write")
-    ap.add_argument("--review", help="with --propose: the review date")
+    findings.add_proposal_arguments(ap)
     args = ap.parse_args(argv)
 
     record = measure()
@@ -784,9 +785,16 @@ def main(argv=None) -> int:
                                  findings.load())
         print("  %d new finding(s); entries on stdout" % len(verdict["new"]),
               file=sys.stderr)
-        print(findings.propose(verdict["new"], args.reason, args.owner,
-                               args.review)
-              or "# no new findings: nothing to propose")
+        try:
+            text = findings.proposal(verdict["new"], verdict["accepted"],
+                                     args)
+        except findings.ProposalError as error:
+            print("  CANNOT PROPOSE: %s" % error, file=sys.stderr)
+            if record.get("blocked_rungs"):
+                # A value can match nothing because its rung did not run.
+                print(incomplete(record), file=sys.stderr)
+            return NOT_EVALUABLE
+        print(text or "# no new findings: nothing to propose")
         if record.get("blocked_rungs"):
             # The entries are right but not all of them: a blocked rung's
             # findings are missing, and a register built from them would

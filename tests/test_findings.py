@@ -309,6 +309,11 @@ def test_a_run_without_its_vocabulary_says_so_and_exits_2(
     # Proposed entries would miss the blocked rung's findings too.
     assert validator.main(["--propose"]) == 2
     assert "INCOMPLETE" in capsys.readouterr().err
+    # A selection refused on such a run says that the rung did not run:
+    # its value may be one of the findings that are missing (P-A6).
+    assert validator.main(["--propose", "--rule", "urn:not:run"]) == 2
+    err = capsys.readouterr().err
+    assert "CANNOT PROPOSE" in err and "INCOMPLETE" in err, err
 
 
 def test_the_report_holds_every_finding(validator, benchmark_module,
@@ -512,3 +517,331 @@ def test_a_lint_run_on_one_file_calls_no_entry_stale(linter, register,
     monkeypatch.setattr(linter.findings, "load",
                         lambda root=None: [elsewhere])
     assert linter.main([str(path)]) == 0
+
+
+# --------------------------------- --propose class by class (P-A6)
+#
+# Decision 50. BPO's port disposed of its findings in 17 classes, each
+# with one reason, owner and classification, and had to call
+# findings.propose() once per class because --propose took every new
+# finding. A selection narrows it; a classification typed once by a named
+# person is copied into the selected entries, checked by the register's
+# own rules before anything is printed.
+
+import argparse  # noqa: E402
+
+PERSON = "Jane Doe (domain-expert)"
+FILLED = ["--reason", "one class", "--owner", "the suite",
+          "--review", "2027-01-01"]
+JUDGED = ["--validity", "real", "--origin", "project",
+          "--resolution", "accepted", "--classified-by", PERSON]
+
+
+def parsed(register, *argv):
+    ap = argparse.ArgumentParser()
+    register.add_proposal_arguments(ap)
+    return ap.parse_args(["--propose", *argv])
+
+
+def planted(register):
+    """Six new findings across two rules, two shape sets and four terms;
+    one of them repeated, as a check can report it."""
+    return [
+        found(register, "urn:a", rule="urn:shape:label", message="a1"),
+        found(register, "urn:a", rule="urn:shape:label", message="a1"),
+        found(register, "urn:a", rule="urn:shape:genus", message="a2"),
+        found(register, "urn:b", rule="urn:shape:label", message="b1",
+              where="validation.b"),
+        found(register, "urn:c", rule="urn:shape:genus", message="c1",
+              severity="Warning"),
+        found(register, "urn:d", rule="urn:shape:genus", message="d1",
+              where="validation.b"),
+    ]
+
+
+def proposed(register, new, *argv, accepted=(), err=None):
+    import io
+
+    err = err if err is not None else io.StringIO()
+    text = register.proposal(new, list(accepted), parsed(register, *argv),
+                             err=err)
+    return yaml.safe_load(text) or [], err
+
+
+def refused(register, new, *argv, accepted=()):
+    with pytest.raises(register.ProposalError) as caught:
+        proposed(register, new, *argv, accepted=accepted)
+    return str(caught.value)
+
+
+def test_with_no_selector_a_proposal_is_as_before(register):
+    """Decision 50, 1: with no new option the behaviour is unchanged --
+    the same entries, byte for byte, and nothing more on stderr."""
+    import io
+
+    new = planted(register)
+    for argv, before in (([], register.propose(new)),
+                         (FILLED, register.propose(
+                             new, "one class", "the suite", "2027-01-01"))):
+        err = io.StringIO()
+        text = register.proposal(new, [], parsed(register, *argv), err=err)
+        assert text == before, argv
+        assert err.getvalue() == "", err.getvalue()
+
+
+def test_each_selector_selects_what_it_names(register):
+    new = planted(register)
+    cases = {
+        ("--rule", "urn:shape:label"): {"a1", "b1"},
+        ("--where", "validation.b"): {"b1", "d1"},
+        ("--focus", "urn:a"): {"a1", "a2"},
+    }
+    for argv, expected in cases.items():
+        entries, _ = proposed(register, new, *argv)
+        assert {e["text"] for e in entries} == expected, (argv, entries)
+
+
+def test_values_of_one_selector_widen_and_selectors_narrow(register):
+    new = planted(register)
+    entries, _ = proposed(register, new, "--focus", "urn:a",
+                          "--focus", "urn:c")
+    assert {e["text"] for e in entries} == {"a1", "a2", "c1"}
+    entries, _ = proposed(register, new, "--focus", "urn:a",
+                          "--focus", "urn:c", "--rule", "urn:shape:genus")
+    assert {e["text"] for e in entries} == {"a2", "c1"}
+    entries, _ = proposed(register, new, "--rule", "urn:shape:genus",
+                          "--where", "validation.b")
+    assert {e["text"] for e in entries} == {"d1"}
+
+
+def test_the_counts_say_what_was_left_out(register):
+    new = planted(register)
+    _, err = proposed(register, new, "--rule", "urn:shape:genus")
+    assert ("3 of 5 distinct new finding(s) selected; 2 not selected, "
+            "still new"
+            in err.getvalue()), err.getvalue()
+
+
+def test_a_value_matching_nothing_is_refused(register):
+    new = planted(register)
+    said = refused(register, new, "--rule", "urn:shape:label",
+                   "--rule", "urn:shape:typo")
+    assert "--rule urn:shape:typo matches no new finding" in said, said
+    assert "urn:shape:label" not in said, "a value that matches is named"
+    said = refused(register, new, "--focus", "urn:entered",
+                   accepted=[found(register, "urn:entered")])
+    assert "--focus urn:entered matches only findings already in the " \
+           "register" in said, said
+
+
+def test_an_empty_selection_is_refused(register):
+    """Each value matches some finding; together they match none."""
+    new = planted(register)
+    said = refused(register, new, "--focus", "urn:b",
+                   "--rule", "urn:shape:genus")
+    assert "no new finding matches --rule urn:shape:genus and --focus " \
+           "urn:b together" in said, said
+
+
+def test_a_focus_file_lists_terms(register, tmp_path):
+    new = planted(register)
+    path = tmp_path / "class.txt"
+    path.write_bytes(b"# the unsure ones\n\nurn:b\n  urn:d  \n")
+    entries, _ = proposed(register, new, "--focus-file", str(path),
+                          "--focus", "urn:b")
+    assert {e["text"] for e in entries} == {"b1", "d1"}
+    for content, said in ((b"urn:b\nnot an iri\n", "line 2, 'not an iri'"),
+                          (b"# only a comment\n", "lists no IRI"),
+                          (b"\xff\xfe", "cannot be read")):
+        path.write_bytes(content)
+        got = refused(register, new, "--focus-file", str(path))
+        assert said in got, (content, got)
+    got = refused(register, new, "--focus-file", str(tmp_path / "absent"))
+    assert "cannot be read" in got, got
+
+
+def test_selected_entries_accept_exactly_the_selection(register):
+    """Pasted in, the selected entries are accepted; every other finding
+    is still new, and a Warning among them still fails the gate."""
+    new = planted(register)
+    entries, _ = proposed(register, new, "--rule", "urn:shape:label",
+                          *FILLED, *JUDGED)
+    assert register.problems_of(entries, version=2) == []
+    verdict = register.judge("validate", new, entries, today=TODAY)
+    assert {r["message"] for r in verdict["new"]} == {"a2", "c1", "d1"}
+    assert not verdict["passed"]
+    assert {r["message"] for r in verdict["failing"]} == {"a2", "c1", "d1"}
+
+
+def test_class_by_class_the_register_fills_and_the_gate_passes(register):
+    """Three classes, each proposed once and pasted in: the gate passes
+    at the end, and no finding is entered twice."""
+    new = planted(register)
+    classes = [
+        ["--rule", "urn:shape:label", *FILLED, *JUDGED],
+        ["--focus", "urn:a", "--rule", "urn:shape:genus", *FILLED,
+         "--validity", "false-alarm", "--origin", "template",
+         "--resolution", "reported", "--reference", "issue 7",
+         "--classified-by", "A. Person (ontologist)"],
+        ["--focus", "urn:c", "--focus", "urn:d", *FILLED,
+         "--validity", "unsure", "--origin", "unknown",
+         "--resolution", "deferred", "--classified-by", PERSON],
+    ]
+    entries = []
+    for argv in classes:
+        accepted = register.judge("validate", new, entries,
+                                  today=TODAY)["accepted"]
+        still = [r for r in new if r not in accepted]
+        got, _ = proposed(register, still, *argv, accepted=accepted)
+        entries.extend(got)
+    assert register.problems_of(entries, version=2) == []
+    verdict = register.judge("validate", new, entries, today=TODAY)
+    assert verdict["passed"] and not verdict["new"], verdict
+    assert len(entries) == 5
+
+
+def test_without_a_classification_the_placeholders_stay(register):
+    new = planted(register)
+    entries, _ = proposed(register, new, "--rule", "urn:shape:label",
+                          *FILLED)
+    got = register.problems_of(entries)
+    assert sum("placeholder" in p for p in got) == 4 * len(entries), got
+
+
+def test_a_given_classification_is_recorded_and_counted(register):
+    new = planted(register)
+    entries, err = proposed(register, new, "--rule", "urn:shape:genus",
+                            *FILLED, *JUDGED)
+    for entry in entries:
+        assert {k: entry[k] for k in register.CLASSIFICATION} == {
+            "validity": "real", "origin": "project",
+            "resolution": "accepted", "classified_by": PERSON}
+        assert "reference" not in entry
+    assert ("3 entries given the classification validity real, origin "
+            "project, resolution accepted, by " + PERSON) in err.getvalue()
+
+
+def test_a_classification_is_given_whole(register):
+    new = planted(register)
+    for drop in register.CLASSIFICATION:
+        flag = "--" + drop.replace("_", "-")
+        argv = list(JUDGED)
+        index = argv.index(flag)
+        del argv[index:index + 2]
+        said = refused(register, new, *FILLED, *argv)
+        assert "given whole or not at all: %s is missing" % flag in said, \
+            said
+    said = refused(register, new, *FILLED, "--reference", "issue 7")
+    assert "are missing" in said, said
+
+
+def test_a_classified_entry_needs_its_reason_owner_and_review(register):
+    new = planted(register)
+    for key in ("reason", "owner", "review"):
+        argv = list(FILLED)
+        index = argv.index("--" + key)
+        del argv[index:index + 2]
+        said = refused(register, new, *argv, *JUDGED)
+        assert "--%s also required with a classification" % key in said, said
+
+
+def test_origin_upstream_is_not_given_for_a_group(register):
+    new = planted(register)
+    argv = [v if v != "project" else "upstream" for v in JUDGED]
+    said = refused(register, new, *FILLED, *argv)
+    assert "origin upstream is not given for a group" in said, said
+
+
+def test_the_register_rules_hold_before_anything_is_printed(register):
+    """Every refusal is the register's own message, and no entry is
+    printed when any would be refused."""
+    new = planted(register)
+    cco = register.upstream_ids()["CCO"]
+
+    def judged(validity, origin, resolution, by=PERSON, *more):
+        return [*FILLED, "--validity", validity, "--origin", origin,
+                "--resolution", resolution, "--classified-by", by, *more]
+
+    cases = [
+        (judged("false-alarm", "project", "accepted"),
+         "accepted requires validity real"),
+        (judged("real", "project", "not-a-defect"),
+         "not-a-defect requires validity false-alarm"),
+        (judged("unsure", "project", "accepted"),
+         "unsure requires resolution deferred"),
+        (judged("real", "unknown", "accepted"),
+         "origin unknown requires validity unsure"),
+        (judged("false-alarm", "template", "reported"),
+         "reported requires a reference"),
+        (judged("right", "project", "accepted"),
+         "validity 'right' is not one of"),
+        (judged("real", "project", "accepted", "Jane Doe (oracle)"),
+         "names the kind 'oracle'"),
+        (judged("real", "project", "accepted", "Jane Doe"),
+         "is not '<name> (<kind>)'"),
+        (judged("real", "project", "accepted", "TODO <name> (<kind>)"),
+         "still a placeholder"),
+    ]
+    for argv, said in cases:
+        got = refused(register, new, "--rule", "urn:shape:label", *argv)
+        assert said in got and "no entry is printed" in got, (said, got)
+        assert "the finding urn:shape:label urn:a" in got, got
+    argv = list(FILLED)
+    argv[argv.index("2027-01-01")] = "2027-02-30"
+    got = refused(register, new, *argv, *JUDGED)
+    assert "is not a date" in got, got
+    on_cco = [found(register, cco + "ont00001180", message="u1")]
+    got = refused(register, on_cco, *FILLED, *JUDGED)
+    assert "must name the upstream" in got, got
+
+
+def test_the_validator_selects_on_the_command_line(validator, capsys,
+                                                   monkeypatch):
+    """The wiring: the validator's --propose passes its new and accepted
+    findings, prints the entries, and exits 2 on a refusal with nothing
+    on stdout."""
+    register = validator.findings
+    new = planted(register)
+    entered = entry_for(register, found(register, "urn:old", rule="urn:x"))
+    monkeypatch.setattr(validator, "measure", lambda: {"rungs": {}})
+    monkeypatch.setattr(validator, "register_findings",
+                        lambda record: new + [found(register, "urn:old",
+                                                    rule="urn:x")])
+    monkeypatch.setattr(register, "load", lambda root=None: [entered])
+    assert validator.main(["--propose", "--rule", "urn:shape:label",
+                           *FILLED, *JUDGED]) == 0
+    out, err = capsys.readouterr()
+    assert {e["text"] for e in yaml.safe_load(out)} == {"a1", "b1"}
+    assert "2 of 5 distinct new finding(s) selected" in err, err
+    assert "2 entries given the classification" in err, err
+    assert validator.main(["--propose", "--focus", "urn:old"]) == 2
+    out, err = capsys.readouterr()
+    assert out == "" and "CANNOT PROPOSE: --focus urn:old matches only " \
+        "findings already in the register" in err, (out, err)
+    assert validator.main(["--propose"]) == 0
+    out, _ = capsys.readouterr()
+    assert out == register.propose(new) + "\n", "unchanged with no option"
+
+
+def test_the_linter_selects_on_the_command_line(linter, capsys,
+                                                monkeypatch):
+    register = linter.findings
+    new = [register.finding("iri_lint", "ontology/a.ttl", "urn:a",
+                            "dangling_ref", "dangling_ref urn:a", "Violation"),
+           register.finding("iri_lint", "ontology/a.ttl", "urn:b",
+                            "readable_label", "readable_label urn:b",
+                            "Warning")]
+    monkeypatch.setattr(linter, "lint", lambda paths, root=None: [])
+    monkeypatch.setattr(linter, "register_findings",
+                        lambda records, root=None: new)
+    monkeypatch.setattr(register, "load", lambda root=None: [])
+    assert linter.main(["--propose", "--rule", "readable_label"]) == 0
+    out, err = capsys.readouterr()
+    assert [e["focus"] for e in yaml.safe_load(out)] == ["urn:b"], out
+    assert "1 of 2 distinct new finding(s) selected" in err, err
+    assert linter.main(["--propose", "--where", "ontology/b.ttl"]) == 2
+    out, err = capsys.readouterr()
+    assert out == "" and "CANNOT PROPOSE" in err, (out, err)
+    assert linter.main(["--propose"]) == 0
+    out, _ = capsys.readouterr()
+    assert out == register.propose(new) + "\n", "unchanged with no option"

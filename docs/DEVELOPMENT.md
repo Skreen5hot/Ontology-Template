@@ -1066,6 +1066,44 @@ An entry still carrying the proposal's `TODO` is refused. `--reason`, `--owner` 
 `--review` fill every proposed entry at once, for a port that arrives with many findings
 of one kind; that is a decision about all of them, and the commit should say whose.
 
+**Class by class** (P-A6, template decision 50). A project that disposes of its findings in
+classes, each with one reason and one judgement, selects each class and proposes it:
+
+```bash
+python tools/ontology/validate.py --propose --rule <shape IRI> \
+  --reason "..." --owner "..." --review 2027-01-01 \
+  --validity real --origin project --resolution accepted \
+  --classified-by "Jane Doe (domain-expert)"
+python tools/ontology/iri_lint.py --propose --focus-file unsure-terms.txt ...
+```
+
+- `--rule`, `--where` (the shape set or file), `--focus` (a term) and `--focus-file` (a file of
+  terms, one IRI per line, `#` for comments) select from the new findings.
+- The values of one option are alternatives, and every option given must hold.
+- A value that matches no new finding is refused, with exit 2, and so is a selection left
+  empty.
+- The findings left out stay new, and the gate still fails on them. stderr says how many
+  were selected and how many were not.
+
+A classification given on the command line is one person's judgement of every selected
+finding, typed once:
+- All four fields, with `--reason`, `--owner` and `--review`. Nothing has a default, and
+  the reviewer is never taken from git or the owner.
+- The entries are checked by the register's own rules, at format version 2, before any is
+  printed. If one would be refused, none is, and each problem is listed with its finding.
+- `--origin upstream` is refused: each such entry names its own upstream term, so enter it
+  by hand.
+- A finding about an upstream term needs its `upstream` field, so a selection that
+  includes one is refused with a classification.
+- stderr says how many entries received the judgement.
+
+The tool chooses nothing (decision 32): it copies what the person typed, as it copies
+`--reason`.
+
+`--focus` selects every new finding about a term. Two findings that share a rule, a shape
+set or file and a term, and differ only in their message, cannot be told apart by
+selection; classify those one by one in the register, as before.
+
 **Classifying a finding** (template decision 32). An entry also records what a person
 concluded, as three separate answers and who gave them:
 
