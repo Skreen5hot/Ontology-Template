@@ -868,3 +868,25 @@ asked for and given: "proceed" (2026-11-15; SHA-256 of that whole message,
 - `4096a68` to `202d8f3` pushed to `main`; Checks, Reasoning, Pages, Install and Scale green
   on `202d8f3`; `v0.9.0` tagged on it and pushed, its Release run passed with the release
   job skipped, as in the template it is. `ROADMAP.md`'s "Release v0.9.0" records it.
+
+**47. "Architectural Decision — P-A5 Approved for v0.10.0"** (2026-11-15)
+
+In answer to the six questions of `evaluations/2026-11-15-pa5-design.md` section 7. The
+whole text is recorded verbatim in
+[`evaluations/2026-11-15-pa5-disposition.md`](evaluations/2026-11-15-pa5-disposition.md)
+(SHA-256 of the text below its rule `c91d53f92b0f09424232d5e09d204c17874e0a34878f84de01efb500072c294f`).
+Its heading carries no number; it is entered as 47. Effect:
+
+- P-A5 is approved for **v0.10.0**, as its sole functional change: each term's comments
+  shown after its definition, every conflicting variant with its module; every
+  `agree_across_modules` property other than the label and definition published; several
+  comments in one module shown, as the validator reports them, and row 9's exemption not
+  built; search unchanged. The read-only BPO measurement of index size, comment coverage
+  and conflict visibility is approved.
+- **Safeguards.** A difference across modules is told apart from several comments in one
+  module. Language, source module and safe text rendering are kept. The existing variant
+  machinery is reused, with no needless duplication in the index. The site shows what the
+  validator found and decides nothing about whether an annotation is right.
+- P-A5 changes no ontology axiom, validator semantics, search ranking or third-party
+  source content. No further design round unless implementation finds a material
+  conflict. After v0.10.0: P-A6, P-A8 and P-A4, each scoped separately.

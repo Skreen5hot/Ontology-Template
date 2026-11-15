@@ -1205,7 +1205,8 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.7.0 | -- | **P8**, a rights and provenance review | approved with four safeguards (decision 40); in v0.7.0, released (decision 41) |
 | v0.8.0 | -- | **P6**, conceptual fidelity | approved with amendments (decisions 42 and 43); in v0.8.0, released (decision 44) |
 | v0.9.0 | -- | **P-A2**, upgrading a project to a new release | approved with four safeguards (decision 45); in v0.9.0, released (decision 46) |
-| Next | -- | P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
+| v0.10.0 | -- | **P-A5**, the explorer shows a term's comments | approved with three safeguards (decision 47) |
+| Next | -- | P-A6, P-A8 and P-A4 (decision 23), each scoped separately (decision 47); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
 | Lower | 9 | Declared third-party label text exempt from the qualifier check; several comments in one module where a project says so | approved, controlled |
