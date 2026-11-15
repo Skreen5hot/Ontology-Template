@@ -36,7 +36,11 @@
  * each comes from, under the findings the build noted; and each finding
  * the register accepts about the term is shown with its reason. The
  * index carries all of it (`variants`, `notes`, `accepted`), and the
- * status page lists the same notes, so none is only here.
+ * status page lists the same notes, so none is only here. The other
+ * properties the annotation profile says must agree across modules, a
+ * comment among them, follow the definition the same way
+ * (`annotations`, decision 47): one value as text, more than one listed
+ * with its language and modules, never one of them picked.
  */
 
 (function () {
@@ -186,6 +190,42 @@
     return wrap;
   }
 
+  /* Each profile property the term has, in the profile's order. One value
+   * is a paragraph; more than one, or one that is not a literal, is a
+   * list of every value with its language and modules, and none is shown
+   * as the text. A term with none of them shows nothing: unlike a
+   * definition, none is required. */
+  function renderAnnotations(record, body) {
+    var have = record.annotations || {};
+    (state.index.annotations || []).forEach(function (property) {
+      var found = have[property.property];
+      if (!found) { return; }
+      body.appendChild(el("h4", null, property.label));
+      if (!found.variants.length) {
+        body.appendChild(el("p", "detail-annotation", found.text));
+        return;
+      }
+      var list = document.createElement("ul");
+      found.variants.forEach(function (variant) {
+        var li = el("li", null, variant.value);
+        li.appendChild(el("span", "muted",
+          " — " + (variant.lang ? variant.lang + ", " : "untagged, ")
+          + (variant.literal ? "" : "not a literal, ")
+          + "in " + variant.modules.join(", ")));
+        list.appendChild(li);
+      });
+      body.appendChild(list);
+      record.notes.forEach(function (note) {
+        if (note.property === property.property) {
+          body.appendChild(el("p", "muted", note.scope === "module"
+            ? "Asserted together in one module; the validator reports "
+              + "them as differing."
+            : "These differ between modules; the validator reports it."));
+        }
+      });
+    });
+  }
+
   function renderDetail(record) {
     var pane = $("detail"), body = $("detail-body");
     body.textContent = "";
@@ -210,10 +250,13 @@
       body.appendChild(box);
     }
     var conflicting = { label: false, definition: false };
+    var FIELDS = { "rdfs:label": "label", "skos:definition": "definition" };
     record.notes.forEach(function (note) {
-      if (note.kind === "conflict" || note.kind === "not-literal") {
-        conflicting[note.about === "rdfs:label" ? "label" : "definition"]
-          = true;
+      /* An annotation's note carries its `property` and is shown with
+       * that annotation, below; it says nothing about the definition. */
+      if ((note.kind === "conflict" || note.kind === "not-literal")
+          && !note.property && FIELDS[note.about]) {
+        conflicting[FIELDS[note.about]] = true;
       }
     });
     ["label", "definition"].forEach(function (field) {
@@ -246,6 +289,8 @@
         "No definition: this term is declared in the vendored extract "
         + "only so that a reference to it resolves."));
     }
+
+    renderAnnotations(record, body);
 
     body.appendChild(iriRow("IRI", record.iri));
 

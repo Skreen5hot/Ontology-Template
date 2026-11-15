@@ -1,5 +1,5 @@
 {
-  "digest": "3ec7ba3d34213d104009e03e7ae8fdea7863e52255028ee2140382c60f8920fb",
+  "digest": "756cdc19ebc9c4050548f0a97431be23b22cff1c2cbefa6a20024f678b8232af",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -18,7 +18,7 @@
     ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
     "config/review.yaml": "cb38aac49ee963e2249f14bf96e152f4333359b23cd4d5d6b627cd3b87dc15f8",
     "config/tooling.yaml": "a106bb41f68541125b979d3aeb022fb5c85ad1ce318e4ed03f5d0a4194b039ec",
-    "docs/DEVELOPMENT.md": "675f858b14c97c4bae98ff270379384b6d5b21353fe9e62aef914279dfcfdd3f",
+    "docs/DEVELOPMENT.md": "df12c049aaf6c61fbc3ff036e50c7cf561e23b0a55eda797252448e29bb03fd7",
     "docs/PORTING.md": "f58802103aa3ee37dbfb939dc56a0c96297b2f2d1ede8d64497eed751ae164f7",
     "docs/porting/port-report.md": "9cd44e61b1ca19f2723283648cf8220ae53ecfa67d57a0535cd0404458d0bf4d",
     "docs/process/METHOD.md": "c8c41e635b571ee1f066c38460c6da3ea1df4269919a1b7ab2da30eafaf5e4f4",
@@ -31,7 +31,7 @@
     "site/pages/competency.html": "aca4de31a9d3db5873f48f82c4d6545ee63e8118379c66a3edf12efe64140fe1",
     "site/pages/crosswalks.html": "ecb37fa38cf308e54840bbf6b8b370b19c7ca1c33c7fea45e55dd1e417b14b2b",
     "site/pages/downloads.html": "3254b2e5462dc2f41f419f72fa7f6c83eee78bb73c39122b2ed35cd64d0343ae",
-    "site/pages/explore.html": "de1c4823b761348f57c462b07273b9f5638b47fd0a747136f8c4043ecc762ad3",
+    "site/pages/explore.html": "c87f26cdab32d756283e9cd3fab7a1812f054e061c53beebb6c703da4c2b5bed",
     "site/pages/home.html": "20180de3244b42eff6eb312515c241226d6690f92047ca194c574cd4619fcf20",
     "site/pages/modules.html": "33125b13f20a3fad8da1cd7145bad93daad295f41152a85d50b70dee4ee39121",
     "site/pages/releases.html": "218217ed48e5b7e4ff2611c9288c8337b66e72874ba181143f503c73bad2410a",
@@ -40,7 +40,7 @@
     "site/pages/status.html": "3bbec54976f4c4fc2c882a268edfaee2bed2770ffdc02b17b27768badc126078",
     "site/pages/vocabulary.html": "562b7e7e55d060d38aa97a02101f64a9f096ed6316b5e087250a79c4a17755e3",
     "site/src/assets/css/site.css": "cdec3e4004c5b8186eba6a38d1a9c9f03ff87d093a1b0a3a30b6c313a1bd18df",
-    "site/src/assets/js/explorer.js": "e1872c248635c9bbdf5c9fcb87e91376f6553f2b8bc0ef835081e3a42d110374",
+    "site/src/assets/js/explorer.js": "4cecf4b3f27b42e4bb958103bfce1e1d025acfa88ee7faa1b523b24018dc8263",
     "site/src/assets/js/ranking.js": "82aa1ad00ff1ab19594ecfaba19f3a36dff980f63209c96a7f2772df66151a81",
     "tests/conftest.py": "acf147e7686978fdafba0c127da9b677127e1ef2321e4914558c2a9cfb81cd87",
     "tests/fixtures/competency/examples/widgets.ttl": "928872769f1cb60bf4ba894368071b585e22f7e281abeac60d45a72d591c9687",
@@ -91,11 +91,11 @@
     "tests/test_review.py": "a6d3e80a9ac5cb7336bf4ec3226ed33108b8009097202d9cd1acf5a5e8e29eee",
     "tests/test_rights.py": "0a29822954fdbd227ef6af53d3eeb6c62338e54391bcb4807e2ea98e5c494ac5",
     "tests/test_scale.py": "0f70716251c9078aa3b7b1a6bbccef808cd0e385072dd5ea85d792a86a5fad50",
-    "tests/test_site.py": "b09f5a5044b793924b11a523dba1057b1661a68d2a5edcdbaec8f454943c5931",
+    "tests/test_site.py": "96851cfc2d333f4837919065d7851d5d9725f573c087dfc45f003ef776839025",
     "tests/test_sources.py": "453a6f5b3854fd212f30680ce86d930e6d051f45cf5dc6d0aa02de6a10dcfc5f",
     "tests/test_stages.py": "698bb9cb00911739f6dcb2678bfeaff611a3d1be4735bd9ffb414d4679b1b987",
     "tests/test_template.py": "ac08843769046972bb7ed4fcc40f80dd9c487ff295280bf4fe6a74721ec8a19b",
-    "tests/test_term_contract.py": "4c6394e578c0fce724c18acdb80651fc24751aad003388d817c3fbf63dbc8563",
+    "tests/test_term_contract.py": "d8837aa924a0dad0939ca663753f1bd3afeef13ec87c8db776d7e0c3b76926c8",
     "tests/test_upstream_vendoring.py": "d69e1511158b51761b11e1395259ff59429b25763e0d888155ce2d09c07043c4",
     "tests/test_vocabulary.py": "a0b53c5d5a70a1b9f9d4d28194c93e215394c4f38714289fd3040f752e841ad7",
     "tools/communications.py": "7d235a354c35f91bcd735836eac965d23c637cc70a955ab9cc958a8cbdbf2e81",
@@ -129,8 +129,8 @@
     "tools/release.py": "183ba1690165bd18dbf52822282416fda5c28ec7777ab2d2583c121cfe80028d",
     "tools/review.py": "42a89a9e3cc0e1309e60d237f1e8250f93d2494784cc8b406bf1c24fdee1e264",
     "tools/rights.py": "8c82e8eda7ddbaf4dd40cbd28aa838f84c7ee59604fc50659dfcfa91aadf1235",
-    "tools/site/build_site.py": "4d515bac93473342425ac558fb30e10053f6ba8bd3ce9df2c85c98cc975930ac",
-    "tools/site/check_site.py": "c11a8be77c70ad969160b818911390411bd9df12c42565cc7a806c17bb9ddc25",
+    "tools/site/build_site.py": "b8cc4003d6614c4a3bf2ac779587b3af7758afd318d461fa455a8107f866c797",
+    "tools/site/check_site.py": "137f37c6e2452aa080740f299147ab271c3100e20c6651b82ce1b07ba3764086",
     "tools/sources.py": "3119c65b51b311a4b69f11ae23c9f77bc511406f57d4bc006f922c3c1371df8e",
     "tools/stages.py": "79471ddf2a61c185cd8fb20792439d6dd4f53d9fa4fc8ac232c9043fdd3a6a25",
     "tools/template_status.py": "68589c8933fbe1fad77ce7452aa400c49773b5cde3ab8b7de929cfcb0a24f70d",
@@ -145,7 +145,7 @@
     "prefix": "example",
     "title": "Example Ontology"
   },
-  "label": "v0.9.0",
+  "label": "unreleased",
   "note": "The digest of every template-owned and template-seeded file as the template shipped it, and the values init rewrites Turtle from (identity). A project keeps this as it arrived, with the block init adds (initialized): it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
   "seeded": {
     "config/annotation-profile.yaml": "22162f289468ef41edd97c3cd4c689215fc39177c5eba362a66da890440677dd",
@@ -170,6 +170,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "a70856dc9d33c0b5b8b4557f9196e7d78aaa39a22059c4b71f244cb8fdc68a07",
-  "template_commit": "7b867249ae4f7980ecbb896bffd1c7e5400b296c",
+  "template_commit": "8f488533a7de024e845afd06d0fde4644dd847b6",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

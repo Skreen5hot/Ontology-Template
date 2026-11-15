@@ -68,6 +68,26 @@ CORPUS = {
 :BothKinds a owl:Class ; rdfs:label "Both kinds" ;
     skos:definition "A process that is also a material entity." ;
     rdfs:subClassOf obo:BFO_0000015, obo:BFO_0000040 .
+:Commented a owl:Class ; rdfs:label "Commented" ;
+    skos:definition "A process with one comment." ;
+    rdfs:comment "A note on it." ; rdfs:subClassOf obo:BFO_0000015 .
+:CommentDrift a owl:Class ; rdfs:label "Comment drift" ;
+    skos:definition "A process whose comment differs between modules." ;
+    rdfs:comment "As module A notes it." ; rdfs:subClassOf obo:BFO_0000015 .
+:TwoComments a owl:Class ; rdfs:label "Two comments" ;
+    skos:definition "A process with two English comments in one module." ;
+    rdfs:comment "<b>First</b> note."@en, "Second note."@en ;
+    rdfs:subClassOf obo:BFO_0000015 .
+:MixedComments a owl:Class ; rdfs:label "Mixed comments" ;
+    skos:definition "A process with comments in one module and another." ;
+    rdfs:comment "One."@en, "Two."@en ; rdfs:subClassOf obo:BFO_0000015 .
+:CommentLanguages a owl:Class ; rdfs:label "Comment languages" ;
+    skos:definition "A process with an English and an untagged comment." ;
+    rdfs:comment "An English note."@en, "An untagged note." ;
+    rdfs:subClassOf obo:BFO_0000015 .
+:IriComment a owl:Class ; rdfs:label "IRI comment" ;
+    skos:definition "A process commented with a reference." ;
+    rdfs:comment :WellFormed ; rdfs:subClassOf obo:BFO_0000015 .
 :Scheme a skos:ConceptScheme ; skos:prefLabel "Scheme" ;
     skos:hasTopConcept :TwoPrefLabels .
 :TwoPrefLabels a skos:Concept ; skos:inScheme :Scheme ;
@@ -79,6 +99,8 @@ CORPUS = {
 <urn:planted:b> a owl:Ontology ;
     dcterms:title "Planted B"@en, "Planted Bee"@en .
 :Drifted skos:definition "A process as module B defines it." .
+:CommentDrift rdfs:comment "As module B notes it." .
+:MixedComments rdfs:comment "Three."@en .
 :Twice a owl:Class .
 """,
     "m_c.ttl": """
@@ -112,7 +134,18 @@ TERM_CASES = [
     ("Drifted", ("conflict", "skos:definition"), "carries two different"),
     ("Twice", ("declared-twice", "declaration"), "is declared in 2 modules"),
     ("BothKinds", ("categories", "category"), "which are declared disjoint"),
+    ("CommentDrift", ("conflict", "rdfs:comment"),
+     "carries two different rdfs:comment"),
+    ("TwoComments", ("conflict", "rdfs:comment"),
+     "carries two different rdfs:comment"),
+    ("MixedComments", ("conflict", "rdfs:comment"),
+     "carries two different rdfs:comment"),
 ]
+
+#: The annotation profile's agreement finding: what the validator says of a
+#: comment, and the planted terms that must not carry it.
+COMMENT_SAYS = "carries two different rdfs:comment"
+COMMENT = "http://www.w3.org/2000/01/rdf-schema#comment"
 
 #: (concept, what the vocabulary page shows, what the validator says).
 CONCEPT_CASES = [
@@ -171,7 +204,7 @@ def ladder(validator, planted):
 
 
 @pytest.fixture(scope="module")
-def site(builder, validator, planted, layout):
+def site(builder, validator, planted, layout, repo):
     """What the site would publish from the planted corpus: its term
     records, its module headers, and its status-page table."""
     import rdflib
@@ -189,7 +222,9 @@ def site(builder, validator, planted, layout):
         for triple in source["graph"]:
             merged.add(triple)
     known = builder.prefixes()
-    records = builder.term_records(sources, merged, known)
+    agreement = load_tool("tc_profile", "tools/ontology/profile_shapes.py"
+                          ).agreement(repo)
+    records = builder.term_records(sources, merged, known, agreement)
     headers = {s["key"]: builder.ontology_header(s["graph"], s["path"])
                for s in sources}
     modules = validator.module_findings(
@@ -201,7 +236,10 @@ def site(builder, validator, planted, layout):
             authored.add(triple)
     return {"records": {r["iri"]: r for r in records}, "headers": headers,
             "modules": modules, "table": table,
-            "schemes": builder.scheme_trees(authored, known)}
+            "schemes": builder.scheme_trees(authored, known),
+            "annotations": [{"property": e["property"], "label": e["label"]}
+                            for e in agreement
+                            if e["property"] == COMMENT]}
 
 
 def found_on(findings, focus):
@@ -295,7 +333,8 @@ def test_what_the_validator_finds_the_site_marks(site, ladder, project):
     for finding in findings:
         messages = list(message_of(finding, record))
         if finding["where"] in CONTRACT_RUNGS or any(
-                CONTRACT_REALIST in m for m in messages):
+                CONTRACT_REALIST in m or COMMENT_SAYS in m
+                for m in messages):
             contract.append(finding)
     assert len(contract) >= len(TERM_CASES) + len(MODULE_CASES)
     module_foci = {m["focus"] for m in site["modules"]}
@@ -428,3 +467,309 @@ def test_the_explorer_shows_variants_notes_and_accepted_findings(repo):
                   "record.accepted.forEach", "record.declared_in.join"):
         assert field in script, field
 
+
+# ------------------------------------------- P-A5: comments (decision 47)
+
+
+def comment_of(record):
+    return (record.get("annotations") or {}).get(COMMENT)
+
+
+def comment_notes(record):
+    return [n for n in record["notes"] if n.get("property") == COMMENT]
+
+
+def test_one_comment_is_published_once(site, project):
+    """One comment is the text, with no variants: the index carries it
+    once (decision 47's third safeguard), and nothing is noted."""
+    record = site["records"][project.namespace() + "Commented"]
+    assert comment_of(record) == {"text": "A note on it.", "variants": []}
+    assert record["notes"] == []
+
+
+def test_a_term_with_no_comment_carries_nothing(site, project):
+    """A comment is not required: no field, no note, no finding."""
+    record = site["records"][project.namespace() + "WellFormed"]
+    assert "annotations" not in record
+    assert record["notes"] == []
+
+
+def test_english_and_untagged_comments_are_both_listed(site, ladder,
+                                                       project):
+    """Two languages are not a conflict: the English is the text, both are
+    listed with their languages, and neither the site nor the validator
+    says anything."""
+    iri = project.namespace() + "CommentLanguages"
+    found = comment_of(site["records"][iri])
+    assert found["text"] == "An English note."
+    assert sorted((v["value"], v["lang"]) for v in found["variants"]) == [
+        ("An English note.", "en"), ("An untagged note.", "")]
+    assert comment_notes(site["records"][iri]) == []
+    record, findings = ladder
+    assert not [m for f in found_on(findings, iri)
+                for m in message_of(f, record) if COMMENT_SAYS in m]
+
+
+def test_a_comment_differing_across_modules_is_listed_by_module(site,
+                                                                project):
+    """Both comments, each with its module, both in the text, and a note
+    scoped to the modules; and the term is on the status page."""
+    record = site["records"][project.namespace() + "CommentDrift"]
+    found = comment_of(record)
+    assert [(v["value"], v["modules"]) for v in found["variants"]] == [
+        ("As module A notes it.", ["m_a"]), ("As module B notes it.", ["m_b"])]
+    assert all(v["value"] in found["text"] for v in found["variants"])
+    [note] = comment_notes(record)
+    assert (note["kind"], note["scope"], note["lang"]) == (
+        "conflict", "modules", "")
+    assert "from m_a, m_b" in note["text"]
+    assert record["id"] in site["table"]
+
+
+def test_two_comments_in_one_module_are_told_apart(site, project):
+    """Decision 47's first safeguard: several comments asserted in one
+    module are listed and noted, as the validator reports them, and the
+    note says they are in one module, not that the modules differ."""
+    record = site["records"][project.namespace() + "TwoComments"]
+    [note] = comment_notes(record)
+    assert (note["scope"], note["lang"]) == ("module", "en")
+    assert "all asserted in m_a" in note["text"]
+    assert "from" not in note["text"]
+    assert len(comment_of(record)["variants"]) == 2
+    assert record["id"] in site["table"]
+
+
+def test_a_module_asserting_several_among_drifted_ones_is_named(site,
+                                                                project):
+    """Two comments in m_a and a third in m_b: across modules, and the
+    note says m_a asserts two of them itself."""
+    record = site["records"][project.namespace() + "MixedComments"]
+    [note] = comment_notes(record)
+    assert note["scope"] == "modules"
+    assert "from m_a, m_b; of them, m_a asserts 2 itself" in note["text"]
+
+
+def test_a_comment_that_is_not_a_literal_is_listed_not_judged(site, ladder,
+                                                              project):
+    """The agreement shape filters a value that is not a literal, so the
+    site lists it, marked, and notes nothing: it decides nothing the
+    validator does not."""
+    iri = project.namespace() + "IriComment"
+    found = comment_of(site["records"][iri])
+    [variant] = found["variants"]
+    assert variant["literal"] is False
+    assert site["records"][iri]["notes"] == []
+    record, findings = ladder
+    assert not [m for f in found_on(findings, iri)
+                for m in message_of(f, record) if COMMENT_SAYS in m]
+
+
+def test_comment_markup_is_kept_as_text(site, project):
+    """The index holds the comment as written; the explorer renders it
+    through textContent (test_site's innerHTML scan, and the Node run
+    below), so a tag in a comment is shown, not run."""
+    record = site["records"][project.namespace() + "TwoComments"]
+    assert "<b>First</b> note." in [v["value"] for v in
+                                    comment_of(record)["variants"]]
+
+
+def test_every_comment_finding_is_noted_and_every_note_found(site, ladder,
+                                                             project):
+    """Both directions, for the comment: each term the agreement shape
+    reports carries the site's note, and each term the site notes is one
+    the shape reports. The site shows what the validator found."""
+    record, findings = ladder
+    found = {f["focus"] for f in findings
+             if any(COMMENT_SAYS in m for m in message_of(f, record))}
+    noted = {iri for iri, r in site["records"].items() if comment_notes(r)}
+    ns = project.namespace()
+    assert found == noted == {ns + "CommentDrift", ns + "TwoComments",
+                              ns + "MixedComments"}
+
+
+def test_a_property_a_project_adds_is_published_under_its_label(builder):
+    """Decision 47, 2: every agree_across_modules property other than the
+    label and definition. A project's skos:scopeNote is published under
+    the label its profile entry gives, and the label and definition are
+    not repeated as annotations."""
+    import rdflib
+
+    graph = rdflib.Graph()
+    graph.parse(data="""
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+<urn:x:T> skos:scopeNote "Where it applies."@en, "Elsewhere."@en ;
+    rdfs:label "T" ; skos:definition "A thing." .
+""", format="turtle")
+    agreement = [
+        {"property": builder.RDFS + "label", "label": "rdfs:label"},
+        {"property": builder.SKOS + "definition", "label": "skos:definition"},
+        {"property": builder.SKOS + "scopeNote", "label": "scope note"}]
+    notes = []
+    found = builder.annotation_texts([("m", graph)], rdflib.URIRef("urn:x:T"),
+                                     agreement, notes, True)
+    assert list(found) == [builder.SKOS + "scopeNote"]
+    [note] = notes
+    assert note["about"] == "scope note"
+    assert note["property"] == builder.SKOS + "scopeNote"
+    assert note["scope"] == "module"
+
+
+def test_the_index_declares_the_profiles_properties(builder, repo):
+    """The index's `annotations` are the profile's agreement properties
+    other than the label and definition, in its order, as the build reads
+    them; check_site holds every record to that list."""
+    profile = load_tool("tc_profile2", "tools/ontology/profile_shapes.py")
+    data = {"agreement": profile.agreement(repo)}
+    wanted = [{"property": e["property"], "label": e["label"]}
+              for e in data["agreement"]
+              if e["property"] not in (builder.RDFS + "label",
+                                       builder.SKOS + "definition")]
+    assert wanted == [{"property": COMMENT, "label": "rdfs:comment"}]
+    source = (repo / "tools/site/build_site.py").read_text(encoding="utf-8")
+    assert '"annotations": [{"property": e["property"], "label": e["label"]}' \
+        in source
+
+
+def test_an_upstream_terms_comments_are_listed_not_judged(builder):
+    """The agreement shape runs on authored terms only, so an upstream
+    term's differing comments are listed with their modules and noted by
+    nothing."""
+    import rdflib
+
+    graph = rdflib.Graph()
+    graph.parse(data="""
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+<urn:x:U> rdfs:comment "One."@en, "Two."@en .
+""", format="turtle")
+    notes = []
+    found = builder.annotation_texts(
+        [("upstream", graph)], rdflib.URIRef("urn:x:U"),
+        [{"property": COMMENT, "label": "rdfs:comment"}], notes, False)
+    assert len(found[COMMENT]["variants"]) == 2
+    assert found[COMMENT]["text"] == "One. / Two."
+    assert notes == []
+
+
+def test_the_checker_refuses_a_concealed_comment(site, project, tmp_path):
+    """check_site holds each annotation to the label's rules: a drifted
+    comment shown as one of its values, or with no note, fails; so does an
+    annotation the index does not declare, and a variant list that is the
+    one value repeated."""
+    import copy
+
+    checker = load_tool("tc_check_site_pa5", "tools/site/check_site.py")
+    declared = site["annotations"]
+    drifted = site["records"][project.namespace() + "CommentDrift"]
+    single = site["records"][project.namespace() + "Commented"]
+    out, _ = concealing_site(tmp_path, None, site["table"])
+    assert checker.check_nothing_concealed(out, [drifted, single],
+                                           declared) == []
+
+    picked = copy.deepcopy(drifted)
+    picked["annotations"][COMMENT]["text"] = "As module A notes it."
+    unnoted = copy.deepcopy(drifted)
+    unnoted["notes"] = [n for n in unnoted["notes"]
+                        if n.get("property") != COMMENT]
+    repeated = copy.deepcopy(single)
+    repeated["annotations"][COMMENT]["variants"] = [
+        {"value": "A note on it.", "lang": "", "literal": True,
+         "modules": ["m_a"]}]
+    for damaged, says, against in (
+            (picked, "not all of them", declared),
+            (unnoted, "no note says so", declared),
+            (repeated, "lists its one", declared),
+            (drifted, "does not declare", [])):
+        problems = checker.check_nothing_concealed(out, [damaged], against)
+        assert [p for p in problems if says in p], (says, problems)
+
+
+def test_search_does_not_read_annotations(repo):
+    """Decision 47, 4: the ranking reads no annotation."""
+    ranking = (repo / "site/src/assets/js/ranking.js").read_text(
+        encoding="utf-8")
+    assert "annotations" not in ranking
+
+
+EXPLORER_HARNESS = r"""
+const fs = require("fs");
+function node(tag) {
+  return {tag: tag, children: [], className: "", hidden: false, _text: "",
+    attrs: {},
+    appendChild(c) { this.children.push(c); return c; },
+    setAttribute(k, v) { this.attrs[k] = v; },
+    addEventListener() {}, focus() {},
+    set textContent(v) { this._text = String(v); this.children = []; },
+    get textContent() { return this._text; }};
+}
+const ids = {};
+globalThis.document = {
+  createElement: node,
+  getElementById(id) { return ids[id] || (ids[id] = node("div")); },
+  addEventListener() {}};
+globalThis.window = {addEventListener() {}, location: {search: ""}};
+let source = fs.readFileSync(process.argv[2], "utf8");
+const hooked = source.replace(/\}\(\)\);\s*$/,
+  "globalThis.__x = {renderDetail: renderDetail, state: state};\n}());");
+if (hooked === source) { throw new Error("explorer.js did not end as expected"); }
+eval(hooked);
+const index = JSON.parse(fs.readFileSync(process.argv[3], "utf8"));
+globalThis.__x.state.index = index;
+function dump(n, depth) {
+  let out = "  ".repeat(depth) + n.tag + (n.className ? "." + n.className : "")
+    + (n._text ? " " + JSON.stringify(n._text) : "") + "\n";
+  n.children.forEach(c => { out += dump(c, depth + 1); });
+  return out;
+}
+const out = {};
+index.classes.forEach(r => {
+  globalThis.__x.renderDetail(r);
+  out[r.id] = dump(ids["detail-body"], 0);
+});
+console.log(JSON.stringify(out));
+"""
+
+
+def test_the_explorer_renders_comments_after_the_definition(site, repo,
+                                                           tmp_path):
+    """The shipped explorer, run by Node on the planted records: a comment
+    follows the definition under its profile label; a drifted comment is a
+    list of every value with its module, and the definition is still shown,
+    since a comment's note says nothing about it; markup stays text.
+    Skipped where Node is not installed; the Checks workflow has it."""
+    import shutil
+    import subprocess
+
+    node = shutil.which("node")
+    if node is None:
+        pytest.skip("node is not installed")
+    records = [dict(r, accepted=[]) for r in site["records"].values()]
+    index = {"classes": records, "annotations": site["annotations"]}
+    (tmp_path / "index.json").write_bytes(json.dumps(index).encode())
+    (tmp_path / "run.js").write_bytes(EXPLORER_HARNESS.encode())
+    result = subprocess.run(
+        [node, str(tmp_path / "run.js"),
+         str(repo / "site/src/assets/js/explorer.js"),
+         str(tmp_path / "index.json")], capture_output=True)
+    assert result.returncode == 0, result.stderr.decode("utf-8", "replace")
+    shown = json.loads(result.stdout.decode("utf-8"))
+    by_name = {r["iri"].rsplit("#", 1)[-1].rsplit("/", 1)[-1]: shown[r["id"]]
+               for r in records}
+
+    one = by_name["Commented"]
+    assert one.index('"A process with one comment."') < one.index(
+        '"rdfs:comment"') < one.index('"A note on it."')
+
+    drift = by_name["CommentDrift"]
+    assert '"A process whose comment differs between modules."' in drift
+    assert "Every definition, by module" not in drift
+    assert '"As module A notes it."' in drift
+    assert '"As module B notes it."' in drift
+    assert "in m_a" in drift and "in m_b" in drift
+    assert "differ between modules" in drift
+
+    two = by_name["TwoComments"]
+    assert '"<b>First</b> note."' in two
+    assert "Asserted together in one module" in two
+
+    assert '"rdfs:comment"' not in by_name["WellFormed"]

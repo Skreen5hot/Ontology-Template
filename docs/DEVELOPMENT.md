@@ -365,7 +365,9 @@ per language, across every module: by default `rdfs:label`, `skos:definition` an
 `rdfs:comment`. A module that inlines another's term carries a copy of its text, and the
 copies drift; each difference is a finding, by identity. Label and definition must stay on
 the list as violations — the wellformedness shapes check them as the term contract — and
-each other entry gets its own generated constraint, with its own severity.
+each other entry gets its own generated constraint, with its own severity. The site's
+explorer publishes each other entry a term carries after its definition, under the entry's
+`label`, so a property added here is both checked and shown.
 
 ## Third-party text inside a module
 
@@ -948,7 +950,7 @@ disk will not run the explorer's scripts: `python -m http.server -d _site 8000`.
 | Page | Read from |
 |---|---|
 | Home, Status | the project file, the term counts, the findings register, the lint and competency results, `docs/decisions/`, the latest `v*` tag |
-| Explore | every authored term and every upstream term, as `data/terms.json`; category from the `rdfs:subClassOf` chain, never a name |
+| Explore | every authored term and every upstream term, as `data/terms.json`; category from the `rdfs:subClassOf` chain, never a name; after the definition, each other property `agree_across_modules` lists, `rdfs:comment` by default. Search reads none of them |
 | Modules, Downloads | the modules, the shape sets, the pins and the extracts, with checksums; a byte-reproducible bundle of the authored files |
 | Vocabulary | each authored `skos:ConceptScheme`, as a tree |
 | Competency | each question, its query, and its verdict at this commit |
@@ -965,10 +967,15 @@ no definition, two labels in one language, text that differs between modules, a 
 is an IRI, two unrelated BFO categories, a module with no header or two: each is a finding
 `validate.py --gate` fails on, and one the register can accept -- so a site that refused it
 would fail at deploy on an ontology every check passed. The term is published as it is:
-every variant of its label and definition with the modules each comes from, the finding
-noted on the term and listed on the status page, and the register's accepted findings about
+every variant of its label, its definition and each other `agree_across_modules` property
+(a comment by default) with the modules each comes from, the finding noted on the term and
+listed on the status page, and the register's accepted findings about
 it shown with their reasons. Nothing is chosen between variants. `tests/test_term_contract.py`
 puts one planted corpus through the site and the validator and requires them to agree.
+A note says whether the values differ across modules or are asserted together in one; the
+site notes only what the validator reports, so a comment that is not a literal, which the
+agreement shape does not judge, is listed and not noted, and an upstream term's comments
+are listed and not judged.
 
 **What the build refuses** is its own inputs: a placeholder nothing fills; a page fragment
 no navigation entry names; an asset that is not `.css` or `.js`; a vendored file no pin

@@ -28,7 +28,12 @@ What it refuses, and why each one:
     reader the site is for cannot follow one;
   * a download whose bytes do not match the manifest's SHA-256, a bundle
     whose SHA256SUMS disagrees with its own members, or a term index whose
-    counts disagree with its records.
+    counts disagree with its records;
+  * a term published with one of its differing values, or without the
+    note that says they differ -- for its label, its definition, and each
+    property of the annotation profile's agreement list the index carries;
+    an annotation the index does not declare; or a variant list that is
+    the one value repeated.
 
 Carried in spirit from BFO-Aligned ValueNet's check_site.py; rewritten
 for this site's pages and data.
@@ -257,15 +262,20 @@ def check_data(site: Path) -> list[str]:
     if counted != terms["counts"]:
         problems.append("the term index counts %s and holds %s"
                         % (terms["counts"], counted))
-    problems.extend(check_nothing_concealed(site, records))
+    problems.extend(check_nothing_concealed(
+        site, records, terms.get("annotations") or []))
     return problems
 
 
-def check_nothing_concealed(site: Path, records: list) -> list[str]:
+def check_nothing_concealed(site: Path, records: list,
+                            annotations: list | None = None) -> list[str]:
     """A term whose text differs within a language is published with
     every variant and a note, never as one of them; and every noted term
     is on the status page, so the explorer is not the only place it is
-    said (BPO evaluation, T7)."""
+    said (BPO evaluation, T7). `annotations` are the index's declared
+    agreement properties beyond the label and definition (decision 47):
+    each a term carries is held to the same, the note required where the
+    agreement shape runs, on an authored term."""
     problems = []
     status = (site / "status/index.html").read_text(encoding="utf-8") \
         if (site / "status/index.html").is_file() else ""
@@ -286,6 +296,36 @@ def check_nothing_concealed(site: Path, records: list) -> list[str]:
                                     % (record["id"], len(same), what))
                 shown = record[field]
                 if lang == shown_lang and not all(v in shown for v in same):
+                    problems.append("%s is published with one of its %d "
+                                    "%s values, not all of them"
+                                    % (record["id"], len(same), what))
+        declared = {a["property"]: a["label"] for a in annotations or []}
+        for iri, found in sorted((record.get("annotations") or {}).items()):
+            if iri not in declared:
+                problems.append("%s carries %s, which the index does not "
+                                "declare" % (record["id"], iri))
+                continue
+            what = declared[iri]
+            if len(found["variants"]) == 1 and found["variants"][0][
+                    "literal"]:
+                problems.append("%s lists its one %s value as a variant"
+                                % (record["id"], what))
+            variants = [v for v in found["variants"] if v["literal"]]
+            shown_lang = "en" if [v for v in variants
+                                  if v["lang"] == "en"] else ""
+            for lang in sorted({v["lang"] for v in variants}):
+                same = [v["value"] for v in variants if v["lang"] == lang]
+                if len(same) < 2:
+                    continue
+                if record["origin"] == "authored" and not [
+                        n for n in record["notes"]
+                        if n["kind"] == "conflict"
+                        and n.get("property") == iri and n["lang"] == lang]:
+                    problems.append("%s has %d %s values in one language "
+                                    "and no note says so"
+                                    % (record["id"], len(same), what))
+                if lang == shown_lang and not all(v in found["text"]
+                                                  for v in same):
                     problems.append("%s is published with one of its %d "
                                     "%s values, not all of them"
                                     % (record["id"], len(same), what))

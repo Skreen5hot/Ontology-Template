@@ -276,26 +276,85 @@ def published_text(variants: list[dict], what: str, required: bool,
             notes.append({"kind": "not-literal", "about": what,
                           "text": "Its %s is not a literal: %s"
                           % (what, variant["value"])})
-    literal = [v for v in variants if v["literal"]]
-    for lang in sorted({v["lang"] for v in literal}):
-        same = [v for v in literal if v["lang"] == lang]
-        if len(same) > 1:
-            notes.append({"kind": "conflict", "about": what, "lang": lang,
-                          "text": "%d different %s values %s, from %s" % (
-                              len(same), what,
-                              "tagged " + lang if lang else "untagged",
-                              ", ".join(sorted({m for v in same
-                                                for m in v["modules"]})))})
-    for lang in ("en", ""):
-        same = [v["value"] for v in literal if v["lang"] == lang]
-        if same:
-            return " / ".join(same)
+    conflict_notes(variants, what, notes)
     if variants:
-        return " / ".join(v["value"] for v in (literal or variants))
+        return shown_text(variants)
     if required:
         notes.append({"kind": "missing", "about": what,
                       "text": "No %s is asserted." % what})
     return ""
+
+
+def shown_text(variants: list[dict]) -> str:
+    """The English values, else the untagged ones, else every value:
+    joined, never one chosen."""
+    literal = [v for v in variants if v["literal"]]
+    for lang in ("en", ""):
+        same = [v["value"] for v in literal if v["lang"] == lang]
+        if same:
+            return " / ".join(same)
+    return " / ".join(v["value"] for v in (literal or variants))
+
+
+def conflict_notes(variants: list[dict], what: str, notes: list,
+                   **extra) -> None:
+    """A note for each language with more than one literal value: the
+    agreement shapes' finding. `scope` tells apart two cases the
+    validator's message words alike: values that differ across modules
+    (`modules`), and several asserted in one module (`module`). Where they
+    differ across modules and a module also asserts several itself, the
+    text says which, and how many (decision 47)."""
+    literal = [v for v in variants if v["literal"]]
+    for lang in sorted({v["lang"] for v in literal}):
+        same = [v for v in literal if v["lang"] == lang]
+        if len(same) < 2:
+            continue
+        modules = sorted({m for v in same for m in v["modules"]})
+        tagged = "tagged " + lang if lang else "untagged"
+        if len(modules) == 1:
+            scope = "module"
+            text = "%d different %s values %s, all asserted in %s" % (
+                len(same), what, tagged, modules[0])
+        else:
+            scope = "modules"
+            text = "%d different %s values %s, from %s" % (
+                len(same), what, tagged, ", ".join(modules))
+            own = ["%s asserts %d" % (m, n) for m in modules
+                   for n in [sum(1 for v in same if m in v["modules"])]
+                   if n > 1]
+            if own:
+                text += "; of them, %s itself" % ", ".join(own)
+        notes.append(dict({"kind": "conflict", "about": what, "lang": lang,
+                           "scope": scope, "text": text}, **extra))
+
+
+def annotation_texts(graphs, subject, agreement: list, notes: list,
+                     judged: bool) -> dict:
+    """The term's values of each `agree_across_modules` property other
+    than the label and definition, which have their own places (decision
+    47): the text, and every variant where there is more than one value or
+    one is not a literal. Only what the term has; a term with none of them
+    gets nothing.
+
+    The notes are the agreement shape's, made only where it runs: on an
+    authored term (`judged`), for two literal values in one language. The
+    shape filters out a value that is not a literal, so the site lists one
+    as a variant and notes nothing; an upstream term's values are listed
+    and not judged. The site shows what the validator finds, and decides
+    nothing more."""
+    found = {}
+    for entry in agreement:
+        iri = entry["property"]
+        if iri in (RDFS + "label", SKOS + "definition"):
+            continue
+        variants = text_variants(graphs, subject, iri)
+        if not variants:
+            continue
+        if judged:
+            conflict_notes(variants, entry["label"], notes, property=iri)
+        found[iri] = {"text": shown_text(variants),
+                      "variants": several(variants)}
+    return found
 
 
 def prefixes() -> list[tuple[str, str]]:
@@ -349,11 +408,13 @@ def several(variants: list[dict]) -> list[dict]:
 
 
 def term_records(sources: list[dict], merged,
-                 known: list[tuple[str, str]]) -> list[dict]:
+                 known: list[tuple[str, str]],
+                 agreement: list | None = None) -> list[dict]:
     """One record per term, authored and upstream, with every variant of
     its label and definition and the module each comes from. An authored
     term's text is read from every authored module, not only the one
-    declaring it: an inlined copy elsewhere is the same IRI, and its text
+    declaring it, and so are the other properties `agreement` (the
+    annotation profile's `agree_across_modules`) lists: an inlined copy elsewhere is the same IRI, and its text
     is what a reader of that module sees. `notes` are what the site found
     wrong; the validator finds the same (tests/test_term_contract.py)."""
     import rdflib
@@ -399,9 +460,11 @@ def term_records(sources: list[dict], merged,
         label = published_text(labels, "rdfs:label", True, notes)
         definition = published_text(definitions, "skos:definition",
                                     authored, notes)
+        annotations = annotation_texts(graphs, subject, agreement or [],
+                                       notes, authored)
         parent_predicate = (RDFS + "subClassOf" if kind == "class"
                             else RDFS + "subPropertyOf")
-        records.append({
+        record = {
             "id": short_id(iri, known),
             "iri": iri,
             "label": label or short_id(iri, known),
@@ -423,7 +486,10 @@ def term_records(sources: list[dict], merged,
                 str(o) for _key, graph in graphs
                 for o in graph.objects(subject,
                                        rdflib.URIRef(SKOS + "altLabel"))}),
-        })
+        }
+        if annotations:
+            record["annotations"] = annotations
+        records.append(record)
     records.sort(key=lambda r: (r["label"].lower(), r["iri"]))
     return records
 
@@ -748,8 +814,13 @@ def gather() -> dict:
     module_findings = validator.module_findings(
         [(s["file"], s["graph"]) for s in authored], _root)
     entries = register.load()
+    # The annotation profile's agreement list, as the validator reads it,
+    # so the explorer publishes what the agreement shapes check.
+    agreement = load_tool("site_profile",
+                          "tools/ontology/profile_shapes.py").agreement(_root)
     records = term_records(authored + [u for u in upstream
-                                       if not u["derived"]], merged, known)
+                                       if not u["derived"]], merged, known,
+                           agreement)
     attach_accepted(records, entries)
 
     tags = [t for t in git("tag", "--merged", "HEAD", "--list", "v*")
@@ -770,6 +841,7 @@ def gather() -> dict:
         "merged": merged,
         "authored_graph": authored_graph,
         "records": records,
+        "agreement": agreement,
         "module_findings": module_findings,
         "spec_path": specs[0] if specs else None,
         "reviews": reviews,
@@ -1076,6 +1148,10 @@ def build(out: Path) -> list[tuple[str, str]]:
         "counts": {"authored": len(authored_terms),
                    "upstream": len(upstream_terms)},
         "classes": data["records"],
+        "annotations": [{"property": e["property"], "label": e["label"]}
+                        for e in data["agreement"]
+                        if e["property"] not in (RDFS + "label",
+                                                 SKOS + "definition")],
         "note": "`classes` holds every term, properties included; the name "
                 "is the explorer's. Upstream terms are vendored, not "
                 "authored here; `origin` says which.",

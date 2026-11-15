@@ -654,3 +654,85 @@ def test_the_checker_notices_a_tampered_specification(checker,
     path.write_bytes(path.read_bytes() + b"\ntampered\n")
     problems = checker.check(target)
     assert any("%s does not match" % name in p for p in problems), problems
+
+
+# ------------------------------------------- P-A5: comments (decision 47)
+
+COMMENTED_MODULE = """@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix : <{ns}> .
+<{ns}commented-module> a owl:Ontology ; dcterms:title "Commented" .
+:CommentedOne a owl:Class ; rdfs:label "Commented one" ;
+    skos:definition "A process with a comment." ;
+    rdfs:comment "Its first note."@en, "Its second note."@en ;
+    rdfs:subClassOf obo:BFO_0000015 .
+"""
+
+
+@pytest.fixture(scope="module")
+def built_with_a_comment(builder, project, tmp_path_factory):
+    """A build whose ontology has a term with two English comments: the
+    template's own has none, so only a planted module shows the build
+    reads the profile and publishes what it lists."""
+    folder = tmp_path_factory.mktemp("commented")
+    module = folder / "commented.ttl"
+    module.write_bytes(COMMENTED_MODULE.replace("{ns}", project.namespace())
+                       .encode("utf-8"))
+    real = builder.layout.ontology_files
+    mp = pytest.MonkeyPatch()
+    mp.setattr(builder.layout, "ontology_files", lambda: real() + [module])
+    # Outside the repository, so it is named by its file name.
+    real_relative = builder.relative
+    mp.setattr(builder, "relative", lambda path: path.name
+               if path == module else real_relative(path))
+    try:
+        out = tmp_path_factory.mktemp("site-commented") / "_site"
+        builder.build(out)
+    finally:
+        mp.undo()
+    return out
+
+
+def test_the_build_publishes_a_terms_comments(built_with_a_comment, checker,
+                                              project):
+    """Through build(): the index declares the profile's comment, the term
+    carries both its comments, noted as asserted in one module, and the
+    status page lists it; check() passes the artifact."""
+    out = built_with_a_comment
+    index = json.loads((out / "data/terms.json").read_text(encoding="utf-8"))
+    comment = "http://www.w3.org/2000/01/rdf-schema#comment"
+    assert index["annotations"] == [{"property": comment,
+                                     "label": "rdfs:comment"}]
+    [record] = [r for r in index["classes"]
+                if r["iri"] == project.namespace() + "CommentedOne"]
+    found = record["annotations"][comment]
+    assert sorted(v["value"] for v in found["variants"]) == [
+        "Its first note.", "Its second note."]
+    [note] = [n for n in record["notes"] if n.get("property") == comment]
+    assert note["scope"] == "module"
+    status = (out / "status/index.html").read_text(encoding="utf-8")
+    assert record["id"] in status
+    assert checker.check(out) == []
+
+
+def test_the_checker_reads_the_index_annotations(checker, copy):
+    """Through check(), on a real artifact: a term given two English
+    comments with no note, and one shown as the text, is refused."""
+    path = copy / "data/terms.json"
+    index = json.loads(path.read_text(encoding="utf-8"))
+    comment = "http://www.w3.org/2000/01/rdf-schema#comment"
+    # The template authors no term; an upstream record stands in, made
+    # authored so the agreement note is required of it.
+    record = index["classes"][0]
+    record["origin"] = "authored"
+    record["annotations"] = {comment: {"text": "one", "variants": [
+        {"value": "one", "lang": "en", "literal": True, "modules": ["a"]},
+        {"value": "two", "lang": "en", "literal": True, "modules": ["b"]}]}}
+    path.write_bytes(json.dumps(index).encode("utf-8"))
+    problems = checker.check(copy)
+    assert [p for p in problems if "rdfs:comment values in one language "
+            "and no note" in p], problems
+    assert [p for p in problems if "not all of them" in p], problems
