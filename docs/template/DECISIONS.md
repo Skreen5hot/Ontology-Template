@@ -974,3 +974,32 @@ Its heading carries no number; it is entered as 51. Effect:
   to v0.11.0.
 - Next: P-A8's design, then P-A4's, each scoped separately; no completed WP6 finding
   reopened.
+
+**52. "Architectural Decision — P-A8 Approved"** (2026-11-15)
+
+In answer to the five questions of `evaluations/2026-11-15-pa8-design.md` section 7. The
+whole text is recorded verbatim in
+[`evaluations/2026-11-15-pa8-disposition.md`](evaluations/2026-11-15-pa8-disposition.md)
+(SHA-256 of the text below its rule `2adac7b0a7ea4f7d65969737530ad7bba2a623bf33b3cf7caef11c5a85b2262c`).
+Its heading carries no number; it is entered as 52. Effect:
+
+- v0.11.0's completion and decision 51 are accepted; P-A6 stays closed. `c9d6855` and
+  `5899018` are pushed.
+- **The notice** is approved: one per applicable third-party text declaration, in the
+  footer of every built page, directly after the licence sentence, exactly once per page.
+  The attribution is kept word for word and rendered as text. With no applicable
+  declaration the footer is unchanged.
+- **The declared licence is not shown.** The notice gives the source, the release and the
+  attribution, and implies nothing about the text's licensing status. It is a statement of
+  provenance, not a legal authorization.
+- **The footer is checked.** `check_site.py` verifies that every page carries the required
+  notices. This is the architect's explicit extension of decision 33, 4 ("checked on the
+  module header only"): the attribution is now checked on the module header and on the
+  site footer. The expected notices are verified against the declarations and the
+  published modules.
+- **The release bundle**'s provenance is a backlog item of its own, not built in P-A8.
+- Unchanged: the validator, the rights review, the licensing disposition, the ontology, the
+  explorer and search.
+- **Release:** P-A8 alone as v0.12.0, with negative and mutation tests, the full suite,
+  compatibility checks and the release checklist. Then P-A4, designed separately; no
+  completed WP6 finding reopened.
