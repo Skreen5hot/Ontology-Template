@@ -925,3 +925,28 @@ Its heading carries no number; it is entered as 49. Effect:
 - Next: P-A6's design, identifying the gap, the correction, the validation evidence, the
   implementation boundaries and the decisions required; not expanded into unrelated
   improvements, and no settled WP6 decision reopened.
+
+**50. "Architectural Decision — P-A6 Approved"** (2026-11-15)
+
+In answer to the four questions of `evaluations/2026-11-15-pa6-design.md` section 7. The
+whole text is recorded verbatim in
+[`evaluations/2026-11-15-pa6-disposition.md`](evaluations/2026-11-15-pa6-disposition.md)
+(SHA-256 of the text below its rule `e4c266368dc303edc0cec7c0c8da32f2fc9893c1f96eb41fda2e04402bd67e46`).
+Its heading carries no number; it is entered as 50. Effect:
+
+- **Selection** is approved: `--rule`, `--where`, `--focus` and `--focus-file` on both
+  checks' `--propose`, alternatives within one, all holding across them. A value that
+  matches nothing, and a selection left empty, are errors. With none given, the behaviour
+  is unchanged; a finding left out stays new and still counts at the gate.
+- **A classification given by a person** once for a selected group is approved with
+  safeguards: all four fields; nothing inferred, the reviewer included; the fields, the
+  reviewer's capacity and the register's rules checked before any completed entry is
+  produced; the number of findings given the judgement reported. It records a person's
+  judgement; it does not classify, and decision 32 stays in force. `origin: upstream` is
+  excluded, and no other required reference or review date is bypassed.
+- **Exact-identity selection** (`--select FILE`) is deferred. The guide says that a term
+  list cannot tell apart findings sharing a rule, location and term; those are classified
+  one by one, as now.
+- **Release:** P-A6 alone as v0.11.0, with negative and mutation tests, the full suite,
+  compatibility checks and the release checklist; no BPO measurement. Then P-A8, then
+  P-A4, each designed separately. `2d7cc2c` and `254ff30` are pushed.
