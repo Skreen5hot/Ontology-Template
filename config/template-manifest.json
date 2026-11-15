@@ -145,7 +145,7 @@
     "prefix": "example",
     "title": "Example Ontology"
   },
-  "label": "unreleased",
+  "label": "v0.10.0",
   "note": "The digest of every template-owned and template-seeded file as the template shipped it, and the values init rewrites Turtle from (identity). A project keeps this as it arrived, with the block init adds (initialized): it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
   "seeded": {
     "config/annotation-profile.yaml": "22162f289468ef41edd97c3cd4c689215fc39177c5eba362a66da890440677dd",
@@ -170,6 +170,6 @@
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
   "seeded_digest": "a70856dc9d33c0b5b8b4557f9196e7d78aaa39a22059c4b71f244cb8fdc68a07",
-  "template_commit": "8f488533a7de024e845afd06d0fde4644dd847b6",
+  "template_commit": "90da970fd69c7a176601664f35def56a347b3dfd",
   "template_repository": "Skreen5hot/Ontology-Template"
 }
