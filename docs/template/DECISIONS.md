@@ -908,3 +908,20 @@ Its heading carries no number; it is entered as 48. Effect:
   it is; the published site's `data/terms.json` declares the `rdfs:comment` annotation.
   `ROADMAP.md`'s "Release v0.10.0" records it. No feature is added to v0.10.0.
 - Next: P-A6, scoped separately, and no completed WP6 finding reopened.
+
+**49. "Architectural Authorization — Decision 48 Closeout"** (2026-11-15)
+
+In answer to the report of `79f915b`, decision 48's record. The whole text is recorded
+verbatim in [`evaluations/2026-11-15-v0100-closeout.md`](evaluations/2026-11-15-v0100-closeout.md)
+(SHA-256 of the text below its rule `c6b967eb4328e2100c1d3be04ee3399d85d92b52614c69c78c1977f9dd4c9798`).
+Its heading carries no number; it is entered as 49. Effect:
+
+- v0.10.0 is accepted as released, and P-A5 is closed; the six-commit correction is
+  accepted. `79f915b` is pushed, with no full suite run for a commit that is documentation
+  only.
+- Two follow-ups stay open and block nothing: the explorer in a real browser, and whether
+  the 7 within-module comment findings are WP6's 7 false alarms. Neither reopens P-A5 or
+  WP6.
+- Next: P-A6's design, identifying the gap, the correction, the validation evidence, the
+  implementation boundaries and the decisions required; not expanded into unrelated
+  improvements, and no settled WP6 decision reopened.
