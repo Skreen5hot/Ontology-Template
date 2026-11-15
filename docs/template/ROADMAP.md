@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix; **v0.10.0** (2026-11-15, decisions 47 and 48), carrying P-A5. See "Release v0.1.0" to "Release v0.10.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix; **v0.10.0** (2026-11-15, decisions 47 and 48), carrying P-A5; **v0.11.0** (2026-11-15, decision 50), carrying P-A6. See "Release v0.1.0" to "Release v0.11.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -1288,6 +1288,108 @@ The rest of the checklist, with decision 32's three verifications:
   `756cdc19ebc9c405`). The published site's index declares the `rdfs:comment`
   annotation. The release is complete.
 
+### Release v0.11.0 (2026-11-15)
+
+The eleventh template release, made under `RELEASING.md`: P-A6 as decision 50 approved it,
+with its safeguards, and nothing else (decision 50, 4). P-A8, then P-A4, stay separate.
+
+**What changes for a project made from v0.10.0.**
+
+- `tools/ontology/validate.py --propose` and `tools/ontology/iri_lint.py --propose` take
+  `--rule`, `--where`, `--focus` and `--focus-file`, so a project can propose entries one
+  class of findings at a time:
+  - the values of one option are alternatives, and every option given must hold;
+  - a value matching no new finding is refused, and so is a selection left empty, with
+    exit 2;
+  - stderr counts the distinct findings selected and left out; the left-out ones stay new,
+    and the gate still fails on them.
+- They also take `--validity`, `--origin`, `--resolution` and `--classified-by`: one
+  person's judgement of every selected finding, typed once.
+  - It is given whole, with `--reason`, `--owner` and `--review`, and nothing has a default.
+  - The entries are checked by the register's own rules, at format version 2, before any is
+    printed; if one would be refused, none is.
+  - `origin: upstream` is refused, since each such entry names its own upstream term.
+  - stderr counts the entries given the judgement.
+- With none of the new options, `--propose` prints what it printed before, byte for byte.
+- `docs/DEVELOPMENT.md` says how, and that a term list cannot tell apart two findings
+  sharing a rule, a location and a term; those are classified one by one, as before.
+
+| What | Why | Tests |
+|---|---|---|
+| `2051078`: `select`, `judgement` and `proposal` in `tools/findings.py`, shared by both checks through `add_proposal_arguments` | P-A6 (decisions 23 and 50): `--propose` wrote one reason for every new finding of a check, and BPO's port disposed of its findings in 17 classes | `tests/test_findings.py` |
+
+**What it does not do.** No tool chooses a classification: a person types it once, and the
+tool copies it, as it copies `--reason` (decision 32 stands). Exact-identity selection,
+`--select FILE`, is deferred (decision 50, 3). It changes:
+- not what a check finds;
+- not a finding's identity or digest;
+- not the gate or decision 11's policy;
+- not the register's format, fields or rules;
+- not `findings.py --classify`;
+- not the other two `--propose` tools (`review.py` and `candidates.py`), which serve a
+  different register.
+
+No BPO measurement was made (decision 50, 4).
+
+Not in it, and still open: the rest of the backlog, below, in its order:
+- P-A8, then P-A4, each scoped separately (decision 50);
+- SDD's domain and range file;
+- items 8 to 11;
+- the follow-up P6 evaluation on BCO's first Stage 05 module (decision 42), which BCO was
+  asked to announce;
+- decision 49's two follow-ups: the explorer in a real browser, and whether v0.10.0's 7
+  within-module comment findings are WP6's 7 false alarms.
+
+Pins: item 1, every pin checked at `2051078` (2026-11-15). 29 pins, none failed; osv.dev
+scanned all 18 Python distributions, none has an advisory. The same five have a newer
+release as at v0.10.0, kept for the same reasons:
+- pip 26.3, Markdown 3.11.3 and uv 0.13.8 postdate the lock's cutoff, and a re-lock is a
+  change of its own;
+- CCO stays at `v2.0-2024-11-06` (decisions 3 and 18);
+- `actions/setup-java` v6.3.0: an action pin moves in a change of its own, and this release
+  carries one change only (decision 50, 4).
+
+The rest of the checklist, with decision 32's three verifications:
+
+- Item 2: the suite passes locally at `2051078`: 1070 passed before the manifest was
+  re-recorded in the same commit, then the two manifest tests (48 with their files). Every
+  check tool exits 0, and the site checks clean. CI green on the tagged commit, confirmed
+  before the tag is pushed.
+- Negative tests, on planted findings, through `proposal` and through both checks' command
+  lines:
+  - no option prints what it did before, byte for byte, stderr included;
+  - each option selects what it names; one repeated widens, two together narrow;
+  - the counts, distinct;
+  - a value matching nothing, one matching only entered findings, an empty selection, and
+    a focus file with a bad line, no IRI, bad bytes or no file, each refused;
+  - the selected entries accept exactly the selection, and a Warning left out still fails;
+  - three classes in turn fill the register, and the gate passes;
+  - placeholders kept without a classification;
+  - a classification given whole, with its reason, owner and review, recorded and counted;
+  - `origin: upstream` refused;
+  - the register's rules refused with its own messages, each named by its finding: accepted
+    without real, not-a-defect without false-alarm, unsure not deferred, unknown origin,
+    reported without a reference, a value not allowed, an undeclared capacity, a malformed
+    or placeholder reviewer, an impossible review date, and an upstream term's finding;
+  - a refusal on a blocked validator run says the run is incomplete.
+- Mutation tests: 30 of 31 caught. The one missed checks the rules at format version 1
+  instead of 2, which differ only in requiring all four fields, already refused before; it
+  is equivalent. One mutant went stale after a later edit, and was re-anchored and caught.
+- Compatibility: a project made at v0.10.0, upgraded by the P-A2 procedure to the template
+  at `2051078`:
+  - the plan's 5 files were all takes, with no layout entry added, changed or removed;
+  - 5 taken, adopted with nothing unresolved or retained, and a second plan found nothing;
+  - every check exits 0, `--against` reports nothing changed, and the suite passes (964).
+- Item 3: a project made as "Use this template" makes one:
+  - a fresh clone of `2051078` reduced to one commit;
+  - installed from the lock (`--bootstrap`, then pip, `pip check` clean);
+  - initialized with the network rebuild, and init committed (init exit 0; nothing left
+    unstaged);
+  - every check exits 0;
+  - `--against` the template reports every owned and seeded file as the template left it;
+  - and the suite passes (964).
+- Item 4: the manifest recorded with the label `v0.11.0` in its own commit.
+
 ### After WP6: the prioritized backlog (decision 29)
 
 From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
@@ -1309,7 +1411,8 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.8.0 | -- | **P6**, conceptual fidelity | approved with amendments (decisions 42 and 43); in v0.8.0, released (decision 44) |
 | v0.9.0 | -- | **P-A2**, upgrading a project to a new release | approved with four safeguards (decision 45); in v0.9.0, released (decision 46) |
 | v0.10.0 | -- | **P-A5**, the explorer shows a term's comments | approved with three safeguards (decision 47); in v0.10.0, released (decision 48) |
-| Next | -- | P-A6, P-A8 and P-A4 (decision 23), each scoped separately (decision 47); SDD's domain and range file (decision 28) | approved earlier |
+| v0.11.0 | -- | **P-A6**, `--propose` class by class | approved with safeguards (decision 50); in v0.11.0 |
+| Next | -- | P-A8, then P-A4 (decision 23), each scoped separately (decision 50); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
 | Lower | 9 | Declared third-party label text exempt from the qualifier check; several comments in one module where a project says so | approved, controlled |
