@@ -890,3 +890,21 @@ Its heading carries no number; it is entered as 47. Effect:
 - P-A5 changes no ontology axiom, validator semantics, search ranking or third-party
   source content. No further design round unless implementation finds a material
   conflict. After v0.10.0: P-A6, P-A8 and P-A4, each scoped separately.
+
+**48. "Architectural Decision — P-A5 v0.10.0 Release Approved"** (2026-11-15)
+
+In answer to the v0.10.0 readiness report. The whole text is recorded verbatim in
+[`evaluations/2026-11-15-v0100-release-disposition.md`](evaluations/2026-11-15-v0100-release-disposition.md)
+(SHA-256 of the text below its rule `0f95bbe09009c7ad07cad64e7b439935f577524ab1193d1ca3943be49b367eb5`).
+Its heading carries no number; it is entered as 48. Effect:
+
+- P-A5 is accepted for v0.10.0, with the BPO measurement (the 53 terms noted, and the index's
+  43% growth). The seven within-module findings need no review before release; whether they
+  are WP6's seven false alarms may be checked separately. Running the shipped explorer
+  under Node, not a browser, is an accepted testing limitation for v0.10.0.
+- `612f982` to `fa26693` (six commits; the report's "seven" was a miscount) pushed to
+  `main`; Checks, Reasoning, Pages, Install and Scale green on `fa26693`; `v0.10.0` tagged
+  on it and pushed, its Release run passed with the release job skipped, as in the template
+  it is; the published site's `data/terms.json` declares the `rdfs:comment` annotation.
+  `ROADMAP.md`'s "Release v0.10.0" records it. No feature is added to v0.10.0.
+- Next: P-A6, scoped separately, and no completed WP6 finding reopened.

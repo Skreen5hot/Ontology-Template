@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix; **v0.10.0** (2026-11-15, decision 47), carrying P-A5. See "Release v0.1.0" to "Release v0.10.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix; **v0.10.0** (2026-11-15, decisions 47 and 48), carrying P-A5. See "Release v0.1.0" to "Release v0.10.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -1280,6 +1280,13 @@ The rest of the checklist, with decision 32's three verifications:
   left unstaged; every check exits 0; `--against` the template reports every owned and
   seeded file as the template left it; and the suite passes (947).
 - Item 4: the manifest recorded with the label `v0.10.0` in its own commit.
+- Items 5 and 6, under decision 48: `612f982` to `fa26693` pushed to `main`; on
+  `fa26693`, Checks, Reasoning and Pages green, and Install and Scale, dispatched, green;
+  `v0.10.0` tagged on `fa26693` and pushed. Its Release run passed, the release job
+  skipped as in the template it is: a template version is its tag and manifest, and no
+  artefact is published. The tagged manifest is the one recorded at item 4 (digest
+  `756cdc19ebc9c405`). The published site's index declares the `rdfs:comment`
+  annotation. The release is complete.
 
 ### After WP6: the prioritized backlog (decision 29)
 
@@ -1301,7 +1308,7 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.7.0 | -- | **P8**, a rights and provenance review | approved with four safeguards (decision 40); in v0.7.0, released (decision 41) |
 | v0.8.0 | -- | **P6**, conceptual fidelity | approved with amendments (decisions 42 and 43); in v0.8.0, released (decision 44) |
 | v0.9.0 | -- | **P-A2**, upgrading a project to a new release | approved with four safeguards (decision 45); in v0.9.0, released (decision 46) |
-| v0.10.0 | -- | **P-A5**, the explorer shows a term's comments | approved with three safeguards (decision 47); in v0.10.0 |
+| v0.10.0 | -- | **P-A5**, the explorer shows a term's comments | approved with three safeguards (decision 47); in v0.10.0, released (decision 48) |
 | Next | -- | P-A6, P-A8 and P-A4 (decision 23), each scoped separately (decision 47); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
