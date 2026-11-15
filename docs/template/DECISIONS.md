@@ -950,3 +950,27 @@ Its heading carries no number; it is entered as 50. Effect:
 - **Release:** P-A6 alone as v0.11.0, with negative and mutation tests, the full suite,
   compatibility checks and the release checklist; no BPO measurement. Then P-A8, then
   P-A4, each designed separately. `2d7cc2c` and `254ff30` are pushed.
+
+**51. "Architectural Authorization — P-A6 v0.11.0"** (2026-11-15)
+
+In answer to the v0.11.0 readiness report. The whole text is recorded verbatim in
+[`evaluations/2026-11-15-v0110-release-disposition.md`](evaluations/2026-11-15-v0110-release-disposition.md)
+(SHA-256 of the text below its rule `dc17173dc739d253ded0d603eadfbdc2e001bfcece8f0283edcf284e64f5d839`).
+Its heading carries no number; it is entered as 51. Effect:
+
+- P-A6 is accepted: selection and a person's classification of a selected group, with no
+  change to finding identities, validation results, register rules or the gate. The
+  distinct counts and the incomplete-rung warning are accepted refinements.
+- **Mutation testing: 30 of 31 caught, and the 31st is not counted as caught.** It checks
+  the completed entries at register format version 1 instead of 2. Version 2 differs from
+  version 1 only in requiring all four classification fields; `judgement()` has already
+  refused a classification missing any of them, so no input reaches the check where the two
+  differ. It is behaviourally equivalent for this operation. `ROADMAP.md`'s "Release
+  v0.11.0" and `2051078`'s message say the same.
+- `59bec6e` to `ec4f47c` pushed to `main`; Checks, Reasoning, Pages, Install and Scale green
+  on `ec4f47c`; `v0.11.0` tagged on it and pushed; its Release run passed with the release
+  job skipped, as in the template it is; the tagged manifest is item 4's (label `v0.11.0`,
+  digest `6d7f32d9c814dd22`). `ROADMAP.md`'s "Release v0.11.0" records it. Nothing is added
+  to v0.11.0.
+- Next: P-A8's design, then P-A4's, each scoped separately; no completed WP6 finding
+  reopened.
