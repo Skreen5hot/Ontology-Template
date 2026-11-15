@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix. See "Release v0.1.0" to "Release v0.9.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix; **v0.10.0** (2026-11-15, decision 47), carrying P-A5. See "Release v0.1.0" to "Release v0.10.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -1185,6 +1185,102 @@ The rest of the checklist, with decision 32's three verifications:
   is published. The tagged manifest is the one recorded at item 4 (digest
   `3ec7ba3d34213d10`). The release is complete.
 
+### Release v0.10.0 (2026-11-15)
+
+The tenth template release, made under `RELEASING.md`: P-A5 as decision 47 approved it,
+with its three safeguards, and nothing else (decision 47, 6). P-A6, P-A8 and P-A4 stay
+separate.
+
+**What changes for a project made from v0.9.0.**
+
+- The explorer shows each term's comments after its definition, under the label the
+  annotation profile gives, and so every other property a project adds to
+  `agree_across_modules` in `config/annotation-profile.yaml`. One value is a paragraph;
+  values that differ within a language are listed with their language and modules, and
+  noted, as a drifted definition is.
+- `data/terms.json` gains `annotations`, declared once at the top of the index and carried
+  only by a term that has one. A project with no term comments gets an index that differs
+  only by that declaration.
+- A conflict note on a label, a definition or an annotation now has a `scope`: `modules`
+  where the values differ across modules, `module` where several are asserted in one, and
+  its text says which. A module asserting several of the values that differ across modules is
+  named.
+- `tools/site/check_site.py` holds each annotation to the label's rules.
+- Search is unchanged. No check, shape or validator message changes.
+
+| What | Why | Tests |
+|---|---|---|
+| `cd4c0c0`: the agreement properties published from `term_records`, one `conflict_notes` shared with the label and definition, the explorer's rendering, the checker's rules | P-A5 (decisions 23 and 47): the validator checked comments across modules and the site published none | `tests/test_term_contract.py`, `tests/test_site.py` |
+| `8f9e2db`: the BPO measurement | Decision 47, 5 | -- |
+
+**What it does not do.** It decides nothing about a comment. Notes are made only where
+the agreement shape runs, so the site and the validator report the same terms:
+- on an authored term, for two literals in one language;
+- not on a comment that is not a literal, which is listed and not noted;
+- not on an upstream term's comments, which are listed and not judged.
+
+Several comments in one module are still a finding, as the shape reports them; row 9's
+exemption is not built (decision 47, 3). It changes no ontology axiom, validator semantics,
+search ranking or third-party source content.
+
+Measured on BPO's ontology, read-only (`evaluations/2026-11-15-pa5-measurement.md`, counts
+only): of 3,129 terms, 2,576 have a comment, and none reached the site before; the index
+grows from 2.45 MB to 3.50 MB (+43%); the site notes 53 terms, exactly the 53 the agreement
+shape reports, 46 across modules and 7 within one.
+
+Not in it, and still open: the rest of the backlog, below, in its order: P-A6, P-A8 and P-A4,
+each scoped separately (decision 47); SDD's domain and range file; items 8 to 11. And the
+follow-up P6 evaluation on BCO's first Stage 05 module (decision 42), which BCO was asked to
+announce.
+
+Pins: item 1, every pin checked at `cd4c0c0` (2026-11-15). 29 pins, none failed; osv.dev
+scanned all 18 Python distributions, none has an advisory. The same five have a newer
+release as at v0.9.0, kept for the same reasons:
+- pip 26.3, Markdown 3.11.3 and uv 0.13.8 postdate the lock's cutoff, and a re-lock is a
+  change of its own;
+- CCO stays at `v2.0-2024-11-06` (decisions 3 and 18);
+- `actions/setup-java` v6.3.0 is a day old. An action pin moves in a change of its own,
+  and this release carries one change only (decision 47, 6).
+
+The rest of the checklist, with decision 32's three verifications:
+
+- Item 2: the suite passes locally at `cd4c0c0` (1053 passed before the manifest was
+  re-recorded in the same commit, then the two manifest tests, 48 with their files), every
+  check tool exits 0, and the site checks clean; CI green on the tagged commit, confirmed
+  before the tag is pushed.
+- Negative tests: on a planted corpus put through the site and the validator:
+  - one comment carried once;
+  - none carrying nothing;
+  - English and untagged both listed, not noted;
+  - a drift across modules;
+  - two in one module, told apart;
+  - a module asserting several among drifted ones;
+  - a non-literal listed and not judged;
+  - markup kept as text;
+  - every comment finding noted and every note found;
+  - a project's added property under its label;
+  - an upstream term's comments not judged;
+  - the checker refusing a picked value, a missing note, an undeclared annotation and a
+    repeated single value;
+  - search reading no annotation;
+  - a build with a planted commented module;
+  - and the shipped explorer run under Node: a comment after the definition, a drifted
+    comment listed by module without marking the definition, markup shown as text.
+- Mutation tests: 24 of 24 (21 at first; the build's and the checker's wiring needed a
+  build with a planted module, since the template authors no term, and one explorer mutant
+  was equivalent and retried in the form the bug would take).
+- Compatibility: a project made at v0.9.0, upgraded by the P-A2 procedure to the
+  template at `8f9e2db` (whose owned and seeded files are `cd4c0c0`'s): the plan's 7 files
+  were all takes, with no layout entry added, changed or removed; 7 taken, adopted with
+  nothing unresolved or retained, a second plan finding nothing; every check exits 0,
+  `--against` reports nothing changed, and the suite passes (947).
+- Item 3: a project made as "Use this template" makes one: a fresh clone of `cd4c0c0`
+  reduced to one commit, installed from the lock (`--bootstrap`, then pip, `pip check`
+  clean), initialized with the network rebuild, and init committed: init exit 0; nothing
+  left unstaged; every check exits 0; `--against` the template reports every owned and
+  seeded file as the template left it; and the suite passes (947).
+- Item 4: the manifest recorded with the label `v0.10.0` in its own commit.
+
 ### After WP6: the prioritized backlog (decision 29)
 
 From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
@@ -1205,7 +1301,7 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.7.0 | -- | **P8**, a rights and provenance review | approved with four safeguards (decision 40); in v0.7.0, released (decision 41) |
 | v0.8.0 | -- | **P6**, conceptual fidelity | approved with amendments (decisions 42 and 43); in v0.8.0, released (decision 44) |
 | v0.9.0 | -- | **P-A2**, upgrading a project to a new release | approved with four safeguards (decision 45); in v0.9.0, released (decision 46) |
-| v0.10.0 | -- | **P-A5**, the explorer shows a term's comments | approved with three safeguards (decision 47) |
+| v0.10.0 | -- | **P-A5**, the explorer shows a term's comments | approved with three safeguards (decision 47); in v0.10.0 |
 | Next | -- | P-A6, P-A8 and P-A4 (decision 23), each scoped separately (decision 47); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
