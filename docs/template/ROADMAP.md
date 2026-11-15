@@ -1178,6 +1178,12 @@ The rest of the checklist, with decision 32's three verifications:
   left unstaged; every check exits 0; `--against` the template reports every owned and
   seeded file as the template left it; and the suite passes (930).
 - Item 4: the manifest recorded with the label `v0.9.0` in its own commit.
+- Items 5 and 6, under decision 46: `4096a68` to `202d8f3` pushed to `main`; on
+  `202d8f3`, Checks, Reasoning and Pages green, and Install and Scale, dispatched, green;
+  `v0.9.0` tagged on `202d8f3` and pushed. Its Release run passed, the release job skipped
+  as in the template it is: a template version is its tag and manifest, and no artefact
+  is published. The tagged manifest is the one recorded at item 4 (digest
+  `3ec7ba3d34213d10`). The release is complete.
 
 ### After WP6: the prioritized backlog (decision 29)
 
@@ -1198,7 +1204,7 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.6.0 | -- | **P7**, decision propagation | approved with three safeguards (decision 38); in v0.6.0 |
 | v0.7.0 | -- | **P8**, a rights and provenance review | approved with four safeguards (decision 40); in v0.7.0, released (decision 41) |
 | v0.8.0 | -- | **P6**, conceptual fidelity | approved with amendments (decisions 42 and 43); in v0.8.0, released (decision 44) |
-| v0.9.0 | -- | **P-A2**, upgrading a project to a new release | approved with four safeguards (decision 45); in v0.9.0 |
+| v0.9.0 | -- | **P-A2**, upgrading a project to a new release | approved with four safeguards (decision 45); in v0.9.0, released (decision 46) |
 | Next | -- | P-A4 to P-A6, P-A8 (decision 23); SDD's domain and range file (decision 28) | approved earlier |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |

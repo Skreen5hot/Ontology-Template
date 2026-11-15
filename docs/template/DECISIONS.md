@@ -856,3 +856,15 @@ from before the board, as PROTOCOL.md's Alerts 1 says (`4096a68`). Effect:
 - It carries template improvements into a project, and is never an ontology migration or
   semantic repair. No other feature in v0.9.0; P-A4 to P-A6 and P-A8 stay separate. No
   further design round unless implementation finds a material conflict.
+
+**46. "confirmed proceed"** (2026-11-14)
+
+In answer to the v0.9.0 report, which asked to push `4096a68` to `202d8f3`, confirm CI on
+`202d8f3`, and tag and push v0.9.0. Recorded verbatim (SHA-256 of the text
+`9738345b09f92209cd77bbf0ea7012ae716ad2e861d182e9de89e1749a647140`). Its recording was
+asked for and given: "proceed" (2026-11-15; SHA-256 of that whole message,
+`119792136aa24c129810a8c2d0920e3fdff09e7276f6c9d105d447a62de4dd90`). Effect:
+
+- `4096a68` to `202d8f3` pushed to `main`; Checks, Reasoning, Pages, Install and Scale green
+  on `202d8f3`; `v0.9.0` tagged on it and pushed, its Release run passed with the release
+  job skipped, as in the template it is. `ROADMAP.md`'s "Release v0.9.0" records it.
