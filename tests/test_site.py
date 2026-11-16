@@ -736,3 +736,352 @@ def test_the_checker_reads_the_index_annotations(checker, copy):
     assert [p for p in problems if "rdfs:comment values in one language "
             "and no note" in p], problems
     assert [p for p in problems if "not all of them" in p], problems
+
+
+# ------------------------------- P-A8: third-party notices (decision 52)
+
+SOURCE_TEXT = "https://example.org/planted#sourceText"
+OTHER_TEXT = "https://example.org/planted#otherText"
+UNUSED_TEXT = "https://example.org/planted#unusedText"
+# Markup and an ampersand, so escaping is visible; quotes and a brace, so
+# neither the HTML nor the fixed words' composition reads them.
+ATTRIBUTION = ('Reproduced from <b>Planted Framework</b> 7.2 & its '
+               '"Annex {A}", as its publisher asks.')
+
+PLANTED_DECLARATIONS = """format_version: 1
+declarations:
+  - property: %s
+    source: Other Standard
+    release: "2024"
+    licence: LicenseRef-Planted-1.0
+    attribution: Contains text from Other Standard 2024.
+  - property: %s
+    source: Planted Framework
+    release: v7.2
+    licence: unknown
+    attribution: '%s'
+  - property: %s
+    source: Unused Source
+    release: v1
+    licence: unknown
+    attribution: Contains text from Unused Source v1.
+""" % (OTHER_TEXT, SOURCE_TEXT, ATTRIBUTION.replace("'", "''"), UNUSED_TEXT)
+
+QUOTING_MODULE = """@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix obo: <http://purl.obolibrary.org/obo/> .
+@prefix p: <https://example.org/planted#> .
+@prefix : <{ns}> .
+<{ns}quoting-module> a owl:Ontology ; dcterms:title "Quoting" .
+:QuotedOne a owl:Class ; rdfs:label "Quoted one" ;
+    skos:definition "A process described by a framework." ;
+    p:sourceText "The framework's own words." ;
+    p:otherText "The standard's words." ;
+    rdfs:subClassOf obo:BFO_0000015 .
+:QuotedTwo a owl:Class ; rdfs:label "Quoted two" ;
+    skos:definition "Another process described by a framework." ;
+    p:sourceText "More of the framework's words." ;
+    rdfs:subClassOf obo:BFO_0000015 .
+"""
+
+PLANTED_NOTICE = ("Contains text from Planted Framework v7.2, which is not "
+                  "project-authored. " + ATTRIBUTION)
+OTHER_NOTICE = ("Contains text from Other Standard 2024, which is not "
+                "project-authored. Contains text from Other Standard 2024.")
+
+
+@pytest.fixture(scope="module")
+def planted_project(project, tmp_path_factory):
+    """A project root holding a declaration file and one module whose
+    text two of its three declarations cover. The template declares
+    none, so only a planted project shows the notice."""
+    root = tmp_path_factory.mktemp("quoting")
+    (root / "config").mkdir()
+    (root / "config/third-party-text.yaml").write_bytes(
+        PLANTED_DECLARATIONS.encode("utf-8"))
+    (root / "ontology").mkdir()
+    module = root / "ontology/quoting.ttl"
+    module.write_bytes(QUOTING_MODULE.replace("{ns}", project.namespace())
+                       .encode("utf-8"))
+    return root, module
+
+
+def build_planted(builder, root, module, out):
+    real_declared = builder.declared
+    real = builder.layout.ontology_files
+    real_relative = builder.relative
+    mp = pytest.MonkeyPatch()
+    mp.setattr(builder, "declared", lambda: real_declared(root))
+    mp.setattr(builder.layout, "ontology_files", lambda: real() + [module])
+    mp.setattr(builder, "relative", lambda path: "ontology/quoting.ttl"
+               if path == module else real_relative(path))
+    try:
+        builder.build(out)
+    finally:
+        mp.undo()
+    return out
+
+
+@pytest.fixture(scope="module")
+def built_with_text(builder, planted_project, tmp_path_factory):
+    root, module = planted_project
+    return build_planted(builder, root, module,
+                         tmp_path_factory.mktemp("site-quoting") / "_site")
+
+
+@pytest.fixture
+def quoting_copy(built_with_text, tmp_path):
+    target = tmp_path / "_site"
+    shutil.copytree(built_with_text, target)
+    return target
+
+
+def footer_paragraphs(checker, path):
+    return checker.parse(path).footer
+
+
+def third_party_data(out):
+    return json.loads((out / "data/third-party.json")
+                      .read_text(encoding="utf-8"))
+
+
+def test_every_page_carries_the_applicable_notices(built_with_text, checker):
+    """Through build() and check(): every page's footer carries the two
+    applicable notices, once each, in the declarations' order, directly
+    after the licence sentence; the declaration with no text has none;
+    and the artifact passes its own check."""
+    pages = sorted(built_with_text.rglob("*.html"))
+    assert len(pages) > 3
+    for page in pages:
+        paragraphs = footer_paragraphs(checker, page)
+        texts = [text for _, text in paragraphs]
+        start = next(i for i, t in enumerate(texts)
+                     if t.startswith("Project-authored ontology"))
+        assert texts[start + 1:start + 3] == [OTHER_NOTICE, PLANTED_NOTICE]
+        assert texts[start + 3].startswith("Developed by ")
+        assert checker.parse(page).third_party() == [OTHER_NOTICE,
+                                                     PLANTED_NOTICE]
+        assert "Unused Source" not in page.read_text(encoding="utf-8")
+    assert checker.check(built_with_text) == []
+
+
+def test_the_attribution_is_verbatim_and_shown_as_text(built_with_text):
+    """The declared attribution reaches the page escaped: its markup is
+    text, its ampersand and quotes are entities, its brace is a brace."""
+    page = (built_with_text / "index.html").read_text(encoding="utf-8")
+    assert "<b>Planted Framework</b>" not in page
+    assert html_escape(PLANTED_NOTICE) in page
+    assert '<p class="notice third-party">%s</p>' % html_escape(
+        PLANTED_NOTICE) in page
+
+
+def html_escape(text):
+    import html
+    return html.escape(text)
+
+
+def test_the_declared_licence_is_not_shown(built_with_text, checker):
+    """Decision 52, 2: neither the footer nor the data file states the
+    declared licence."""
+    for page in built_with_text.rglob("*.html"):
+        footer = page.read_text(encoding="utf-8").split('<footer')[1]
+        assert "LicenseRef-Planted" not in footer
+        assert "licence as declared" not in footer
+        for notice in checker.parse(page).third_party():
+            assert "unknown" not in notice.lower()
+            assert "licen" not in notice.lower()
+    data = third_party_data(built_with_text)
+    for notice in data["notices"]:
+        assert "licence" not in notice
+    assert "LicenseRef-Planted" not in json.dumps(data)
+
+
+def test_the_data_file_agrees_with_embedded_text(built_with_text,
+                                                 planted_project,
+                                                 disposition):
+    """The notices are verified against the declarations and the
+    published modules: the build's data file lists exactly what the
+    licensing disposition's embedded_text() finds, module by module."""
+    root, module = planted_project
+    mp = pytest.MonkeyPatch()
+    mp.setattr(disposition.layout, "ontology_files", lambda: [module])
+    try:
+        rows = disposition.embedded_text(root)
+    finally:
+        mp.undo()
+    data = third_party_data(built_with_text)
+    by_property = {(r["property"], r["module"], r["values"], r["source"])
+                   for r in rows}
+    listed = {(n["property"], m["module"], m["values"],
+               "%s %s" % (n["source"], n["release"]))
+              for n in data["notices"] for m in n["modules"]}
+    assert listed == by_property
+    assert {r["property"] for r in rows} == {OTHER_TEXT, SOURCE_TEXT}
+    downloads = json.loads((built_with_text / "data/downloads.json")
+                           .read_text(encoding="utf-8"))
+    published = {r["path"] for r in downloads["authored"]}
+    assert {m["module"] for n in data["notices"]
+            for m in n["modules"]} <= published
+    assert data["statement"].count("not a legal authorization") == 1
+
+
+def test_with_no_applicable_text_the_footer_is_unchanged(builder, built,
+                                                         checker):
+    """The template declares nothing: no page carries a notice, the data
+    file lists none, and footer_notices() gives what it gave before."""
+    out, _ = built
+    assert third_party_data(out)["notices"] == []
+    for page in out.rglob("*.html"):
+        assert "third-party" not in page.read_text(encoding="utf-8")
+    ctx = {"site": site_json(builder._root), "licence": "MIT"}
+    before = builder.footer_notices(ctx)
+    assert builder.footer_notices(dict(ctx, third_party=[])) == before
+    assert not any("third-party" in p for p in before)
+
+
+def test_a_declaration_with_no_text_gives_no_notice(builder,
+                                                    planted_project,
+                                                    tmp_path):
+    """A declaration file with text declared but none in any module: no
+    notice, and the pages are the template's own, byte for byte."""
+    root, _ = planted_project
+    empty = tmp_path / "empty-module.ttl"
+    empty.write_bytes(b"")
+    out = build_planted(builder, root, empty, tmp_path / "_site")
+    assert third_party_data(out)["notices"] == []
+    for page in out.rglob("*.html"):
+        assert "third-party" not in page.read_text(encoding="utf-8")
+
+
+def test_acknowledgment_is_unchanged_beside_a_notice(builder):
+    """The credit line is composed as before; the notice is a paragraph
+    of its own between the licence sentence and the credit."""
+    site = site_json(builder._root)
+    site["notices"]["acknowledgment"]["text"] = "With thanks to <them>."
+    ctx = {"site": site, "licence": "MIT"}
+    before = builder.footer_notices(ctx)
+    notice = {"text": PLANTED_NOTICE}
+    after = builder.footer_notices(dict(ctx, third_party=[notice]))
+    assert after == before[:-1] + [
+        '<p class="notice third-party">%s</p>' % html_escape(PLANTED_NOTICE),
+        before[-1]]
+    assert before[-1].endswith("With thanks to &lt;them&gt;.</p>")
+
+
+def test_the_declarations_are_the_projects_file(builder, planted_project):
+    """declared() reads config/third-party-text.yaml under the project
+    root, in the file's order; the build reads it at the repository's."""
+    root, _ = planted_project
+    assert [d["property"] for d in builder.declared(root)] == [
+        OTHER_TEXT, SOURCE_TEXT, UNUSED_TEXT]
+    assert builder.declared() == []
+
+
+def test_the_two_tools_compose_the_same_words(builder, checker):
+    assert builder.THIRD_PARTY_NOTICE == checker.THIRD_PARTY_NOTICE
+    assert checker.LICENCE_SENTENCE in builder.footer_notices(
+        {"site": site_json(builder._root), "licence": "MIT"})[-2]
+
+
+ESCAPED = html_escape(PLANTED_NOTICE)
+OTHER_P = '<p class="notice third-party">%s</p>' % html_escape(OTHER_NOTICE)
+PLANTED_P = '<p class="notice third-party">%s</p>' % ESCAPED
+
+
+@pytest.mark.parametrize("old, new, expect", [
+    (PLANTED_P + "\n", "", "lacks the third-party notice"),
+    ("which is not project-authored. Reproduced",
+     "which is project-authored. Reproduced", "lacks the third-party notice"),
+    ("which is not project-authored. Reproduced",
+     "which is project-authored. Reproduced", "no declaration requires"),
+    (PLANTED_P, PLANTED_P + "\n    " + PLANTED_P, "2 times"),
+    (OTHER_P + "\n    " + PLANTED_P, PLANTED_P + "\n    " + OTHER_P,
+     "not in the declarations' order"),
+    ('<p class="notice third-party">' + ESCAPED,
+     '<p class="notice">' + ESCAPED, "lacks the third-party notice"),
+    ("&lt;b&gt;Planted Framework&lt;/b&gt;", "<b>Planted Framework</b>",
+     "lacks the third-party notice"),
+    (OTHER_P + "\n    " + PLANTED_P + "\n", "", "lacks the third-party"),
+])
+def test_the_checker_refuses_a_damaged_footer(checker, quoting_copy, old,
+                                              new, expect):
+    """Each footer refusal, falsified on one page of a real artifact."""
+    damage(quoting_copy / "modules/index.html", old, new)
+    problems = checker.check(quoting_copy)
+    assert [p for p in problems if p.startswith("modules/index.html: ")
+            and expect in p], problems
+
+
+def test_the_checker_refuses_notices_moved_off_the_licence_sentence(
+        checker, quoting_copy):
+    page = quoting_copy / "modules/index.html"
+    text = page.read_text(encoding="utf-8")
+    block = OTHER_P + "\n    " + PLANTED_P + "\n    "
+    assert block in text
+    text = text.replace(block, "")
+    text = text.replace('<p class="build">', block + '<p class="build">')
+    page.write_bytes(text.encode("utf-8"))
+    problems = checker.check(quoting_copy)
+    assert problems == ["modules/index.html: the third-party notices do not "
+                        "follow the licence sentence"], problems
+
+
+def test_the_checker_refuses_a_notice_on_a_site_that_declares_none(
+        checker, copy):
+    damage(copy / "index.html", '<p class="credit">',
+           '<p class="notice third-party">Contains text from X.</p>\n'
+           '    <p class="credit">')
+    problems = checker.check(copy)
+    assert [p for p in problems if "no declaration requires" in p], problems
+
+
+def rewrite_data(site, change):
+    path = site / "data/third-party.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    change(data)
+    path.write_bytes(json.dumps(data).encode("utf-8"))
+
+
+@pytest.mark.parametrize("change, expect", [
+    (lambda d: d["notices"][1].update(attribution="Other words."),
+     "is not the fixed words"),
+    (lambda d: d["notices"][1].update(
+        text=d["notices"][1]["text"].replace("is not", "is")),
+     "is not the fixed words"),
+    (lambda d: d["notices"][1].update(modules=[]),
+     "names no module holding the text"),
+    (lambda d: d["notices"][1]["modules"][0].update(values=0),
+     "names no module holding the text"),
+    (lambda d: d["notices"][1]["modules"][0].update(
+        module="ontology/elsewhere.ttl"), "not a published module"),
+    (lambda d: d["notices"][1].pop("release"), "has no 'release'"),
+    (lambda d: d.pop("notices"), "could not be read"),
+])
+def test_the_checker_refuses_a_damaged_notice_list(checker, quoting_copy,
+                                                   change, expect):
+    rewrite_data(quoting_copy, change)
+    problems = checker.check(quoting_copy)
+    assert [p for p in problems if expect in p], problems
+
+
+def test_the_checker_requires_the_notice_list(checker, quoting_copy):
+    (quoting_copy / "data/third-party.json").unlink()
+    problems = checker.check(quoting_copy)
+    assert [p for p in problems if "third-party notices could not be read"
+            in p], problems
+
+
+def test_the_checker_holds_pages_to_a_notice_the_data_adds(checker, copy):
+    """A notice listed in the data is required of every page: on the
+    template's site, which shows none, every page then lacks it."""
+    rewrite_data(copy, lambda d: d["notices"].append({
+        "property": SOURCE_TEXT, "source": "Planted Framework",
+        "release": "v7.2", "attribution": ATTRIBUTION,
+        "text": PLANTED_NOTICE,
+        "modules": [{"module": "ontology/example.ttl", "values": 1}]}))
+    problems = checker.check(copy)
+    pages = len(list(copy.rglob("*.html")))
+    assert len([p for p in problems if "lacks the third-party notice"
+                in p]) == pages, problems

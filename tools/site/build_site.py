@@ -72,6 +72,25 @@ build assumes private, so a local preview never shows links a reader
 could not follow. tools/site/check_site.py refuses a link into the
 repository on a site built that way.
 
+THIRD-PARTY TEXT IN THE FOOTER (P-A8, decision 52)
+
+A module may carry text the project did not write, declared in
+config/third-party-text.yaml. For each declaration whose property has a
+value in a published module, every page's footer carries one notice,
+directly after the licence sentence, in fixed words:
+
+    Contains text from {source} {release}, which is not project-authored.
+    {attribution}
+
+The attribution is the declared string, escaped and never markup; the
+declared licence is not shown. A declaration with no value in any module
+gives no notice, so with none the footer is as before, byte for byte.
+data/third-party.json lists the notices and the modules holding the
+text, and tools/site/check_site.py holds every page to it. The notice
+states provenance as the project declared it; it is not a legal
+authorization, and nothing here judges whether the text may be
+redistributed (decision 33).
+
 WHAT IS OPTIONAL
 
 The specification and review pages are built when a component with the
@@ -647,6 +666,48 @@ def report_route(ctx: dict) -> str:
     return ""
 
 
+#: The words of a third-party notice (P-A8, decision 52), fixed: they
+#: state where the text comes from, and nothing in them reads as a
+#: permission or as a licence. tools/site/check_site.py composes the same.
+THIRD_PARTY_NOTICE = ("Contains text from {source} {release}, which is not "
+                      "project-authored. {attribution}")
+
+#: What data/third-party.json says it is.
+THIRD_PARTY_STATEMENT = (
+    "Each notice states, as the project declared it in "
+    "config/third-party-text.yaml, where text in the published modules "
+    "comes from. It is a statement of provenance, not a legal "
+    "authorization, and says nothing about whether the text may be "
+    "redistributed.")
+
+
+def declared(root: Path | None = None) -> list[dict]:
+    """The project's third-party text declarations, in the file's order."""
+    return load_tool("site_third_party",
+                     "tools/licensing/third_party.py").load(root)
+
+
+def third_party_notices(authored: list[dict]) -> list[dict]:
+    """One notice per declaration whose property has a value in a
+    published module, in the declarations' order. A declaration with no
+    value makes no claim about the site, so it has none."""
+    tool = load_tool("site_third_party", "tools/licensing/third_party.py")
+    out = []
+    for declaration in declared():
+        modules = []
+        for source in authored:
+            count = tool.values_in(source["graph"], declaration)
+            if count:
+                modules.append({"module": source["path"], "values": count})
+        if not modules:
+            continue
+        fields = {f: declaration[f]
+                  for f in ("property", "source", "release", "attribution")}
+        out.append(dict(fields, modules=modules,
+                        text=THIRD_PARTY_NOTICE.format(**fields)))
+    return out
+
+
 def notice_block(text: str) -> str:
     return ('<section class="notice-block" aria-label="Status">\n'
             "  <p><strong>%s</strong></p>\n</section>" % esc(text))
@@ -673,6 +734,9 @@ def footer_notices(ctx: dict) -> list[str]:
         "offered under the %s licence. The vendored extracts carry their "
         "own licences (%s) and attribution, listed on the Modules and "
         "Downloads pages." % (ctx["licence"], upstream)))
+    for notice in ctx.get("third_party", []):
+        out.append("<p class=\"notice third-party\">%s</p>"
+                   % esc(notice["text"]))
     credit = "Developed by %s." % project.load()["licence_holder"]
     if notices["acknowledgment"].get("text"):
         credit += " " + notices["acknowledgment"]["text"]
@@ -1118,7 +1182,8 @@ def build(out: Path) -> list[tuple[str, str]]:
            "name": project.load()["title"],
            "repository": "https://github.com/" + project.repository(),
            "private": repository_private(),
-           "licence": disposition.project_licence()}
+           "licence": disposition.project_licence(),
+           "third_party": third_party_notices(data["authored"])}
     files: dict[str, bytes] = {}
     known = data["known"]
     pid = project.project_id()
@@ -1159,6 +1224,14 @@ def build(out: Path) -> list[tuple[str, str]]:
     files["data/terms.json"] = (json.dumps(terms, indent=2, sort_keys=True,
                                            ensure_ascii=False)
                                 .encode("utf-8") + b"\n")
+
+    files["data/third-party.json"] = (json.dumps({
+        "format_version": 1,
+        "generated_by": "tools/site/build_site.py",
+        "source_commit": commit,
+        "statement": THIRD_PARTY_STATEMENT,
+        "notices": ctx["third_party"],
+    }, indent=2, sort_keys=True, ensure_ascii=False).encode("utf-8") + b"\n")
 
     # ---- downloads
     authored_files = [s["file"] for s in data["authored"]] + data["shapes"]

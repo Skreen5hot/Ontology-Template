@@ -384,6 +384,26 @@ on licensing. Text whose licence is `unknown` passes when it is declared and att
 nothing is refused for its licence (template decision 33, the architect's acceptance of the
 risk). Nothing can find third-party text that is not declared.
 
+**On the site** (template decision 52). Each declaration whose property has a value in a
+published module puts one notice in the footer of every page, directly after the licence
+sentence, in fixed words:
+
+> Contains text from {source} {release}, which is not project-authored. {attribution}
+
+The attribution is your declared string, word for word, shown as text: markup in it is
+not run. The declared licence is not shown. A declaration with no value in any module gives
+no notice, and with none the footer is as before. The build lists the notices, and the
+modules holding the text, in `data/third-party.json`; `check_site.py` fails a page that
+lacks one, repeats one, carries one that no declaration requires, or puts them anywhere
+but after the licence sentence. The notice says where the text comes from, as you
+declared it. It does not say the text may be published, and nothing checks that.
+
+If you put a notice in `site.json`'s `acknowledgment` before this, as a credit line, it now
+shows twice: `site.json` is yours, and an upgrade does not touch it, so remove it there.
+
+The Downloads bundle carries the modules and your `LICENSE`, and nothing yet about the
+declared text in them. That is a separate backlog item.
+
 A declaration may also name the source's rights review, `rights:` with its register id.
 That is the next section's: text with no review, or whose use no decision has released,
 holds a stage marked `done` and a release, never anything else.

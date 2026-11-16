@@ -33,7 +33,15 @@ What it refuses, and why each one:
     note that says they differ -- for its label, its definition, and each
     property of the annotation profile's agreement list the index carries;
     an annotation the index does not declare; or a variant list that is
-    the one value repeated.
+    the one value repeated;
+  * a page whose footer does not carry, directly after the licence
+    sentence, exactly once each and in order, the third-party notices
+    data/third-party.json lists, or carries one it does not list; and a
+    listed notice whose words are not the fixed ones composed from its
+    declared source, release and attribution, or that names no published
+    module holding the text (P-A8; decision 52 extends decision 33, 4 to
+    the footer). The notice states provenance; this checks it is shown,
+    not that the text may be published.
 
 Carried in spirit from BFO-Aligned ValueNet's check_site.py; rewritten
 for this site's pages and data.
@@ -56,6 +64,11 @@ _here = Path(__file__).resolve()
 _root = next(p for p in (_here, *_here.parents)
              if (p / "config/repository-layout.yaml").is_file())
 
+#: tools/site/build_site.py's THIRD_PARTY_NOTICE; a test holds them equal.
+THIRD_PARTY_NOTICE = ("Contains text from {source} {release}, which is not "
+                      "project-authored. {attribution}")
+LICENCE_SENTENCE = "Project-authored ontology, documentation and site content"
+
 RESOURCE_ATTRS = {("script", "src"), ("link", "href"), ("img", "src"),
                   ("source", "src"), ("iframe", "src")}
 
@@ -74,6 +87,9 @@ class Page(HTMLParser):
         self.stamp = None
         self._in_stamp = False
         self._in_script = False
+        self.footer = []       # the footer's paragraphs: [classes, text]
+        self._in_footer = False
+        self._in_paragraph = False
 
     def handle_starttag(self, tag, attrs):
         attrs = dict(attrs)
@@ -99,16 +115,31 @@ class Page(HTMLParser):
                 self.inline_scripts += 1
         if tag == "code" and attrs.get("data-build") == "commit":
             self._in_stamp = True
+        if tag == "footer":
+            self._in_footer = True
+        if tag == "p" and self._in_footer:
+            self._in_paragraph = True
+            self.footer.append([(attrs.get("class") or "").split(), ""])
 
     def handle_endtag(self, tag):
         if tag == "script":
             self._in_script = False
         if tag == "code":
             self._in_stamp = False
+        if tag == "footer":
+            self._in_footer = False
+        if tag == "p":
+            self._in_paragraph = False
 
     def handle_data(self, data):
         if self._in_stamp:
             self.stamp = (self.stamp or "") + data
+        if self._in_paragraph:
+            self.footer[-1][1] += data
+
+    def third_party(self) -> list[str]:
+        return [text for classes, text in self.footer
+                if "third-party" in classes]
 
 
 def parse(path: Path) -> Page:
@@ -185,6 +216,76 @@ def check(site: Path) -> list[str]:
                                     "does not have" % (name, url))
 
     problems.extend(check_data(site))
+    problems.extend(check_third_party(site, parsed))
+    return problems
+
+
+def check_third_party(site: Path, parsed: dict) -> list[str]:
+    """Every page carries the notices data/third-party.json lists, once
+    each, in order, directly after the licence sentence, and no other;
+    and each listed notice is the fixed words with its declared fields,
+    for text a published module holds."""
+    try:
+        listed = json.loads((site / "data/third-party.json")
+                            .read_text(encoding="utf-8"))["notices"]
+        published = {row["path"] for row in json.loads(
+            (site / "data/downloads.json").read_text(encoding="utf-8"))
+            ["authored"]}
+    except (OSError, ValueError, KeyError, TypeError) as exc:
+        return ["the third-party notices could not be read: %s" % exc]
+    problems = []
+    for notice in listed:
+        name = "%s %s" % (notice.get("source"), notice.get("release"))
+        try:
+            words = THIRD_PARTY_NOTICE.format(**{
+                f: notice[f] for f in ("source", "release", "attribution")})
+        except KeyError as exc:
+            problems.append("the third-party notice for %s has no %s"
+                            % (name, exc))
+            continue
+        if notice.get("text") != words:
+            problems.append("the third-party notice for %s is not the fixed "
+                            "words with its declared source, release and "
+                            "attribution" % name)
+        modules = [m for m in notice.get("modules") or []
+                   if m.get("values", 0) > 0]
+        if not modules:
+            problems.append("the third-party notice for %s names no module "
+                            "holding the text" % name)
+        for module in modules:
+            if module.get("module") not in published:
+                problems.append("the third-party notice for %s names %s, "
+                                "which is not a published module"
+                                % (name, module.get("module")))
+    expected = [n.get("text") for n in listed]
+    for path, page in parsed.items():
+        name = path.relative_to(site.resolve()).as_posix()
+        shown = page.third_party()
+        for text in expected:
+            count = shown.count(text)
+            if count == 0:
+                problems.append("%s: the footer lacks the third-party "
+                                "notice %r" % (name, text))
+            elif count > 1:
+                problems.append("%s: the footer carries the third-party "
+                                "notice %r %d times" % (name, text, count))
+        for text in shown:
+            if text not in expected:
+                problems.append("%s: the footer carries a third-party notice "
+                                "no declaration requires: %r" % (name, text))
+        if shown and shown == expected:
+            texts = [t for _, t in page.footer]
+            start = next(i for i, (classes, _) in enumerate(page.footer)
+                         if "third-party" in classes)
+            block = [c for c, _ in page.footer[start:start + len(shown)]]
+            if (start == 0 or not texts[start - 1].startswith(
+                    LICENCE_SENTENCE)
+                    or not all("third-party" in c for c in block)):
+                problems.append("%s: the third-party notices do not follow "
+                                "the licence sentence" % name)
+        elif shown and sorted(shown) == sorted(expected):
+            problems.append("%s: the third-party notices are not in the "
+                            "declarations' order" % name)
     return problems
 
 
@@ -349,7 +450,7 @@ def main(argv=None) -> int:
         print("  %d finding(s) across %d page(s)" % (len(problems), pages))
         return 1
     print("  %d page(s) checked: structure, origins, links, fragments, "
-          "downloads, bundle, term index" % pages)
+          "downloads, bundle, term index, third-party notices" % pages)
     return 0
 
 
