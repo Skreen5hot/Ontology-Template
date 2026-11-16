@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix; **v0.10.0** (2026-11-15, decisions 47 and 48), carrying P-A5; **v0.11.0** (2026-11-15, decisions 50 and 51), carrying P-A6. See "Release v0.1.0" to "Release v0.11.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix; **v0.10.0** (2026-11-15, decisions 47 and 48), carrying P-A5; **v0.11.0** (2026-11-15, decisions 50 and 51), carrying P-A6; **v0.12.0** (2026-11-15, decision 52), carrying P-A8. See "Release v0.1.0" to "Release v0.12.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -1396,6 +1396,110 @@ The rest of the checklist, with decision 32's three verifications:
   artefact is published. The tagged manifest is the one recorded at item 4 (digest
   `6d7f32d9c814dd22`). The release is complete.
 
+### Release v0.12.0 (2026-11-15)
+
+The twelfth template release, made under `RELEASING.md`: P-A8 as decision 52 approved it,
+with its safeguards, and nothing else (decision 52, 5). P-A4 stays separate.
+
+**What changes for a project made from v0.11.0.**
+
+- A project that declares third-party text in `config/third-party-text.yaml` now has one
+  notice in the footer of every page for each declaration whose property has a value in a
+  published module. The notice comes directly after the licence sentence, and its words
+  are fixed: "Contains text from {source} {release}, which is not project-authored.
+  {attribution}".
+  - The attribution is the declared string, word for word. It is escaped, so markup in it
+    shows as text.
+  - The declared licence is not shown (decision 52, 2).
+  - A declaration with no value in any module gives no notice. With none, every page is
+    built as before, byte for byte.
+- The build writes `data/third-party.json`: the notices, the modules holding the text, and
+  a statement that each notice is provenance, not a legal authorization. It is written
+  with no notices when nothing applies.
+- `tools/site/check_site.py` fails a page whose footer lacks a listed notice, repeats one,
+  carries one that no declaration requires, puts them out of order, or puts them anywhere
+  but directly after the licence sentence. It also fails a listed notice that is not the
+  fixed words composed from its declared fields, or that names no published module
+  holding the text. This extends decision 33, 4 to the footer (decision 52, 3).
+- `docs/DEVELOPMENT.md` says how. A project that put its notice in `site.json`'s
+  `acknowledgment` will see it twice after upgrading, and removes it there: `site.json` is
+  the project's, and the upgrade does not touch it.
+
+| What | Why | Tests |
+|---|---|---|
+| `68e68bd`: `third_party_notices` and the footer in `tools/site/build_site.py`; `check_third_party` in `tools/site/check_site.py` | P-A8 (decisions 23 and 52): declared third-party text was published on the site, and the footer named only the project's and the upstream ontologies' licences | `tests/test_site.py` |
+
+**What it does not do.** The notice states where the text comes from, as the project
+declared it. It does not say that the text may be published, and nothing checks that
+(decision 33, 5). It changes:
+- not the validator or its module-header check;
+- not what a declaration is, or `third_party.load()`;
+- not the licensing disposition;
+- not the rights review (P8);
+- not `site.json`'s fields;
+- not the ontology, the explorer, search or the term index.
+
+The release bundle carries the modules and `LICENSE`, and still nothing about the declared
+text in them: that is a backlog item of its own (decision 52, 4). No BPO measurement was
+made; the template's own site declares nothing, so it shows no change.
+
+Not in it, and still open: the rest of the backlog, below, in its order:
+- P-A4, designed separately (decision 52);
+- the release bundle's provenance;
+- SDD's domain and range file;
+- items 8 to 11;
+- the follow-up P6 evaluation on BCO's first Stage 05 module (decision 42), which BCO was
+  asked to announce;
+- decision 49's two follow-ups: the explorer in a real browser, and whether v0.10.0's 7
+  within-module comment findings are WP6's 7 false alarms.
+
+Pins: item 1, every pin checked at `68e68bd` (2026-11-15). 29 pins, none failed; osv.dev
+scanned all 18 Python distributions, none has an advisory. The same five have a newer
+release as at v0.11.0, kept for the same reasons:
+- pip 26.3, Markdown 3.11.3 and uv 0.13.8 postdate the lock's cutoff, and a re-lock is a
+  change of its own;
+- CCO stays at `v2.0-2024-11-06` (decisions 3 and 18);
+- `actions/setup-java` v6.3.0: an action pin moves in a change of its own, and this release
+  carries one change only (decision 52, 5).
+
+The rest of the checklist, with decision 32's three verifications:
+
+- Item 2: the suite passes locally at `68e68bd` (1100 passed). Every check tool exits 0,
+  and the site checks clean. CI green on the tagged commit, confirmed before the tag is
+  pushed.
+- Negative tests (27, `tests/test_site.py`), on a planted project with three declarations,
+  two of them applicable, through `build()` and `check()`:
+  - every page carries the two notices, once each, in the declarations' order, directly
+    after the licence sentence, and the artifact passes its own check;
+  - the attribution is verbatim, with its markup, ampersand, quotes and brace shown as
+    text;
+  - the declared licence appears neither in the footer nor in the data file;
+  - the data file lists exactly what the licensing disposition's `embedded_text()` finds,
+    module by module, and only published modules;
+  - with no applicable text, the footer and the pages are as before; and a declaration
+    with no value gives no notice;
+  - `acknowledgment` is unchanged beside a notice;
+  - the checker refuses a missing, altered, repeated, extra, reordered, unclassed or
+    unescaped notice on a page, and notices moved off the licence sentence;
+  - and it refuses a data file whose notice is not the fixed words, names no module or an
+    unpublished one, lacks a field or the list, or is missing.
+- Mutation tests: 30 of 30 caught, 14 in the build (composition, condition, order,
+  escaping, position, wiring, the data file) and 16 in the checker.
+- Compatibility: a project made at v0.11.0, upgraded by the P-A2 procedure to the template
+  at `68e68bd`:
+  - the plan's 4 files were all takes, with no layout entry added, changed or removed;
+  - 4 taken, adopted with nothing unresolved or retained, and a second plan found nothing;
+  - every check exits 0, `--against` reports nothing changed, and the suite passes (992).
+- Item 3: a project made as "Use this template" makes one:
+  - a fresh clone of `68e68bd` reduced to one commit;
+  - installed from the lock (`--bootstrap`, then pip, `pip check` clean);
+  - initialized with the network rebuild, and init committed (init exit 0; nothing left
+    unstaged);
+  - every check exits 0;
+  - `--against` the template reports every owned and seeded file as the template left it;
+  - and the suite passes (992).
+- Item 4: the manifest recorded with the label `v0.12.0` in its own commit.
+
 ### After WP6: the prioritized backlog (decision 29)
 
 From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
@@ -1418,7 +1522,7 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.9.0 | -- | **P-A2**, upgrading a project to a new release | approved with four safeguards (decision 45); in v0.9.0, released (decision 46) |
 | v0.10.0 | -- | **P-A5**, the explorer shows a term's comments | approved with three safeguards (decision 47); in v0.10.0, released (decision 48) |
 | v0.11.0 | -- | **P-A6**, `--propose` class by class | approved with safeguards (decision 50); in v0.11.0, released (decision 51) |
-| v0.12.0 | -- | **P-A8**, the footer carries a declared third-party attribution | approved with safeguards (decision 52) |
+| v0.12.0 | -- | **P-A8**, the footer carries a declared third-party attribution | approved with safeguards (decision 52); in v0.12.0 |
 | Next | -- | P-A4 (decision 23), designed separately (decision 52); SDD's domain and range file (decision 28) | approved earlier |
 | Backlog | -- | The Downloads bundle carries standalone provenance for declared third-party text in its modules (P-A8's design, §5) | entered as its own item, not placed (decision 52, 4) |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
