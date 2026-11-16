@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix; **v0.10.0** (2026-11-15, decisions 47 and 48), carrying P-A5; **v0.11.0** (2026-11-15, decisions 50 and 51), carrying P-A6; **v0.12.0** (2026-11-15, decision 52), carrying P-A8. See "Release v0.1.0" to "Release v0.12.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix; **v0.10.0** (2026-11-15, decisions 47 and 48), carrying P-A5; **v0.11.0** (2026-11-15, decisions 50 and 51), carrying P-A6; **v0.12.0** (2026-11-16, decisions 52 and 53), carrying P-A8. See "Release v0.1.0" to "Release v0.12.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -1499,6 +1499,12 @@ The rest of the checklist, with decision 32's three verifications:
   - `--against` the template reports every owned and seeded file as the template left it;
   - and the suite passes (992).
 - Item 4: the manifest recorded with the label `v0.12.0` in its own commit.
+- Items 5 and 6, under decision 53: the tree and the commits verified; `e3443d9` to
+  `f86da5d` pushed to `main`; on `f86da5d`, Checks, Reasoning and Pages green, and Install
+  and Scale, dispatched, green; `v0.12.0` tagged on `f86da5d` and pushed. Its Release run
+  passed, the release job skipped as in the template it is: a template version is its
+  tag and manifest, and no artefact is published. The tagged manifest is the one recorded
+  at item 4 (digest `8666493499effacc`). The release is complete.
 
 ### After WP6: the prioritized backlog (decision 29)
 
@@ -1522,8 +1528,8 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.9.0 | -- | **P-A2**, upgrading a project to a new release | approved with four safeguards (decision 45); in v0.9.0, released (decision 46) |
 | v0.10.0 | -- | **P-A5**, the explorer shows a term's comments | approved with three safeguards (decision 47); in v0.10.0, released (decision 48) |
 | v0.11.0 | -- | **P-A6**, `--propose` class by class | approved with safeguards (decision 50); in v0.11.0, released (decision 51) |
-| v0.12.0 | -- | **P-A8**, the footer carries a declared third-party attribution | approved with safeguards (decision 52); in v0.12.0 |
-| Next | -- | P-A4 (decision 23), designed separately (decision 52); SDD's domain and range file (decision 28) | approved earlier |
+| v0.12.0 | -- | **P-A8**, the footer carries a declared third-party attribution | approved with safeguards (decision 52); in v0.12.0, released (decision 53) |
+| Next | -- | P-A4 (decision 23), designed separately (decisions 52 and 53); SDD's domain and range file (decision 28) | approved earlier |
 | Backlog | -- | The Downloads bundle carries standalone provenance for declared third-party text in its modules (P-A8's design, §5) | entered as its own item, not placed (decision 52, 4) |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |

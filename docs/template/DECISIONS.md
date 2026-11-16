@@ -1003,3 +1003,22 @@ Its heading carries no number; it is entered as 52. Effect:
 - **Release:** P-A8 alone as v0.12.0, with negative and mutation tests, the full suite,
   compatibility checks and the release checklist. Then P-A4, designed separately; no
   completed WP6 finding reopened.
+
+**53. "Architectural Decision 53 — P-A8 v0.12.0 Release Authorization"** (2026-11-16)
+
+In answer to the v0.12.0 readiness report. The whole text is recorded verbatim in
+[`evaluations/2026-11-16-v0120-release-disposition.md`](evaluations/2026-11-16-v0120-release-disposition.md)
+(SHA-256 of the text below its rule `2ca16d56d48529133dd0ed2b9c6731bfa601bfdb202d5ec4a22fc61a31836bdf`). Effect:
+
+- P-A8 is accepted for release: the 27 negative tests, 30 of 30 mutants caught, the full
+  suite, the compatibility upgrade, the fresh init and the manifest tests.
+- The temporary git index incident is not a blocker, on condition that the final tree and
+  commits were verified. They were, before the push: the working tree equal to HEAD, the
+  index holding all 271 tracked files, no CRLF, and each commit holding only the files
+  reported.
+- `e3443d9` to `f86da5d` pushed to `main`; Checks, Reasoning, Pages, Install and Scale green
+  on `f86da5d`; `v0.12.0` tagged on it and pushed; its Release run passed with the release
+  job skipped, as in the template it is; the tagged manifest is item 4's (label `v0.12.0`,
+  digest `8666493499effacc`). `ROADMAP.md`'s "Release v0.12.0" records it.
+- The Downloads bundle's provenance stays outside v0.12.0, as its own backlog item.
+- Next: P-A4's design, scoped separately; no completed WP6 finding reopened.
