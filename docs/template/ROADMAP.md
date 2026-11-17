@@ -33,7 +33,7 @@ Decisions: [`DECISIONS.md`](DECISIONS.md).
 | 13 | WP5 Project ergonomics and documentation (alongside) | **done** (accepted 2026-10-30, decision 17) |
 | 14 | WP6 The final BPO evaluation | **done** (closed 2026-11-05, decision 30); the backlog is "After WP6", below |
 
-Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix; **v0.10.0** (2026-11-15, decisions 47 and 48), carrying P-A5; **v0.11.0** (2026-11-15, decisions 50 and 51), carrying P-A6; **v0.12.0** (2026-11-16, decisions 52 and 53), carrying P-A8. See "Release v0.1.0" to "Release v0.12.0", below.
+Released: **v0.1.0** (2026-10-30, decision 19), after phase 13; **v0.2.0** (2026-11-05, decision 31), after WP6, carrying items 1 to 4 of the backlog; **v0.3.0** (2026-11-06, decision 32), carrying items 5 and 6; **v0.4.0** (2026-11-06, decision 34), carrying item 12 with P5 and item 7; **v0.5.0** (2026-11-06, decision 36), carrying P4; **v0.6.0** (2026-11-07, decision 38), carrying P7 and decision 39's init fix; **v0.7.0** (2026-11-07, decision 40), carrying P8; **v0.8.0** (2026-11-14, decisions 42 and 43), carrying P6; **v0.9.0** (2026-11-14, decision 45), carrying P-A2 and the alert fix; **v0.10.0** (2026-11-15, decisions 47 and 48), carrying P-A5; **v0.11.0** (2026-11-15, decisions 50 and 51), carrying P-A6; **v0.12.0** (2026-11-16, decisions 52 and 53), carrying P-A8; **v0.13.0** (2026-11-17, decision 54), carrying P-A4. See "Release v0.1.0" to "Release v0.13.0", below.
 
 ## 1. Extract and generalize the core
 
@@ -1506,6 +1506,95 @@ The rest of the checklist, with decision 32's three verifications:
   tag and manifest, and no artefact is published. The tagged manifest is the one recorded
   at item 4 (digest `8666493499effacc`). The release is complete.
 
+### Release v0.13.0 (2026-11-17)
+
+The thirteenth template release, made under `RELEASING.md`: P-A4 as decision 54 approved it,
+and nothing else (decision 54, 3). P-A4 is closed.
+
+**What changes for a project made from v0.12.0.**
+
+- `docs/DEVELOPMENT.md` has a section, "A naming rule that relates a local name to a
+  value", under "Naming, deprecation, and what changed". A naming rule that reads a value
+  off the class (a class carrying the code `10002` is named `P10002`) cannot be a scheme
+  rule. The section shows it as a project's own shape set: the shape set, its fixture, the
+  two layout entries, and a project test listing its message.
+- It says which choices are the project's, and where in the query each is made:
+  exemptions, literal datatypes, language tags, whitespace and several values. The
+  example makes one set of them, and says none is a template rule (decision 54).
+- `tests/test_naming_guide.py` reads the example out of the guide and runs it. Oxigraph
+  and pyshacl must each report exactly the five classes the guide names, by IRI and by
+  the code each is reported for, and agree record for record.
+- Nothing a project runs changes. A project that wants the rule copies the example into
+  its own files, which the template neither owns nor seeds.
+
+| What | Why | Tests |
+|---|---|---|
+| `2667bf8`: the section in `docs/DEVELOPMENT.md`, and `tests/test_naming_guide.py` | P-A4 (decisions 23 and 54): BPO's second D7 rule relates a local name to a literal, which a scheme rule cannot state, and nothing pointed to a shape set | `tests/test_naming_guide.py` |
+
+**What it does not do.** It changes:
+- not `config/naming.yaml`, which is seeded and the project's, or `scheme_rules`;
+- not the validator, the SPARQL runner or the shape sets the template ships;
+- not the gate, the register or the layout contract;
+- not the ontology;
+- not BPO's rules: whether BPO moves its second D7 rule into a shape set is BPO's call.
+
+No completed WP6 finding is reopened, and no BPO measurement was made: BPO's rule is in its
+private port, and the design (section 3) measured the mechanism on the template.
+
+Not in it, and still open: the rest of the backlog, below, in its order:
+- SDD's domain and range file;
+- the release bundle's provenance (decision 52, 4);
+- items 8 to 11;
+- the follow-up P6 evaluation on BCO's first Stage 05 module (decision 42), which BCO was
+  asked to announce;
+- decision 49's two follow-ups: the explorer in a real browser, and whether v0.10.0's 7
+  within-module comment findings are WP6's 7 false alarms.
+
+Pins: item 1, every pin checked at `2667bf8` (2026-11-17), with a GitHub token: unauthenticated,
+the GitHub API's rate limit failed every pin it hosts. 29 pins, none failed; osv.dev
+scanned all 18 Python distributions, none has an advisory. The same five have a newer
+release as at v0.12.0, kept for the same reasons:
+- pip 26.3, Markdown 3.11.3 and uv 0.13.9 postdate the lock's cutoff, and a re-lock is a
+  change of its own;
+- CCO stays at `v2.0-2024-11-06` (decisions 3 and 18);
+- `actions/setup-java` v6.3.0: an action pin moves in a change of its own, and this release
+  carries one change only (decision 54, 3).
+
+The rest of the checklist, with decision 32's three verifications:
+
+- Item 2: the suite passes locally at `2667bf8` (1109 passed). Every check tool exits 0,
+  and the site checks clean. CI green on the tagged commit, confirmed before the tag is
+  pushed.
+- Negative tests (`tests/test_naming_guide.py`, 9):
+  - each engine reports exactly the guide's five breaking cases, each once, as
+    violations, and none of its five positive controls;
+  - the two engines agree record for record;
+  - the layout entries are a shape set and its fixture, with no `template:` key;
+  - the guide's project test passes on the example, and fails on a fixture that breaks
+    nothing;
+  - the reader takes only a block directly after its marker, and refuses a marker used
+    twice.
+- Mutation tests: 21 of 22 caught. 17 are in the guide: the exemption, `STR()`, the
+  prefix, the target, the severity, the fixture's cases, the markers, the layout entries
+  and the project test. 5 are in the test's own reading and assertions. The survivor
+  weakens `==` to `<=` on the expected set while the next line still requires five
+  records.
+- Compatibility: a project made at v0.12.0, upgraded by the P-A2 procedure to the template
+  at `2667bf8`:
+  - the plan's 2 files were a take (the guide) and an addition (the test), with no layout
+    entry added, changed or removed;
+  - 2 taken, adopted with nothing unresolved or retained, and a second plan found nothing;
+  - every check exits 0, `--against` reports nothing changed, and the suite passes (1001).
+- Item 3: a project made as "Use this template" makes one:
+  - a fresh clone of `2667bf8` reduced to one commit;
+  - installed from the lock (`--bootstrap`, then pip, `pip check` clean);
+  - initialized with the network rebuild, and init committed (init exit 0; nothing left
+    unstaged);
+  - every check exits 0;
+  - `--against` the template reports every owned and seeded file as the template left it;
+  - and the suite passes (1001).
+- Item 4: the manifest recorded with the label `v0.13.0` in its own commit.
+
 ### After WP6: the prioritized backlog (decision 29)
 
 From the WP6 analysis (`evaluations/2026-11-05-wp6-results-analysis.md`, §4) as the
@@ -1529,7 +1618,7 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.10.0 | -- | **P-A5**, the explorer shows a term's comments | approved with three safeguards (decision 47); in v0.10.0, released (decision 48) |
 | v0.11.0 | -- | **P-A6**, `--propose` class by class | approved with safeguards (decision 50); in v0.11.0, released (decision 51) |
 | v0.12.0 | -- | **P-A8**, the footer carries a declared third-party attribution | approved with safeguards (decision 52); in v0.12.0, released (decision 53) |
-| v0.13.0 | -- | **P-A4**, a naming rule relating a local name to a value, written as a project's shape set | approved (decision 54) |
+| v0.13.0 | -- | **P-A4**, a naming rule relating a local name to a value, written as a project's shape set | approved (decision 54); in v0.13.0 |
 | Next | -- | SDD's domain and range file (decision 28) | approved earlier |
 | Backlog | -- | The Downloads bundle carries standalone provenance for declared third-party text in its modules (P-A8's design, §5) | entered as its own item, not placed (decision 52, 4) |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
