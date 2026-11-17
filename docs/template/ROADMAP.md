@@ -1529,7 +1529,8 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.10.0 | -- | **P-A5**, the explorer shows a term's comments | approved with three safeguards (decision 47); in v0.10.0, released (decision 48) |
 | v0.11.0 | -- | **P-A6**, `--propose` class by class | approved with safeguards (decision 50); in v0.11.0, released (decision 51) |
 | v0.12.0 | -- | **P-A8**, the footer carries a declared third-party attribution | approved with safeguards (decision 52); in v0.12.0, released (decision 53) |
-| Next | -- | P-A4 (decision 23), designed separately (decisions 52 and 53); SDD's domain and range file (decision 28) | approved earlier |
+| v0.13.0 | -- | **P-A4**, a naming rule relating a local name to a value, written as a project's shape set | approved (decision 54) |
+| Next | -- | SDD's domain and range file (decision 28) | approved earlier |
 | Backlog | -- | The Downloads bundle carries standalone provenance for declared third-party text in its modules (P-A8's design, §5) | entered as its own item, not placed (decision 52, 4) |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
@@ -1549,7 +1550,7 @@ The BPO Testing Team's template findings from Phase A, each checked against the 
 | P-A1 | Transitive Python dependencies are unpinned; owlrl, which pyshacl imports, among them |
 | P-A2 | No procedure for upgrading a project to a new template release |
 | P-A3 | `template_status.py --against` does not see changes to shapes, fixtures, or the profile, naming and reasoning config |
-| P-A4 | A scheme rule cannot relate a local name to a literal (to be considered: it may be BPO's alone) |
+| P-A4 | A scheme rule cannot relate a local name to a literal (to be considered: it may be BPO's alone). Resolved in the guide (decision 54) |
 | P-A5 | The explorer shows no comments, so comment drift is invisible on the site |
 | P-A6 | `--propose` cannot fill entries class by class |
 | P-A7 | The register has no field for a finding's classification (real, false alarm, unsure) |

@@ -1022,3 +1022,25 @@ In answer to the v0.12.0 readiness report. The whole text is recorded verbatim i
   digest `8666493499effacc`). `ROADMAP.md`'s "Release v0.12.0" records it.
 - The Downloads bundle's provenance stays outside v0.12.0, as its own backlog item.
 - Next: P-A4's design, scoped separately; no completed WP6 finding reopened.
+
+**54. "Architectural Disposition — P-A4 Approved"** (2026-11-17)
+
+In answer to the four questions of `evaluations/2026-11-17-pa4-design.md` section 7. The
+whole text is recorded verbatim in
+[`evaluations/2026-11-17-pa4-disposition.md`](evaluations/2026-11-17-pa4-disposition.md)
+(SHA-256 of the text below its rule `de4da7d03af9a20eead20c994a3af834d7fb700388ce6dae3ea7d72eeabaa5a1`).
+Its heading carries no number; it is entered as 54. Effect:
+
+- `8b78882`, the design, is pushed.
+- **P-A4 is resolved in the naming guide and closed.** A rule relating a local name to a
+  value is written as a project's own SHACL-SPARQL shape set; `docs/DEVELOPMENT.md` says
+  how. No new scheme-rule form is introduced.
+- **The guide's own example and fixture are tested** through Oxigraph and pyshacl, and the
+  identities of the expected findings are verified, not only their number.
+- **The guide explains** the choices the project controls: exemptions, literal datatypes,
+  language tags, whitespace and several values, without imposing BPO's policy on other
+  projects.
+- **Not changed:** `config/naming.yaml`, the existing validation engines, the ontology.
+- **Release:** P-A4 alone as v0.13.0, under the established validation and the release
+  checklist. Then a message to the BPO Testing Team, distinguishing what the template
+  supports from what BPO implements.
