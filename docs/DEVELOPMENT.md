@@ -891,12 +891,164 @@ only, not on the faithful formalization of a real ontology (decision 42).
 follow `config/naming.yaml` (the linter's `naming_convention`). An IRI scheme that gives a
 local-name pattern a meaning — `P<number>` for a process type — is a **scheme rule** there:
 a pattern that must, or must not, sit under a category through `rdfs:subClassOf`, gated by
-the validator under `where: naming`. None ships enabled. A deprecated term names a
+the validator under `where: naming`. None ships enabled. A rule that relates a local name to a value is
+not a scheme rule; see the next section. A deprecated term names a
 replacement or a reason, and a deprecated class keeps its definition and its parent (the
 realist deprecated-term shape).
 `tools/ontology/term_diff.py` reports the terms added, removed, deprecated or changed
 between two commits — the Term diff workflow comments it on every pull request, and the
 Release workflow ships it as `CHANGES.md`, inside the checksums.
+
+### A naming rule that relates a local name to a value
+
+A scheme rule compares a local name with a pattern and a category. It cannot read a value
+off the class: "a class carrying the code `10002` is named `P10002`" relates the local name
+to a literal, and "a class is named as its vocabulary concept is" relates it to another
+term. Write such a rule as a shape set of your own, as "Adding a shape set" describes. It
+runs in the gate with the template's shape sets, and the template does not ship one,
+because every choice in it is the project's (template decision 54).
+
+The shape set, `shapes/code_names_shapes.ttl`. It filters on the project namespace as
+`config/project.yaml` spells it; `https://example.org/my-ontology#` here stands for yours:
+
+<!-- naming-guide-example: shapes -->
+```turtle
+@prefix sh:  <http://www.w3.org/ns/shacl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix cn:  <https://example.org/my-ontology/shapes/code-names#> .
+
+# Our IRI scheme: a class carrying a catalogue code is named P<code>.
+
+cn:prefixes
+    a owl:Ontology ;
+    sh:declare
+        [ sh:prefix "rdfs" ; sh:namespace "http://www.w3.org/2000/01/rdf-schema#"^^xsd:anyURI ] ,
+        [ sh:prefix "owl"  ; sh:namespace "http://www.w3.org/2002/07/owl#"^^xsd:anyURI ] ,
+        [ sh:prefix "my"   ; sh:namespace "https://example.org/my-ontology#"^^xsd:anyURI ] .
+
+cn:CodeNamesShape
+    a sh:NodeShape ;
+    sh:severity sh:Violation ;
+
+    sh:target [
+        a sh:SPARQLTarget ;
+        sh:prefixes cn:prefixes ;
+        sh:select """SELECT ?this WHERE {
+          ?this a owl:Class ; my:code ?any .
+          FILTER(STRSTARTS(STR(?this), "https://example.org/my-ontology#"))
+        }""" ] ;
+
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Class {$this} carries the code {?code} and is not named P{?code}." ;
+        sh:prefixes cn:prefixes ;
+        sh:select """SELECT $this ?code WHERE {
+          $this my:code ?code .
+          FILTER NOT EXISTS { $this rdfs:subClassOf* my:Grouping }
+          FILTER(STRAFTER(STR($this), "https://example.org/my-ontology#")
+                 != CONCAT("P", STR(?code)))
+        }""" ] .
+```
+
+Its fixture, `shapes/code_names_bad_examples.ttl`: cases built to break it, and positive
+controls that must survive.
+
+<!-- naming-guide-example: fixture -->
+```turtle
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix my:   <https://example.org/my-ontology#> .
+
+# Cases built to break code_names_shapes.ttl, with positive controls.
+
+my:code a owl:AnnotationProperty .
+my:Grouping a owl:Class .
+
+# -- positive controls: each is named for its code ---------------------
+my:P10002 a owl:Class ; my:code "10002" .
+my:P10003 a owl:Class ; my:code "10003"^^xsd:string .
+my:P10004 a owl:Class ; my:code "10004"^^xsd:integer .
+my:P10005 a owl:Class ; my:code "10005"@en .
+my:Regional a owl:Class ; rdfs:subClassOf my:Grouping ; my:code "10006" .
+my:P10007 a owl:Class .
+
+# -- cases that break it -------------------------------------------------
+my:P10008 a owl:Class ; my:code "10009" .
+my:Planning a owl:Class ; my:code "10010" .
+my:P10011 a owl:Class ; my:code "10011" , "10012" .
+my:P10013 a owl:Class ; my:code " 10013" .
+my:P10014 a owl:Class ; my:code "10015"^^xsd:integer .
+```
+
+Declare both in `config/repository-layout.yaml`, which is the project's file. With no
+`template:` key, neither is reported as divergence from the template:
+
+<!-- naming-guide-example: layout -->
+```yaml
+  - id: validation.code-names
+    path: shapes/code_names_shapes.ttl
+    role: ontology-validation
+    description: >-
+      Our IRI scheme: a class carrying a catalogue code is named P<code>.
+
+  - id: fixture.code-names-bad-examples
+    path: shapes/code_names_bad_examples.ttl
+    role: test-fixture
+    description: >-
+      Cases built to break code_names_shapes.ttl, with positive controls.
+```
+
+And list its message in a test of the project's own, under `tests/project/`:
+
+<!-- naming-guide-example: test -->
+```python
+# tests/project/test_code_names.py
+from conftest import load_tool
+
+CODE_NAMES_CONSTRAINTS = ["and is not named P"]
+
+
+def test_every_code_names_constraint_is_exercised(repo):
+    validator = load_tool("t_code_names", "tools/ontology/validate.py")
+    data = validator.load([repo / "shapes/code_names_bad_examples.ttl"])
+    shapes = validator.load([repo / "shapes/code_names_shapes.ttl"])
+    fired = {v["message"] for v in validator.run(data, shapes)["violations"]}
+    missing = [m for m in CODE_NAMES_CONSTRAINTS
+               if not any(m in f for f in fired)]
+    assert not missing, missing
+```
+
+**The choices are yours, and the query is where you make them.** The example makes one set
+of them; none is a template rule, and none is another project's.
+
+- **Exemptions.** The `FILTER NOT EXISTS` line exempts every class under `my:Grouping`
+  (`my:Regional` in the fixture). Name your own categories there, as many as your scheme
+  has, or delete the line if nothing is exempt.
+- **Datatypes.** `STR(?code)` compares the value's lexical form, so `"10003"^^xsd:string`
+  and `"10004"^^xsd:integer` both name their classes. Keep it: without `STR()`, `CONCAT`
+  on an `xsd:integer` is an error, the filter is false, and `my:P10014`, carrying `10015`,
+  passes without a word. To refuse a typed code instead, add a constraint of its own that
+  reports `FILTER(DATATYPE(?code) != xsd:string)`.
+- **Language tags.** `STR()` drops the tag as well, so `"10005"@en` names `my:P10005`. To
+  refuse a tagged code, report `FILTER(LANG(?code) != "")` in a constraint of its own.
+- **Whitespace.** The value is compared as written: `" 10013"` would need a local name with
+  a space in it, so `my:P10013` is reported. To tolerate surrounding whitespace, compare
+  against the value with it removed (SPARQL's `REPLACE`), and say why in the shape's
+  comment.
+- **Several values.** Each value is tested on its own, so `my:P10011`, carrying `10011` and
+  `10012`, is reported once, for `10012`. To allow one code only, add a property shape
+  with `sh:maxCount 1` on `my:code`.
+- **What is targeted.** The target is every class in the namespace that carries a code
+  (`my:P10007`, with none, is not this rule's). A rule that every `P`-name must carry a
+  code is a different rule: a scheme rule can state that one if the `P`-names sit under a
+  category, and a shape like this one if they do not.
+
+`tests/test_naming_guide.py` reads the four blocks above out of this file, runs the shape set
+on the fixture through both engines, and requires both to report exactly `my:P10008`,
+`my:Planning`, `my:P10011` (for `10012`), `my:P10013` and `my:P10014`. If the example stops
+working, the suite fails.
 
 ## Requests, reviews and records
 
