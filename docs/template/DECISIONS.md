@@ -1044,3 +1044,27 @@ Its heading carries no number; it is entered as 54. Effect:
 - **Release:** P-A4 alone as v0.13.0, under the established validation and the release
   checklist. Then a message to the BPO Testing Team, distinguishing what the template
   supports from what BPO implements.
+
+**55. "1. yes 2. only if the precision offers value vs potential confusion 3. yes 4. No this
+is not really a chane to the tempate (unless there is reason otherwise)"** (2026-11-18)
+
+In answer to the four questions of `evaluations/2026-11-18-sdd-domain-range-design.md`
+section 7. Recorded verbatim in
+[`evaluations/2026-11-18-sdd-domain-range-disposition.md`](evaluations/2026-11-18-sdd-domain-range-disposition.md)
+(SHA-256 of the text below its rule `c227a5de2670855e3936f33a095c2ae09336e97d7725f26a91e03f81a852aa4b`). Effect, with the
+two conditional answers as read and reported to the architect:
+
+- **1. Approved:** one file per source, with the derivation of §4.2 across both pinned
+  sources.
+- **2. Read as: the distinction that carries value is kept, the one that does not is
+  dropped.** "Anonymous only" against "unconstrained" is kept: without it SDD's R-S8 would
+  read every BFO property whose domain or range is a union (12 domains, 9 ranges) as "any
+  type fits", and pass wrong types silently. "Asserted" against "derived" is dropped: the
+  file's top-level fields already show what the property asserts. Each derived domain and
+  range carries one of three statuses: `named`, `anonymous only`, `unconstrained`.
+- **3. Approved:** an optional `properties:` key per source in `config/upstream-sources.yaml`.
+- **4. Read as: no release of its own.** It changes an owned tool and a seeded file, so it is
+  a template change, and a project receives it with the next release that carries a
+  functional change, as the hierarchy files went out in v0.2.0 (decision 25). Built on
+  `main`, unreleased; SDD can read it at a `main` commit, as it read the hierarchy files.
+  The notice to SDD names that commit.

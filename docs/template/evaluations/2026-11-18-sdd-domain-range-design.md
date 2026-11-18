@@ -1,7 +1,8 @@
 # SDD's request: each object property's domain and range, from the pins
 
 **To:** the architect. **From:** the Ontology Template Team. **Date:** 2026-11-18.
-**Status:** proposed. **Under:** decision 28, which accepted the Semantic Data Dictionary
+**Status:** decided, 2026-11-18 (decision 55,
+`2026-11-18-sdd-domain-range-disposition.md`); §8 says how it is built. **Under:** decision 28, which accepted the Semantic Data Dictionary
 team's request (`SDD-EXAMPLE-2026-11-04-domain-range-register`) and settled what the file
 holds; decision 29, which placed it in the backlog; and the ROADMAP's "Next" row after
 v0.13.0. Like the earlier designs, this one states the gap, the correction, the validation
@@ -262,3 +263,15 @@ is ever revisited, these files follow it.
 
 Size: one function in the vendoring tool, its manifest and verify entries, two generated
 files, a guide paragraph, and tests. Nothing is built until it is approved.
+
+## 8. As decided (decision 55)
+
+- **The file and the rule** (questions 1 and 3) as proposed: one file per source, derived
+  across both pinned sources, under an optional `properties:` key.
+- **Three statuses, not four** (question 2, read as: keep the precision that carries value).
+  Each derived domain and range carries `named`, `anonymous only` or `unconstrained`. The
+  asserted values are the top-level fields, so `asserted` and `derived` are not separate
+  statuses. `anonymous only` is kept because without it every BFO property whose domain or
+  range is a union would read as unconstrained.
+- **No release of its own** (question 4). Built on `main`, unreleased, and carried by the
+  next release with a functional change. The notice to SDD names the `main` commit.
