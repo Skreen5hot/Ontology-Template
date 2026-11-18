@@ -573,6 +573,28 @@ components:
       category offline. Asked for by the Semantic Data Dictionary team
       (decision 25).
 
+  - id: vendor.bfo-properties
+    path: vendor/bfo/bfo-properties.json
+    role: vendored-register
+    generator: tool.vendor-upstream
+    redistributable: true
+    description: >-
+      Every object property BFO 2020 core describes, with its named
+      domains, ranges, superproperties and inverses as asserted, and a
+      derived domain and range with a status (decisions 28 and 55).
+
+  - id: vendor.cco-properties
+    path: vendor/cco/cco-properties.json
+    role: vendored-register
+    generator: tool.vendor-upstream
+    redistributable: true
+    description: >-
+      Every object property CCO v2.0's register lists, with its named
+      domains, ranges, superproperties and inverses as asserted, and a
+      derived domain and range, through BFO's properties too, with a
+      status. Asked for by the Semantic Data Dictionary team (decisions
+      28 and 55).
+
   - id: docs.vendor-notice
     path: vendor/NOTICE.md
     role: documentation

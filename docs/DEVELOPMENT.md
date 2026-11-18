@@ -465,6 +465,28 @@ source itself describes, is recorded under `outside_namespace`: CCO v2.0 declare
 process profile (`obo:BFO_0000144`), which BFO 2020 does not have, and puts 12 classes
 under it. With it, every CCO class at this pin reaches `obo:BFO_0000001`.
 
+**A source may have an object-property file** (decisions 28 and 55), declared with an
+optional `properties:` path, as BFO's and CCO's are (`vendor/<source>/<source>-properties.json`).
+- **What it lists:** every object property the register lists, with its named `rdfs:domain`,
+  `rdfs:range`, superproperties and inverses as the pinned files assert them, and a count of
+  the anonymous domains and ranges. Inverses are read from either end, from the source's own
+  files.
+- **What it derives**, under `derived`:
+  - the domain and range through `rdfs:subPropertyOf` and `owl:inverseOf`, repeated until
+    nothing changes, over every pinned source's properties together. So a CCO property under
+    a BFO property inherits from BFO's file;
+  - for each derived class, the property it is asserted on, and whether as a domain or a
+    range.
+- **A derived list is a conjunction:** a type fits when it descends from every class listed.
+- **Each derived domain and range has a status:**
+  - `named`: the list is not empty;
+  - `anonymous only`: a class expression the file does not carry, such as a union, applies.
+    The property is constrained; do not read it as "any type fits";
+  - `unconstrained`: nothing in the pinned files constrains it.
+- **`owl:Thing` is never written.**
+- **Consumers only:** no check reads the file; it is published for consumers such as the
+  Semantic Data Dictionary.
+
 **A source may be several files** at one commit: `files:` with a `url` and `sha256` each,
 instead of a single `url` and `sha256`. They are read as one graph. Every url must name the
 commit.
@@ -475,7 +497,7 @@ pinned file describes is recorded in `config/upstream-extracts.json` rather than
 
 **A sister ontology** (one this project builds on, such as the Business Process Ontology) is
 another entry in `config/upstream-sources.yaml`: url(s) at a commit, sha256, namespace,
-prefix, extract, register and hierarchy paths, licence. If its Turtle states no licence, name its LICENSE
+prefix, extract, register and hierarchy paths (and, optionally, a properties path), licence. If its Turtle states no licence, name its LICENSE
 file at the same commit as `statement_url` with a `statement_sha256`. The end of that file
 carries a worked entry, commented out: the BPO pin the Business Capability Ontology uses.
 Declare the extract as a `vendored-ontology` and the register and hierarchy as

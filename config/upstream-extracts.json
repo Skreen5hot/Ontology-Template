@@ -23,6 +23,26 @@
       "named_by_specification_described_by_no_pinned_file": [],
       "namespace": "http://purl.obolibrary.org/obo/",
       "project": "Basic Formal Ontology",
+      "properties": "vendor/bfo/bfo-properties.json",
+      "properties_counts": {
+        "anonymous_domains": 12,
+        "anonymous_ranges": 9,
+        "derived_domain_status": {
+          "anonymous only": 12,
+          "named": 28,
+          "unconstrained": 0
+        },
+        "derived_range_status": {
+          "anonymous only": 9,
+          "named": 31,
+          "unconstrained": 0
+        },
+        "named_domain_edges": 28,
+        "named_range_edges": 31,
+        "properties": 40
+      },
+      "properties_on_disk_matches": true,
+      "properties_sha256": "d99e395caf1df71317fa5f49e9adff2efbae73733016bbdbf6f3e4b8e96a0d86",
       "register": "vendor/bfo/bfo-register.json",
       "register_on_disk_matches": true,
       "register_sha256": "ff473b47aae7610e11303166bfc9ab6c46e234cea0b7265e16f19c0283986186",
@@ -107,7 +127,9 @@
         "http://purl.obolibrary.org/obo/BFO_0000224"
       ],
       "seed_terms_from_corpus_and_shapes": [
-        "http://purl.obolibrary.org/obo/BFO_0000001"
+        "http://purl.obolibrary.org/obo/BFO_0000001",
+        "http://purl.obolibrary.org/obo/BFO_0000017",
+        "http://purl.obolibrary.org/obo/BFO_0000054"
       ],
       "select": "all",
       "source_files": [
@@ -143,6 +165,26 @@
       "named_by_specification_described_by_no_pinned_file": [],
       "namespace": "https://www.commoncoreontologies.org/",
       "project": "Common Core Ontologies",
+      "properties": "vendor/cco/cco-properties.json",
+      "properties_counts": {
+        "anonymous_domains": 3,
+        "anonymous_ranges": 6,
+        "derived_domain_status": {
+          "anonymous only": 5,
+          "named": 216,
+          "unconstrained": 4
+        },
+        "derived_range_status": {
+          "anonymous only": 8,
+          "named": 213,
+          "unconstrained": 4
+        },
+        "named_domain_edges": 112,
+        "named_range_edges": 110,
+        "properties": 225
+      },
+      "properties_on_disk_matches": true,
+      "properties_sha256": "bc9f375e39b5ac60f0637bfd35b01952eae88550d7990dbe467ebb35ddfb9612",
       "register": "vendor/cco/cco-register.json",
       "register_on_disk_matches": true,
       "register_sha256": "6ae382fafc5b3b1098ec155bf8d5f956921a8219a282ccbda79f3ce22d61185c",
@@ -180,7 +222,7 @@
     "dropped": 105,
     "full": 78,
     "seeds": 77,
-    "seeds_from_corpus_and_shapes": 2,
+    "seeds_from_corpus_and_shapes": 4,
     "seeds_from_specification": 0,
     "seeds_from_whole_sources": 76,
     "spec_terms_unresolved": 0,

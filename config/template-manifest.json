@@ -1,5 +1,5 @@
 {
-  "digest": "bff18e16f6c99473737d53730caecd4a8461662ce1a6543b1a761c7573e25a3c",
+  "digest": "3a61d132935111e69c3893d81f94ecdcb40bd876120fa41212ad358177affff1",
   "files": {
     ".claude/settings.json": "9b041bff11cb8a538e72160adb8b61916e16fd264488ebc6ed09408794c223c4",
     ".gitattributes": "5101743feaf71040effdac82a044b656aa510d423e8894e078db3b5c0e0d4090",
@@ -18,7 +18,7 @@
     ".gitignore": "906a9004859c344d654b788880f803857a39ed80aace7dd898ceedbed29547ce",
     "config/review.yaml": "cb38aac49ee963e2249f14bf96e152f4333359b23cd4d5d6b627cd3b87dc15f8",
     "config/tooling.yaml": "a106bb41f68541125b979d3aeb022fb5c85ad1ce318e4ed03f5d0a4194b039ec",
-    "docs/DEVELOPMENT.md": "8d18cb4fde719ef784cffaaf5b6b281d47e0af0b50a216ef0cc3559d6b52b28a",
+    "docs/DEVELOPMENT.md": "4d7a62d9057556d903e1d1d987eee5d017300c77e35209db633459ca30bcc1e5",
     "docs/PORTING.md": "f58802103aa3ee37dbfb939dc56a0c96297b2f2d1ede8d64497eed751ae164f7",
     "docs/porting/port-report.md": "9cd44e61b1ca19f2723283648cf8220ae53ecfa67d57a0535cd0404458d0bf4d",
     "docs/process/METHOD.md": "c8c41e635b571ee1f066c38460c6da3ea1df4269919a1b7ab2da30eafaf5e4f4",
@@ -97,7 +97,7 @@
     "tests/test_stages.py": "698bb9cb00911739f6dcb2678bfeaff611a3d1be4735bd9ffb414d4679b1b987",
     "tests/test_template.py": "ac08843769046972bb7ed4fcc40f80dd9c487ff295280bf4fe6a74721ec8a19b",
     "tests/test_term_contract.py": "d8837aa924a0dad0939ca663753f1bd3afeef13ec87c8db776d7e0c3b76926c8",
-    "tests/test_upstream_vendoring.py": "d69e1511158b51761b11e1395259ff59429b25763e0d888155ce2d09c07043c4",
+    "tests/test_upstream_vendoring.py": "25a2e8ca7308ee80f59e761d0420fe64e5c2d859009c1ab4fe757c2a5a5d8195",
     "tests/test_vocabulary.py": "a0b53c5d5a70a1b9f9d4d28194c93e215394c4f38714289fd3040f752e841ad7",
     "tools/communications.py": "7d235a354c35f91bcd735836eac965d23c637cc70a955ab9cc958a8cbdbf2e81",
     "tools/decisions.py": "defa2dd67c12145e514f21f992b9bdbba81a435da340efb8b849bc7da76293ff",
@@ -106,7 +106,7 @@
     "tools/hooks/claude_ttl_lint.py": "0e4351ddb4ec278857030434b505a97931fcefa49637b2c340b36129063c9258",
     "tools/init_project.py": "9c018bd867a850480f65e311d95a2e1c1b6583902352b7a9aed9a57d0cc2c70f",
     "tools/layout.py": "6363c0f542e308d71276969a499184d74536abfa98842c6914c0cc10ac77613d",
-    "tools/licensing/disposition.py": "1cae1d21b8787cdb759a842a3902074ded1d33f540d8b885452cb5fc90dfc46e",
+    "tools/licensing/disposition.py": "a69b0198d84480303ead927b97177521cdbc28fcbeddb997c5b8703aee8f9bc6",
     "tools/licensing/third_party.py": "30c6d45cc4243d2cde684db75e7bc4b2ccbd24f33a3f411b3fdf095a802167f5",
     "tools/lock.py": "89b6c363b3fd5278d16a88e94ec2fe1290f96aac00d874fb22cea3b9fcba7573",
     "tools/ontology/benchmark.py": "5f4a98e9a5b14d6b15b05e92a3fca77d23c88321e44e6e023441a88828a1b6a5",
@@ -123,7 +123,7 @@
     "tools/ontology/sparql_constraints.py": "d3a55926991b7714da80c920a476178427b833f6518ffb121c54bf76729a006e",
     "tools/ontology/term_diff.py": "299b715429674fbf6b9905f24e3c0ca70acf8522fadca149d0b02628d955611c",
     "tools/ontology/validate.py": "56176cfcae7f134132f5e90b6c5d0da0e05875d0b74666cfe3d893a399ed0a5e",
-    "tools/ontology/vendor_upstream.py": "4c79b7e7e7b34254045ec8459375cba158c2775fb3f49035db812c8e6c916202",
+    "tools/ontology/vendor_upstream.py": "263e6502c9baf16e692f698a2b71229b58340bcef28eeb42efe6280cf131add2",
     "tools/ontology/vocabulary.py": "8913972fae9bb1afd43f137654a1736ab4bc93f73e121d572a659306b78bd1d8",
     "tools/pins.py": "121b6f0f092aa836fc8f08d1f12d53007c7d88a7d0afe02be3266a0404aafca6",
     "tools/project.py": "03cdd60299f268b469580d1964bd725f88665bff7d5f874777605e86d92663cf",
@@ -146,7 +146,7 @@
     "prefix": "example",
     "title": "Example Ontology"
   },
-  "label": "v0.13.0",
+  "label": "unreleased",
   "note": "The digest of every template-owned and template-seeded file as the template shipped it, and the values init rewrites Turtle from (identity). A project keeps this as it arrived, with the block init adds (initialized): it is the record of what the project was made from, and tools/template_status.py compares the project's files, and a newer template's manifest, against it. template_commit is the template commit this record was made on; the commit that carries the record follows it, and a release tag names that commit.",
   "seeded": {
     "config/annotation-profile.yaml": "22162f289468ef41edd97c3cd4c689215fc39177c5eba362a66da890440677dd",
@@ -158,7 +158,7 @@
     "config/review-register.yaml": "50b5a28a3d3961092a9c5b4696dac85693dd901848224a5c40840ace4dabeacd",
     "config/rights.yaml": "679f153966ebf86a1642ea3f5fbd8fed37016896c0e5e59b0975b0b6492a6ae3",
     "config/sources.yaml": "7ca5d6fdc4a006f46d7a8d550f4412d85c1bafcce552ad55ea4c8214016e4150",
-    "config/upstream-sources.yaml": "9598fc10e84a85ec8e9bfae128146a8f912ee2215358062532ae4f2b77346112",
+    "config/upstream-sources.yaml": "f4a76e67d385dbe4814f8314e1b3ccee216d005435e9dbbaf9913a8dbb78ba06",
     "docs/decisions/README.md": "de957c16bbd82d8f2b8d33deb0a98cf229505bd21a2d8a30a60d21273d491649",
     "ontology/trace.yaml": "7a73edabff1166f1b0a1ef0422bb03a1975863dd4540964f0807b57244ab719d",
     "research/rights.yaml": "643e3456c7cfc47f0e1cbd0e8939a0c025b2164b728b558cbfa6fc44ea1899d0",
@@ -170,7 +170,7 @@
     "shapes/wellformedness_bad_examples.ttl": "313974a3fae0c318d4b75349eebff7f7b9d0db9ecad57cc4b7733652cc43c25d",
     "shapes/wellformedness_shapes.ttl": "c83ee7af0c991603e06569fcd5c09f7d0a3d7e566c7a27908e350899bbacdedd"
   },
-  "seeded_digest": "a70856dc9d33c0b5b8b4557f9196e7d78aaa39a22059c4b71f244cb8fdc68a07",
-  "template_commit": "89c0fee37f6c3108112b02df651c2ca6b9906813",
+  "seeded_digest": "d955494d0cf78c8d27a06dd675d7085ebf3857108ed50728d13504594161539a",
+  "template_commit": "44ee27fb4f9a9599a35433d3015033ab3fda2ff2",
   "template_repository": "Skreen5hot/Ontology-Template"
 }

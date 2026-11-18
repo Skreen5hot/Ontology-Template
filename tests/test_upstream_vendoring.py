@@ -81,7 +81,7 @@ def extract(layout, component_id):
 
 
 def constructed_upstreams(vendoring, monkeypatch, upstreams, seeds,
-                          disjointness=None):
+                          disjointness=None, properties=None):
     """Pins and bytes built here, so `build` runs without the network.
 
     `upstreams` is [(id, namespace, select, turtle)], where turtle is one
@@ -89,6 +89,7 @@ def constructed_upstreams(vendoring, monkeypatch, upstreams, seeds,
     Afterwards `vendoring.build(tmp)` builds from these.
     """
     disjointness = disjointness or {}
+    properties = properties or {}
     licence = "<http://purl.org/dc/terms/license>"
     pins = []
     for key, namespace, select, text in upstreams:
@@ -109,6 +110,7 @@ def constructed_upstreams(vendoring, monkeypatch, upstreams, seeds,
             "register": "vendor/%s-register.json" % key,
             "hierarchy": "vendor/%s-hierarchy.json" % key, "_texts": texts,
             "disjointness": disjointness.get(key),
+            "properties": properties.get(key),
             "licence": {"spdx": "MIT", "url": "https://l.invalid/",
                         "licence_statement_contains": "licence-" + key.upper(),
                         "attribution": key}})
@@ -227,6 +229,7 @@ def test_the_manifest_records_a_source_digest_for_every_extract(vendoring,
         assert record["select"] == pinned[key]["select"], key
         assert record["register"] == pinned[key]["register"], key
         assert record["hierarchy"] == pinned[key]["hierarchy"], key
+        assert record["properties"] == pinned[key]["properties"], key
 
 
 def test_the_extract_headers_name_this_project(layout, project):
@@ -621,6 +624,8 @@ def test_a_register_is_never_loaded_as_ontology(layout, vendoring):
     for entry in vendoring.sources():
         assert entry["register"] not in loaded, entry["register"]
         assert entry["hierarchy"] not in loaded, entry["hierarchy"]
+        if entry["properties"]:
+            assert entry["properties"] not in loaded, entry["properties"]
 
 
 # ----------------------------------------------------------- hierarchy
@@ -1159,3 +1164,264 @@ def test_a_tampered_disjointness_file_is_found_offline(vendoring, repo):
     finally:
         path.write_bytes(original)
     assert path.read_bytes() == original
+
+
+# ---------------------------------------------------- properties (SDD)
+
+
+@pytest.fixture(scope="module")
+def property_files(vendoring):
+    import json
+
+    root = vendoring.layout.repository_root()
+    return {entry["id"]: json.loads((root / entry["properties"]).read_text(
+        encoding="utf-8")) for entry in vendoring.sources()
+        if entry["properties"]}
+
+
+def test_a_property_file_describes_its_pin_and_every_register_property(
+        vendoring, registers, property_files):
+    """Decision 28: every object property the register lists, and nothing
+    else, from the same pinned files; the derivation names every source
+    it read, with its commit."""
+    pinned = vendoring.sources()
+    assert {"bfo", "cco"} <= set(property_files)
+    for entry in pinned:
+        record = property_files[entry["id"]]
+        assert record["commit"] == entry["commit"], entry["id"]
+        assert record["files"] == entry["files"], entry["id"]
+        assert record["licence"] == entry["licence"]["spdx"], entry["id"]
+        listed = {iri for iri, term in registers[entry["id"]]["terms"].items()
+                  if OWL + "ObjectProperty" in term["types"]}
+        assert set(record["properties"]) == listed, entry["id"]
+        assert record["derived_from"] == [
+            {"source": e["id"], "commit": e["commit"]} for e in pinned]
+
+
+def test_the_property_counts_at_the_pins(property_files):
+    """The design's measurement (2026-11-18, section 3), reproduced by the
+    generated files. A change to the pins changes these, on purpose."""
+    bfo, cco = property_files["bfo"]["counts"], property_files["cco"]["counts"]
+    assert bfo == {
+        "properties": 40, "named_domain_edges": 28, "named_range_edges": 31,
+        "anonymous_domains": 12, "anonymous_ranges": 9,
+        "derived_domain_status": {"named": 28, "anonymous only": 12,
+                                  "unconstrained": 0},
+        "derived_range_status": {"named": 31, "anonymous only": 9,
+                                 "unconstrained": 0}}
+    assert cco == {
+        "properties": 225, "named_domain_edges": 112, "named_range_edges": 110,
+        "anonymous_domains": 3, "anonymous_ranges": 6,
+        "derived_domain_status": {"named": 216, "anonymous only": 5,
+                                  "unconstrained": 4},
+        "derived_range_status": {"named": 213, "anonymous only": 8,
+                                 "unconstrained": 4}}
+
+
+def test_owl_thing_is_never_written(property_files):
+    """Decision 28: where the source states nothing, nothing is filled
+    in."""
+    import json
+
+    for record in property_files.values():
+        assert OWL + "Thing" not in json.dumps(record)
+
+
+def naive_derivation(rows):
+    """An independent reference: for each property and side, every
+    (property, side) reachable by stepping to a superproperty (same side)
+    or to an inverse (other side), and the classes asserted there."""
+    inverses = {}
+    for p, row in rows.items():
+        for q in row["inverses"]:
+            if q in rows:
+                inverses.setdefault(p, set()).add(q)
+                inverses.setdefault(q, set()).add(p)
+    out = {}
+    for start in rows:
+        for side in ("domain", "range"):
+            seen, waiting = set(), [(start, side)]
+            while waiting:
+                node = waiting.pop()
+                if node in seen:
+                    continue
+                seen.add(node)
+                p, s = node
+                waiting += [(q, s) for q in rows[p]["superproperties"]
+                            if q in rows]
+                other = "range" if s == "domain" else "domain"
+                waiting += [(q, other) for q in inverses.get(p, ())]
+            classes = sorted({c for p, s in seen for c in rows[p][s]})
+            anonymous = any(rows[p]["anonymous_" + s] for p, s in seen)
+            status = ("named" if classes else
+                      "anonymous only" if anonymous else "unconstrained")
+            out[(start, side)] = (classes, status)
+    return out
+
+
+def test_the_derivation_agrees_with_a_naive_closure(property_files):
+    """Every derived list and status at the pins, against a reachability
+    search written separately from the tool's fixpoint."""
+    rows = {}
+    for record in property_files.values():
+        rows.update(record["properties"])
+    reference = naive_derivation(rows)
+    differ = []
+    for p, row in rows.items():
+        for side in ("domain", "range"):
+            got = (row["derived"][side], row["derived"][side + "_status"])
+            if got != reference[(p, side)]:
+                differ.append((p, side))
+    assert differ == [], differ[:5]
+
+
+def test_the_files_derivation_is_the_tools(vendoring, property_files):
+    """The files on disk, rederived by the tool from their own asserted
+    fields: what `derived` says is what the derivation gives, so a change
+    to the rule cannot leave the published files behind."""
+    rows = {}
+    for record in property_files.values():
+        for iri, row in record["properties"].items():
+            rows[iri] = {k: v for k, v in row.items() if k != "derived"}
+    derived = vendoring.derive_properties(rows)
+    differ = [iri for record in property_files.values()
+              for iri, row in record["properties"].items()
+              if row["derived"] != derived[iri]]
+    assert differ == [], differ[:5]
+
+
+def test_a_cco_property_derives_through_bfos_file(property_files):
+    """Across sources (decision 55): CCO states an inverse of BFO's
+    occupies-temporal-region that BFO's file does not, and the CCO
+    property's domain is derived from BFO's own range."""
+    bfo = property_files["bfo"]["properties"][OBO + "BFO_0000199"]
+    cco = property_files["cco"]["properties"][
+        "https://www.commoncoreontologies.org/ont00001874"]
+    assert bfo["inverses"] == [], "BFO's file states no inverse for it"
+    assert cco["inverses"] == [OBO + "BFO_0000199"]
+    assert {"property": OBO + "BFO_0000199", "as": "range"} in \
+        cco["derived"]["domain_via"][OBO + "BFO_0000008"]
+
+
+def test_the_derivation_on_constructed_sources(vendoring, monkeypatch,
+                                               tmp_path):
+    """One case per rule: a superproperty, an inverse stated from either
+    end, a chain of both, a cycle, an anonymous domain alone and beside a
+    named one, inheritance from another source's property, a property
+    under owl:topObjectProperty, one with nothing, and a source without
+    `properties:`, which gets no file."""
+    import json
+
+    a, b = "https://a.invalid/", "https://b.invalid/"
+    typed = "<http://www.w3.org/1999/02/22-rdf-syntax-ns#type>"
+    op = "<%sObjectProperty>" % OWL
+    sub = "<%ssubPropertyOf>" % RDFS
+    dom, rng = "<%sdomain>" % RDFS, "<%srange>" % RDFS
+    inv = "<%sinverseOf>" % OWL
+    union = "[ <%sunionOf> ( <%sU1> <%sU2> ) ]" % (OWL, a, a)
+    lines = ["<{a}%s> {t} {op} ." % name for name in (
+        "top", "sub", "inv", "chain", "c1", "c2", "anon", "anon2", "mixed",
+        "cross", "under", "free", "p1", "p2", "p3", "q1", "q2", "q3",
+        "ai")]
+    lines += ["<{a}dp> {t} <%sDatatypeProperty> ; {d} <{a}D> ." % OWL]
+    lines += [
+        "<{a}top> {d} <{a}D> ; {r} <{a}R> .",
+        "<{a}sub> {s} <{a}top> .",
+        "<{a}top> {i} <{a}inv> .",
+        "<{a}chain> {s} <{a}inv> .",
+        "<{a}c1> {s} <{a}c2> ; {d} <{a}X> .",
+        "<{a}c2> {s} <{a}c1> .",
+        "<{a}anon> {d} %s ." % union,
+        "<{a}anon2> {s} <{a}anon> .",
+        "<{a}mixed> {d} <{a}D> , %s ." % union,
+        "<{a}cross> {s} <{b}bp> .",
+        "<{a}under> {s} <%stopObjectProperty> ." % OWL,
+        "<{a}p1> {s} <{a}p2> .", "<{a}p2> {s} <{a}p3> .",
+        "<{a}p3> {d} <{a}P> .",
+        "<{a}q3> {s} <{a}q2> .", "<{a}q2> {s} <{a}q1> .",
+        "<{a}q1> {d} <{a}Q> .",
+    ]
+    text = "\n".join(lines).format(a=a, b=b, t=typed, op=op, s=sub, d=dom,
+                                   r=rng, i=inv) + "\n"
+    constructed_upstreams(vendoring, monkeypatch, [
+        ("a", a, "named", text),
+        ("b", b, "named",
+         "<{b}bp> {t} {op} ; {d} <{b}B> .\n"
+         "<{b}bp2> {t} {op} ; {r} <{b}R2> ; {i} <{a}ai> .\n".format(
+             a=a, b=b, t=typed, op=op, d=dom, r=rng, i=inv)),
+    ], seeds=set(), properties={"a": "vendor/a-properties.json"})
+
+    built = vendoring.build(tmp_path)
+    assert built["b"]["properties_text"] is None
+    record = json.loads(built["a"]["properties_text"])
+    got = record["properties"]
+
+    def derived(name, side):
+        row = got[a + name]["derived"]
+        return row[side], row[side + "_status"]
+
+    assert got[a + "top"]["inverses"] == [a + "inv"]
+    assert got[a + "inv"]["inverses"] == [a + "top"], "read from either end"
+    assert derived("sub", "domain") == ([a + "D"], "named")
+    assert got[a + "sub"]["derived"]["domain_via"] == {
+        a + "D": [{"property": a + "top", "as": "domain"}]}
+    assert got[a + "sub"]["domain"] == [], "derived is not asserted"
+    assert derived("inv", "domain") == ([a + "R"], "named")
+    assert derived("inv", "range") == ([a + "D"], "named")
+    assert derived("chain", "domain") == ([a + "R"], "named")
+    assert got[a + "chain"]["derived"]["domain_via"] == {
+        a + "R": [{"property": a + "top", "as": "range"}]}
+    assert derived("c1", "domain") == ([a + "X"], "named")
+    assert derived("c2", "domain") == ([a + "X"], "named")
+    assert derived("anon", "domain") == ([], "anonymous only")
+    assert got[a + "anon"]["anonymous_domain"] == 1
+    assert derived("anon2", "domain") == ([], "anonymous only")
+    assert derived("mixed", "domain") == ([a + "D"], "named")
+    assert got[a + "mixed"]["anonymous_domain"] == 1
+    assert derived("cross", "domain") == ([b + "B"], "named")
+    assert derived("under", "domain") == ([], "unconstrained")
+    assert derived("free", "domain") == ([], "unconstrained")
+    assert derived("free", "range") == ([], "unconstrained")
+    assert derived("p1", "domain") == ([a + "P"], "named")
+    assert derived("q3", "domain") == ([a + "Q"], "named"), (
+        "one of the two chains needs a second pass, whatever the order")
+    assert got[a + "ai"]["inverses"] == [], "b states it, not a"
+    assert derived("ai", "domain") == ([b + "R2"], "named"), (
+        "an inverse another source states reaches this property")
+    assert a + "dp" not in got, "a datatype property is not listed"
+    assert record["derived_from"] == [{"source": "a", "commit": "c0ffee"},
+                                      {"source": "b", "commit": "c0ffee"}]
+    assert record["counts"]["derived_domain_status"] == {
+        "named": 15, "anonymous only": 2, "unconstrained": 2}
+    assert OWL + "Thing" not in built["a"]["properties_text"]
+
+
+def test_a_source_without_properties_is_not_refused(vendoring, monkeypatch):
+    """The key is optional, like `disjointness:`: a project's own source
+    declarations without it still load, and get no file."""
+    pins_with(vendoring, monkeypatch, lambda e: e.pop("properties"))
+    entries = vendoring.sources()
+    assert entries[0]["properties"] is None
+
+
+def test_a_tampered_property_file_is_found_offline(vendoring, repo):
+    """Generated and digest-pinned like the hierarchy: a domain edited by
+    hand is a finding, not a quiet change to every consumer's check."""
+    entry = next(e for e in vendoring.sources() if e["id"] == "cco")
+    path = repo / entry["properties"]
+    original = path.read_bytes()
+    tampered = original.replace(b'"unconstrained"', b'"named"', 1)
+    assert tampered != original
+    try:
+        path.write_bytes(tampered)
+        record = vendoring.verify()
+        assert any(entry["properties"] in f and "digests to" in f
+                   for f in record["findings"]), record["findings"]
+        path.unlink()
+        record = vendoring.verify()
+        assert any(entry["properties"] in f and "is missing" in f
+                   for f in record["findings"]), record["findings"]
+    finally:
+        path.write_bytes(original)
+    assert path.read_bytes() == original
+    assert vendoring.verify()["ok"]

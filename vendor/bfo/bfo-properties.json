@@ -1,0 +1,1714 @@
+{
+ "attribution": "Basic Formal Ontology (BFO) 2020, ISO/IEC 21838-2. Copyright the BFO contributors, licensed CC BY 4.0.",
+ "commit": "044490fc5100ffed6df7d4d15cbc167698b6fdee",
+ "counts": {
+  "anonymous_domains": 12,
+  "anonymous_ranges": 9,
+  "derived_domain_status": {
+   "anonymous only": 12,
+   "named": 28,
+   "unconstrained": 0
+  },
+  "derived_range_status": {
+   "anonymous only": 9,
+   "named": 31,
+   "unconstrained": 0
+  },
+  "named_domain_edges": 28,
+  "named_range_edges": 31,
+  "properties": 40
+ },
+ "derived_from": [
+  {
+   "commit": "044490fc5100ffed6df7d4d15cbc167698b6fdee",
+   "source": "bfo"
+  },
+  {
+   "commit": "510dad76be0ef710b65a421075af912af25342b7",
+   "source": "cco"
+  }
+ ],
+ "files": [
+  {
+   "sha256": "6944e2c96a0d8709dc15ae5364792019e208061eda3f32311af4f3b8d8443a3b",
+   "url": "https://raw.githubusercontent.com/BFO-ontology/BFO-2020/044490fc5100ffed6df7d4d15cbc167698b6fdee/src/owl/bfo-core.ttl"
+  }
+ ],
+ "format_version": 1,
+ "generated_by": "tools/ontology/vendor_upstream.py",
+ "licence": "CC-BY-4.0",
+ "licence_as_stated_by_source": "https://creativecommons.org/licenses/by/4.0/",
+ "namespace": "http://purl.obolibrary.org/obo/",
+ "note": "Every object property the register lists. The top-level fields are assertions; everything under `derived` is derived, never asserted by the source. A derived list is a conjunction: a type fits when it descends from every class listed. An empty list's status says why: `anonymous only` means a class expression this file does not carry applies, so the property is constrained; `unconstrained` means nothing in the pinned files constrains it. owl:Thing is never written. Generated -- do not edit.",
+ "project": "Basic Formal Ontology",
+ "properties": {
+  "http://purl.obolibrary.org/obo/BFO_0000054": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000017"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000017": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000054"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000055"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000015"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000015": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000054"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000055"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000017"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000055"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000015"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000055": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000015"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000015": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000054"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000055"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000017"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000017": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000054"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000055"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000015"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000054"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000017"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000056": {
+   "anonymous_domain": 1,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000015"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000015": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000056"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000057"
+      }
+     ]
+    }
+   },
+   "domain": [],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000057"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000015"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000057": {
+   "anonymous_domain": 0,
+   "anonymous_range": 1,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000015"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000015": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000056"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000057"
+      }
+     ]
+    },
+    "range": [],
+    "range_status": "anonymous only",
+    "range_via": {}
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000015"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000056"
+   ],
+   "range": [],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000058": {
+   "anonymous_domain": 0,
+   "anonymous_range": 1,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000031"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000031": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000058"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000059"
+      }
+     ]
+    },
+    "range": [],
+    "range_status": "anonymous only",
+    "range_via": {}
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000031"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000059"
+   ],
+   "range": [],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000059": {
+   "anonymous_domain": 1,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000031"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000031": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000058"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000059"
+      }
+     ]
+    }
+   },
+   "domain": [],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000058"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000031"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000062": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000062"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000063"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000062"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000063"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000063"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000063": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000062"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000063"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000062"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000063"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000062"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000066": {
+   "anonymous_domain": 1,
+   "anonymous_range": 1,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [],
+    "range_status": "anonymous only",
+    "range_via": {}
+   },
+   "domain": [],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000183"
+   ],
+   "range": [],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000084": {
+   "anonymous_domain": 0,
+   "anonymous_range": 1,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000031"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000031": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000084"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000101"
+      }
+     ]
+    },
+    "range": [],
+    "range_status": "anonymous only",
+    "range_via": {}
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000031"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000101"
+   ],
+   "range": [],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000101": {
+   "anonymous_domain": 1,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000031"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000031": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000084"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000101"
+      }
+     ]
+    }
+   },
+   "domain": [],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000084"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000031"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000108": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000001"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000001": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000108"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000008"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000008": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000108"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000001"
+   ],
+   "inverses": [],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000008"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000115": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000002",
+     "http://purl.obolibrary.org/obo/BFO_0000040"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000002": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000176"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000178"
+      }
+     ],
+     "http://purl.obolibrary.org/obo/BFO_0000040": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000115"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000129"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000002",
+     "http://purl.obolibrary.org/obo/BFO_0000040"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000002": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000176"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000178"
+      }
+     ],
+     "http://purl.obolibrary.org/obo/BFO_0000040": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000115"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000129"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000040"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000129"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000040"
+   ],
+   "superproperties": [
+    "http://purl.obolibrary.org/obo/BFO_0000178"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000117": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000117"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000132"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000117"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000132"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000132"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000121": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000117"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000121"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000132"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000139"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000117"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000121"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000132"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000139"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000139"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "superproperties": [
+    "http://purl.obolibrary.org/obo/BFO_0000117"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000124": {
+   "anonymous_domain": 1,
+   "anonymous_range": 1,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [],
+    "range_status": "anonymous only",
+    "range_via": {}
+   },
+   "domain": [],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000171"
+   ],
+   "range": [],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000127": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000040"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000040": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000127"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000218"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000016"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000016": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000127"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000218"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000040"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000218"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000016"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000129": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000002",
+     "http://purl.obolibrary.org/obo/BFO_0000040"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000002": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000176"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000178"
+      }
+     ],
+     "http://purl.obolibrary.org/obo/BFO_0000040": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000115"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000129"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000002",
+     "http://purl.obolibrary.org/obo/BFO_0000040"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000002": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000176"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000178"
+      }
+     ],
+     "http://purl.obolibrary.org/obo/BFO_0000040": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000115"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000129"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000040"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000115"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000040"
+   ],
+   "superproperties": [
+    "http://purl.obolibrary.org/obo/BFO_0000176"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000132": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000117"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000132"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000117"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000132"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000117"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000139": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000117"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000121"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000132"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000139"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000003"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000003": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000117"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000121"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000132"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000139"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000121"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000003"
+   ],
+   "superproperties": [
+    "http://purl.obolibrary.org/obo/BFO_0000132"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000153": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000011"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000011": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000153"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000008"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000008": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000153"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000011"
+   ],
+   "inverses": [],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000008"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000171": {
+   "anonymous_domain": 1,
+   "anonymous_range": 1,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [],
+    "range_status": "anonymous only",
+    "range_via": {}
+   },
+   "domain": [],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000124"
+   ],
+   "range": [],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000176": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000002"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000002": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000176"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000178"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000002"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000002": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000176"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000178"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000002"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000178"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000002"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000178": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000002"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000002": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000176"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000178"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000002"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000002": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000176"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000178"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000002"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000176"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000002"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000183": {
+   "anonymous_domain": 1,
+   "anonymous_range": 1,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [],
+    "range_status": "anonymous only",
+    "range_via": {}
+   },
+   "domain": [],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000066"
+   ],
+   "range": [],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000184": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000182"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000182": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000184"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000185"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000040"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000040": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000184"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000185"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000182"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000185"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000040"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000185": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000040"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000040": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000184"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000185"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000182"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000182": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000184"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000185"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000040"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000184"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000182"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000194": {
+   "anonymous_domain": 1,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000020"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000020": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000194"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000195"
+      }
+     ]
+    }
+   },
+   "domain": [],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000195"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000020"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000195": {
+   "anonymous_domain": 0,
+   "anonymous_range": 1,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000020"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000020": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000194"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000195"
+      }
+     ]
+    },
+    "range": [],
+    "range_status": "anonymous only",
+    "range_via": {}
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000020"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000194"
+   ],
+   "range": [],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000196": {
+   "anonymous_domain": 1,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000020"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000020": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000194"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000195"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000196"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000197"
+      }
+     ]
+    }
+   },
+   "domain": [],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000197"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000020"
+   ],
+   "superproperties": [
+    "http://purl.obolibrary.org/obo/BFO_0000194"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000197": {
+   "anonymous_domain": 0,
+   "anonymous_range": 1,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000020"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000020": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000194"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000195"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000196"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000197"
+      }
+     ]
+    },
+    "range": [],
+    "range_status": "anonymous only",
+    "range_via": {}
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000020"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000196"
+   ],
+   "range": [],
+   "superproperties": [
+    "http://purl.obolibrary.org/obo/BFO_0000195"
+   ]
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000199": {
+   "anonymous_domain": 1,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000008"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000008": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000199"
+      },
+      {
+       "as": "domain",
+       "property": "https://www.commoncoreontologies.org/ont00001874"
+      }
+     ]
+    }
+   },
+   "domain": [],
+   "inverses": [],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000008"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000200": {
+   "anonymous_domain": 1,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000011"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000011": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000200"
+      }
+     ]
+    }
+   },
+   "domain": [],
+   "inverses": [],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000011"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000210": {
+   "anonymous_domain": 1,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [],
+    "domain_status": "anonymous only",
+    "domain_via": {},
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000006"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000006": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000210"
+      }
+     ]
+    }
+   },
+   "domain": [],
+   "inverses": [],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000006"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000216": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000011"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000011": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000216"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000006"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000006": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000216"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000011"
+   ],
+   "inverses": [],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000006"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000218": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000016"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000016": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000127"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000218"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000040"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000040": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000127"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000218"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000016"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000127"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000040"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000221": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000203"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000203": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000221"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000222"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000008"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000008": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000221"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000222"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000203"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000222"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000008"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000222": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000008"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000008": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000221"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000222"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000203"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000203": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000221"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000222"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000008"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000221"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000203"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000223": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000203"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000203": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000223"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000224"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000008"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000008": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000223"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000224"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000203"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000224"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000008"
+   ],
+   "superproperties": []
+  },
+  "http://purl.obolibrary.org/obo/BFO_0000224": {
+   "anonymous_domain": 0,
+   "anonymous_range": 0,
+   "derived": {
+    "domain": [
+     "http://purl.obolibrary.org/obo/BFO_0000008"
+    ],
+    "domain_status": "named",
+    "domain_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000008": [
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000223"
+      },
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000224"
+      }
+     ]
+    },
+    "range": [
+     "http://purl.obolibrary.org/obo/BFO_0000203"
+    ],
+    "range_status": "named",
+    "range_via": {
+     "http://purl.obolibrary.org/obo/BFO_0000203": [
+      {
+       "as": "domain",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000223"
+      },
+      {
+       "as": "range",
+       "property": "http://purl.obolibrary.org/obo/BFO_0000224"
+      }
+     ]
+    }
+   },
+   "domain": [
+    "http://purl.obolibrary.org/obo/BFO_0000008"
+   ],
+   "inverses": [
+    "http://purl.obolibrary.org/obo/BFO_0000223"
+   ],
+   "range": [
+    "http://purl.obolibrary.org/obo/BFO_0000203"
+   ],
+   "superproperties": []
+  }
+ },
+ "relation": "domain, range, superproperties and inverses: as this source's pinned files assert them, direct and named; anonymous domains and ranges counted. derived: through rdfs:subPropertyOf and owl:inverseOf, to a fixpoint, over every pinned source's object properties together",
+ "release": "release-2024-01-29",
+ "source": "bfo"
+}

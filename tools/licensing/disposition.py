@@ -124,7 +124,8 @@ def vendored_sources() -> dict:
                               % (UPSTREAM_SOURCES, required,
                                  entry["extract"]))
         found[entry["extract"]] = entry
-        for derived in ("register", "hierarchy", "disjointness"):
+        for derived in ("register", "hierarchy", "disjointness",
+                        "properties"):
             if entry.get(derived):
                 found[entry[derived]] = entry
     return found

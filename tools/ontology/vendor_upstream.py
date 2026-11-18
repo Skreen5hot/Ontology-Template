@@ -216,6 +216,7 @@ def sources() -> list[dict]:
                               % (PINS, required, entry.get("id", entry)))
         entry["files"] = files_of(entry)
         entry.setdefault("disjointness", None)
+        entry.setdefault("properties", None)
         entry.setdefault("select", "named")
         if entry["select"] not in SELECT_MODES:
             raise Refused("%s declares select %r; the modes are %s"
@@ -852,6 +853,34 @@ def build(cache: Path) -> dict:
             hierarchy["outside_namespace"])
         record["hierarchy_dropped"] = hierarchy[
             "dropped_anonymous_superclass_axioms"]
+    # Every source's object properties, derived together: a CCO property
+    # under a BFO property inherits from BFO's own file (decision 55).
+    asserted = {entry["id"]: asserted_properties(per_source[entry["id"]],
+                                                 built[entry["id"]]["register"])
+                for entry in declared}
+    every = {}
+    for entry in declared:
+        for iri, row in asserted[entry["id"]].items():
+            if iri in every:
+                raise Refused("%s is an object property in two registers"
+                              % iri)
+            every[iri] = row
+    derived = derive_properties(every)
+    derived_from = [{"source": entry["id"], "commit": entry["commit"]}
+                    for entry in declared]
+    for entry in declared:
+        record = built[entry["id"]]
+        record["properties_text"] = None
+        if not entry["properties"]:
+            continue
+        mine = asserted[entry["id"]]
+        record_properties = properties_of(
+            entry, record["stated_licence"], mine,
+            {iri: derived[iri] for iri in mine}, derived_from)
+        record["properties_text"] = register_bytes(
+            record_properties).decode("utf-8")
+        record["properties_counts"] = record_properties["counts"]
+
     for entry in declared:
         del built[entry["id"]]["register"]
 
@@ -1101,6 +1130,184 @@ def hierarchy_of(source: dict, graph, stated: str, register: dict,
     }
 
 
+def asserted_properties(graph, register: dict) -> dict:
+    """Every object property the register lists, as its own files assert
+    it: named domains, ranges, superproperties and inverses, and a count
+    of the anonymous domains and ranges (decision 28).
+
+    Inverses are read in both directions, `P owl:inverseOf Q` listing Q
+    under P and P under Q, from this source's files: CCO's merged file
+    states an inverse for a BFO property that BFO's own file does not,
+    and it is CCO's statement, so it is in CCO's record.
+    """
+    import rdflib
+
+    def named(iri, predicate):
+        found, anonymous = set(), 0
+        for value in graph.objects(rdflib.URIRef(iri), predicate):
+            if isinstance(value, rdflib.URIRef):
+                found.add(str(value))
+            else:
+                anonymous += 1
+        return sorted(found), anonymous
+
+    out = {}
+    for iri, record in register["terms"].items():
+        if OWL + "ObjectProperty" not in record["types"]:
+            continue
+        subject = rdflib.URIRef(iri)
+        domain, anonymous_domain = named(iri, rdflib.RDFS.domain)
+        range_, anonymous_range = named(iri, rdflib.RDFS.range)
+        supers, _ = named(iri, rdflib.RDFS.subPropertyOf)
+        inverses = {str(o) for o in graph.objects(subject, rdflib.OWL.inverseOf)
+                    if isinstance(o, rdflib.URIRef)}
+        inverses |= {str(s) for s in graph.subjects(rdflib.OWL.inverseOf,
+                                                    subject)
+                     if isinstance(s, rdflib.URIRef)}
+        out[iri] = {"domain": domain, "range": range_,
+                    "anonymous_domain": anonymous_domain,
+                    "anonymous_range": anonymous_range,
+                    "superproperties": supers,
+                    "inverses": sorted(inverses)}
+    return out
+
+
+def derive_properties(asserted: dict) -> dict:
+    """The derived domain and range of every property in `asserted` (all
+    pinned sources' rows, keyed by IRI), by a fixpoint (decision 55):
+
+      - if P rdfs:subPropertyOf Q, Q's derived domains are P's, and ranges
+        likewise: every P-statement is a Q-statement;
+      - if P owl:inverseOf Q, in either direction, Q's derived ranges are
+        P's domains, and Q's domains P's ranges;
+      - repeated until nothing changes; the sets only grow, so a cycle
+        terminates.
+
+    A derived list is a conjunction -- every class that applies, not the
+    most specific -- so it may name a class and its ancestor. A property
+    no row describes (owl:topObjectProperty) contributes nothing, and
+    owl:Thing is never written. Each class carries the properties it is
+    asserted on, and whether as a domain or a range.
+
+    Status, when the list is empty, says why: `anonymous only` when a
+    class expression the file does not carry applies on the property or
+    along its chain, so the property is constrained and a consumer must
+    not read it as "any type fits"; `unconstrained` when nothing does.
+    """
+    supers = {p: [q for q in row["superproperties"] if q in asserted]
+              for p, row in asserted.items()}
+    inverses = {p: set() for p in asserted}
+    for p, row in asserted.items():
+        for q in row["inverses"]:
+            if q in asserted:
+                inverses[p].add(q)
+                inverses[q].add(p)
+    domain = {p: {(c, p, "domain") for c in row["domain"]}
+              for p, row in asserted.items()}
+    range_ = {p: {(c, p, "range") for c in row["range"]}
+              for p, row in asserted.items()}
+    anon_domain = {p: row["anonymous_domain"] > 0
+                   for p, row in asserted.items()}
+    anon_range = {p: row["anonymous_range"] > 0
+                  for p, row in asserted.items()}
+    changed = True
+    while changed:
+        changed = False
+        for p in asserted:
+            for d, r, ad, ar in (
+                    [(domain[q], range_[q], anon_domain[q], anon_range[q])
+                     for q in supers[p]]
+                    + [(range_[q], domain[q], anon_range[q], anon_domain[q])
+                       for q in sorted(inverses[p])]):
+                if not d <= domain[p]:
+                    domain[p] |= d
+                    changed = True
+                if not r <= range_[p]:
+                    range_[p] |= r
+                    changed = True
+                if ad and not anon_domain[p]:
+                    anon_domain[p] = changed = True
+                if ar and not anon_range[p]:
+                    anon_range[p] = changed = True
+
+    def side(found, anonymous):
+        classes = sorted({c for c, _p, _as in found})
+        via = {}
+        for c, p, kind in sorted(found):
+            via.setdefault(c, []).append({"property": p, "as": kind})
+        status = ("named" if classes else
+                  "anonymous only" if anonymous else "unconstrained")
+        return classes, via, status
+
+    out = {}
+    for p in asserted:
+        d, d_via, d_status = side(domain[p], anon_domain[p])
+        r, r_via, r_status = side(range_[p], anon_range[p])
+        out[p] = {"domain": d, "domain_status": d_status, "domain_via": d_via,
+                  "range": r, "range_status": r_status, "range_via": r_via}
+    return out
+
+
+STATUSES = ("named", "anonymous only", "unconstrained")
+
+
+def properties_of(source: dict, stated: str, mine: dict, derived: dict,
+                  derived_from: list) -> dict:
+    """The file SDD asked for (decisions 28 and 55): the source's object
+    properties as asserted, each with its derived domain and range."""
+    properties = {iri: dict(row, derived=derived[iri])
+                  for iri, row in mine.items()}
+
+    def tally(key):
+        return {s: sum(1 for row in properties.values()
+                       if row["derived"][key] == s) for s in STATUSES}
+
+    return {
+        "format_version": FORMAT_VERSION,
+        "generated_by": GENERATOR,
+        "source": source["id"],
+        "project": source["project"],
+        "release": source["release"],
+        "commit": source["commit"],
+        "files": source["files"],
+        "namespace": source["namespace"],
+        "licence": source["licence"]["spdx"],
+        "licence_as_stated_by_source": stated,
+        "attribution": " ".join(source["licence"]["attribution"].split()),
+        "relation": (
+            "domain, range, superproperties and inverses: as this "
+            "source's pinned files assert them, direct and named; "
+            "anonymous domains and ranges counted. derived: through "
+            "rdfs:subPropertyOf and owl:inverseOf, to a fixpoint, over "
+            "every pinned source's object properties together"),
+        "note": (
+            "Every object property the register lists. The top-level "
+            "fields are assertions; everything under `derived` is "
+            "derived, never asserted by the source. A derived list is a "
+            "conjunction: a type fits when it descends from every class "
+            "listed. An empty list's status says why: `anonymous only` "
+            "means a class expression this file does not carry applies, "
+            "so the property is constrained; `unconstrained` means "
+            "nothing in the pinned files constrains it. owl:Thing is "
+            "never written. Generated -- do not edit."),
+        "derived_from": derived_from,
+        "counts": {
+            "properties": len(properties),
+            "named_domain_edges": sum(len(r["domain"])
+                                      for r in properties.values()),
+            "named_range_edges": sum(len(r["range"])
+                                     for r in properties.values()),
+            "anonymous_domains": sum(r["anonymous_domain"]
+                                     for r in properties.values()),
+            "anonymous_ranges": sum(r["anonymous_range"]
+                                    for r in properties.values()),
+            "derived_domain_status": tally("domain_status"),
+            "derived_range_status": tally("range_status"),
+        },
+        "properties": properties,
+    }
+
+
 def register_bytes(register: dict) -> bytes:
     """Deterministic: sorted keys, one indentation, LF, trailing newline."""
     return (json.dumps(register, indent=1, sort_keys=True,
@@ -1171,6 +1378,16 @@ def manifest_of(built: dict) -> dict:
                 (root / entry["hierarchy"]).is_file()
                 and (root / entry["hierarchy"]).read_bytes()
                 == record["hierarchy_text"].encode("utf-8")),
+            "properties": entry["properties"],
+            "properties_counts": record.get("properties_counts"),
+            "properties_sha256": (
+                sha256_of(record["properties_text"].encode("utf-8"))
+                if record["properties_text"] is not None else None),
+            "properties_on_disk_matches": (
+                record["properties_text"] is None
+                or ((root / entry["properties"]).is_file()
+                    and (root / entry["properties"]).read_bytes()
+                    == record["properties_text"].encode("utf-8"))),
         }
     return {
         "format_version": FORMAT_VERSION,
@@ -1230,7 +1447,8 @@ def notice_of(built: dict) -> str:
         "source pinned `select: all`, every term it describes), and drops",
         "every axiom whose object is an anonymous class expression. The",
         "registers list every term each source describes, with its labels,",
-        "and the hierarchies every class's named direct superclasses.",
+        "the hierarchies every class's named direct superclasses, and the",
+        "property files every object property's domains and ranges.",
         "See the header of each extract, and `" + MANIFEST + "`.",
         "",
     ]
@@ -1246,7 +1464,9 @@ def notice_of(built: dict) -> str:
             "- extract: `" + entry["extract"] + "`",
             "- register: `" + entry["register"] + "`",
             "- class hierarchy: `" + entry["hierarchy"] + "`",
-        ] + ["- source: " + pinned["url"] for pinned in entry["files"]] + [
+        ] + (["- object properties, domains and ranges: `"
+              + entry["properties"] + "`"] if entry.get("properties")
+             else []) + ["- source: " + pinned["url"] for pinned in entry["files"]] + [
             "- commit: `" + entry["commit"] + "`",
             "- licence: " + entry["licence"]["spdx"] + " -- "
             + entry["licence"]["url"],
@@ -1359,6 +1579,27 @@ def verify() -> dict:
                     % (entry["id"], entry["hierarchy"], pinned.get("commit"),
                        entry["commit"]))
 
+        if entry["properties"]:
+            properties = root / entry["properties"]
+            want = recorded["extracts"].get(entry["id"], {}).get(
+                "properties_sha256")
+            if not properties.is_file():
+                findings.append("%s: %s is missing"
+                                % (entry["id"], entry["properties"]))
+            elif sha256_of(properties.read_bytes()) != want:
+                findings.append(
+                    "%s: %s digests to %s but %s records %s"
+                    % (entry["id"], entry["properties"],
+                       sha256_of(properties.read_bytes())[:16], MANIFEST,
+                       (want or "nothing")[:16]))
+            else:
+                pinned = json.loads(properties.read_text(encoding="utf-8"))
+                if pinned.get("commit") != entry["commit"]:
+                    findings.append(
+                        "%s: %s describes commit %s, and the pin is %s"
+                        % (entry["id"], entry["properties"],
+                           pinned.get("commit"), entry["commit"]))
+
     # Spec terms the last build recorded as unresolvable are excused; any
     # other spec term is held to the same standard as a corpus term. A
     # spec revision that names a new CCO class therefore fails here until
@@ -1451,6 +1692,9 @@ def main(argv=None) -> int:
     differing += [record["hierarchy"]
                   for record in manifest["extracts"].values()
                   if not record["hierarchy_on_disk_matches"]]
+    differing += [record["properties"]
+                  for record in manifest["extracts"].values()
+                  if not record["properties_on_disk_matches"]]
 
     for key, record in sorted(manifest["extracts"].items()):
         print("    %-4s %-40s %6d triple(s)  %s"
@@ -1464,6 +1708,12 @@ def main(argv=None) -> int:
               % ("", record["hierarchy"], record["hierarchy_classes"],
                  "same" if record["hierarchy_on_disk_matches"]
                  else "DIFFERS"))
+        if record["properties"]:
+            print("    %-4s %-40s %6d propert(ies) %s"
+                  % ("", record["properties"],
+                     record["properties_counts"]["properties"],
+                     "same" if record["properties_on_disk_matches"]
+                     else "DIFFERS"))
 
     notice = notice_of(built)
     notice_path = root / NOTICE
@@ -1479,7 +1729,8 @@ def main(argv=None) -> int:
                   "from the pinned sources produces: %s"
                   % (len(differing), ", ".join(sorted(differing))))
             return 1
-        print("  every extract, register, hierarchy and the notice are "
+        print("  every extract, register, hierarchy, property file and the "
+              "notice are "
               "byte-identical to a fresh build from the pinned upstreams")
         return 0
 
@@ -1509,6 +1760,15 @@ def main(argv=None) -> int:
               % (record["source"]["hierarchy"], record["hierarchy_classes"],
                  record["hierarchy_outside_namespace"],
                  record["hierarchy_dropped"]))
+        if record["properties_text"] is not None:
+            target = root / record["source"]["properties"]
+            target.write_bytes(record["properties_text"].encode("utf-8"))
+            counts = record["properties_counts"]
+            print("  wrote %s (%d object properties; derived domain %s; "
+                  "derived range %s)"
+                  % (record["source"]["properties"], counts["properties"],
+                     counts["derived_domain_status"],
+                     counts["derived_range_status"]))
 
     notice_path.parent.mkdir(parents=True, exist_ok=True)
     notice_path.write_bytes(notice.encode("utf-8"))

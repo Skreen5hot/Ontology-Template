@@ -98,6 +98,7 @@ sources:
     extract: vendor/bfo/bfo-core-extract.ttl
     register: vendor/bfo/bfo-register.json
     hierarchy: vendor/bfo/bfo-hierarchy.json
+    properties: vendor/bfo/bfo-properties.json
     disjointness: vendor/bfo/bfo-disjointness.ttl
     licence:
       spdx: CC-BY-4.0
@@ -124,6 +125,7 @@ sources:
     extract: vendor/cco/cco-extract.ttl
     register: vendor/cco/cco-register.json
     hierarchy: vendor/cco/cco-hierarchy.json
+    properties: vendor/cco/cco-properties.json
     licence:
       spdx: BSD-3-Clause
       url: >-
