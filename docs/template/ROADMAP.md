@@ -1626,7 +1626,8 @@ architect decided it. WP6 closed on 2026-11-05 (decision 30,
 | v0.11.0 | -- | **P-A6**, `--propose` class by class | approved with safeguards (decision 50); in v0.11.0, released (decision 51) |
 | v0.12.0 | -- | **P-A8**, the footer carries a declared third-party attribution | approved with safeguards (decision 52); in v0.12.0, released (decision 53) |
 | v0.13.0 | -- | **P-A4**, a naming rule relating a local name to a value, written as a project's shape set | approved (decision 54); in v0.13.0, released |
-| Next | -- | SDD's domain and range file (decision 28) | approved earlier; designed and decided (decision 55): on `main`, released with the next functional release |
+| On `main` | -- | SDD's domain and range file (decision 28): `vendor/<source>/<source>-properties.json`, built at `037e464` | decided (decision 55); built, unreleased, carried by the next functional release. Open: the notice to SDD naming the commit, and SDD's answer on its 148/149 CCO edge count (`EXAMPLE-SDD-2026-11-18-domain-range-design`) |
+| Next | -- | The P6 follow-up on BCO's Stage 05 modules at BCO `26d477f` (decision 42; BCO's notice of 2026-11-17), read-only | approved earlier |
 | Backlog | -- | The Downloads bundle carries standalone provenance for declared third-party text in its modules (P-A8's design, §5) | entered as its own item, not placed (decision 52, 4) |
 | Lower | 7 | Candidate reports for possible homonyms and duplicates: a list for a person, never the gate | folded into item 12 (decision 34); in v0.4.0 |
 | Lower | 8 | A co-asserted anchor-parent convention declared once in config | approved, controlled |
